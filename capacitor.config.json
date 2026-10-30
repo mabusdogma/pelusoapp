@@ -1,5 +1,8 @@
 {
   "appId": "com.peluso.app",
   "appName": "PelusoApp",
-  "webDir": "www"
+  "webDir": "www",
+  "server": {
+    "cleartext": true
+  }
 }
