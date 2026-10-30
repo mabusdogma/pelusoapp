@@ -4265,6 +4265,10 @@
                     }
                 }
             });
+            var currentTempEl = document.getElementById('sensor-temp-' + prefixId);
+            if (currentTempEl && ent.attributes && ent.attributes.current_temperature !== undefined) {
+                currentTempEl.innerText = ent.attributes.current_temperature;
+            }
         }
 
        function switchTab(tabId, element) {
