@@ -32,7 +32,7 @@ jobs:
 
       - name: Generate App Icons and Splash
         run: |
-          npx capacitor-assets generate --android --iconPath assets/icon.png
+          npx capacitor-assets generate --android
 
       - name: Build Android APK
         run: |
