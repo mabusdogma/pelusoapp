@@ -2812,17 +2812,27 @@
 
     <!-- LÓGICA JAVASCRIPT -->
     <script>
-		console.log = console.warn = console.error = console.info = function() {};
-	    if (!HA_URL) { HA_URL = LOCAL_HA_URL; }
-        let cameraInterval = null;
-		let lastActivity = Date.now();
+		let cameraInterval = null;
+        let lastActivity = Date.now();
         var isDraggingAcSlider = false;
         var reconnectTimer = null;
         var LOCAL_HA_URL = 'http://192.168.1.132:8123';
         var TAILSCALE_HA_URL = 'http://100.114.227.7:8123';
-        var HA_URL = localStorage.getItem('ha_url');
+        var currentHost = window.location.hostname;
+        var HA_URL = LOCAL_HA_URL;
+        if (currentHost.indexOf('100.') === 0) {
+            HA_URL = TAILSCALE_HA_URL;
+        } else if (currentHost.indexOf('192.168.') === 0) {
+            HA_URL = LOCAL_HA_URL;
+        } else {
+            HA_URL = localStorage.getItem('ha_url') || LOCAL_HA_URL;
+        }
+        localStorage.setItem('ha_url', HA_URL);
         var HA_TOKEN = localStorage.getItem('ha_token') || '';
-        var ws;
+		var ws;
+		var msgId = 1;
+		var entityStates = {};
+		var connectionAttempt = 0;
         var msgId = 1;
         var entityStates = {};
         var pendingAlarmService = '';
@@ -3402,22 +3412,41 @@
         };
 
 		function checkNetworkAndConnect() {
-            var networkTextEl = document.getElementById('status-network');
-            if (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                HA_URL = LOCAL_HA_URL;
-            } else {
-                HA_URL = window.location.origin;
-            }
-            if (networkTextEl) {
-                if (HA_URL.indexOf('100.114') !== -1) {
-                    networkTextEl.innerText = 'Tailscale';
-                } else {
-                    networkTextEl.innerText = 'LAN';
-                }
-            }
-
-            connectWS();
-        }
+			var networkTextEl = document.getElementById('status-network');
+			if (!HA_TOKEN) {
+				openConfigModal();
+				return;
+			}
+			var testUrl = LOCAL_HA_URL + '/manifest.json';
+			var timedOut = false;
+			var timer = setTimeout(function() {
+				timedOut = true;
+				console.log('LAN timeout, cambiando a Tailscale');
+				HA_URL = TAILSCALE_HA_URL;
+				localStorage.setItem('ha_url', HA_URL);
+				if (networkTextEl) networkTextEl.innerText = 'Tailscale';
+				connectWS();
+			}, 2500);
+			fetch(testUrl, { mode: 'no-cors', cache: 'no-store' })
+				.then(function(response) {
+					if (timedOut) return;
+					clearTimeout(timer);
+					HA_URL = LOCAL_HA_URL;
+					localStorage.setItem('ha_url', HA_URL);
+					if (networkTextEl) networkTextEl.innerText = 'LAN';
+					console.log('LAN accesible, usando red local');
+					connectWS();
+				})
+				.catch(function(err) {
+					if (timedOut) return;
+					clearTimeout(timer);
+					console.log('LAN no disponible, cambiando a Tailscale');
+					HA_URL = TAILSCALE_HA_URL;
+					localStorage.setItem('ha_url', HA_URL);
+					if (networkTextEl) networkTextEl.innerText = 'Tailscale';
+					connectWS();
+				});
+		}
 		
         function updateEnergyPercentages() {
             var total = window._energyData.produccion;
@@ -5126,7 +5155,7 @@
         }, 60000);
 
         window.onload = function () {
-            if (!HA_TOKEN || !HA_URL) {
+            if (!HA_TOKEN) {
                 openConfigModal();
             } else {
                 checkNetworkAndConnect();
