@@ -3580,65 +3580,62 @@
         }
 
 		function fetchHorarioCovadonga() {
-            if (!HA_TOKEN || !HA_URL) return;
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                setTimeout(fetchHorarioCovadonga, 2000);
+                return;
+            }
             var now = new Date();
             var startIso = now.toISOString();
             var endDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
             var endIso = endDate.toISOString();
-
-            fetch(HA_URL + '/api/calendars/calendar.horario_covadonga?start=' + startIso + '&end=' + endIso, {
-                headers: {
-                    'Authorization': 'Bearer ' + HA_TOKEN,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(function(response) {
-                if (!response.ok) {
-                    throw new Error('Servidor no disponible');
-                }
-                return response.json();
-            })
-            .then(function(events) {
+            sendWS({
+                type: 'call_service',
+                domain: 'calendar',
+                service: 'get_events',
+                target: { entity_id: 'calendar.horario_covadonga' },
+                service_data: {
+                    start_date_time: startIso,
+                    end_date_time: endIso
+                },
+                return_response: true
+            }, function(res) {
                 var container = document.getElementById('horario-covadonga-resumen');
                 if (!container) return;
-
-                if (!events || events.length === 0) {
-                    container.innerHTML = '<b>Limpieza:</b> No hay eventos próximos';
-                    return;
-                }
-                
-                var diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-                var meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-                
-                var textos = [];
-                for (var i = 0; i < Math.min(events.length, 2); i++) {
-                    var ev = events[i];
-                    var startDateStr = ev.start.dateTime || ev.start.date || ev.start;
-                    var d = new Date(startDateStr);
-                    if (!isNaN(d.getTime())) {
-                        var diaSem = diasSemana[d.getDay()];
-                        var diaNum = d.getDate();
-                        var mes = meses[d.getMonth()];
-                        var hours = d.getHours();
-                        var ampm = hours >= 12 ? 'pm' : 'am';
-                        hours = hours % 12;
-                        hours = hours ? hours : 12;
-                        textos.push(diaSem + ' ' + diaNum + ' ' + mes + ' (' + hours + ampm + ') ');
+                try {
+                    var events = [];
+                    if (res && res.result && res.result.response && res.result.response['calendar.horario_covadonga']) {
+                        events = res.result.response['calendar.horario_covadonga'].events || [];
                     }
-                }
-                
-                if (textos.length > 0) {
-                    container.innerHTML = '<b>Limpieza:</b> ' + textos.join(' / ');
-                } else {
-                    container.innerHTML = '<b>Limpieza:</b> Sin fechas programadas';
-                }
-            })
-            .catch(function(err) {
-                var container = document.getElementById('horario-covadonga-resumen');
-                if (container) {
+                    if (!events || events.length === 0) {
+                        container.innerHTML = '<b>Limpieza:</b> No hay eventos próximos';
+                        return;
+                    }
+                    var diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+                    var meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                    var textos = [];
+                    for (var i = 0; i < Math.min(events.length, 2); i++) {
+                        var ev = events[i];
+                        var startDateStr = ev.start.dateTime || ev.start.date || ev.start;
+                        var d = new Date(startDateStr);
+                        if (!isNaN(d.getTime())) {
+                            var diaSem = diasSemana[d.getDay()];
+                            var diaNum = d.getDate();
+                            var mes = meses[d.getMonth()];
+                            var hours = d.getHours();
+                            var ampm = hours >= 12 ? 'pm' : 'am';
+                            hours = hours % 12;
+                            hours = hours ? hours : 12;
+                            textos.push(diaSem + ' ' + diaNum + ' ' + mes + ' (' + hours + ampm + ') ');
+                        }
+                    }
+                    if (textos.length > 0) {
+                        container.innerHTML = '<b>Limpieza:</b> ' + textos.join(' / ');
+                    } else {
+                        container.innerHTML = '<b>Limpieza:</b> Sin fechas programadas';
+                    }
+                } catch (e) {
                     container.innerHTML = '<b>Limpieza:</b> Sincronizando...';
                 }
-                setTimeout(fetchHorarioCovadonga, 10000);
             });
         }
 
