@@ -4758,7 +4758,7 @@
                 var kermitList = ['binary_sensor.kermit_en_linea', 'sensor.kermit_bateria', 'binary_sensor.kermit_scheduled_charge_enabled', 'binary_sensor.kermit_cargando', 'sensor.kermit_power', 'sensor.kermit_charge_remaining_time', 'device_tracker.kermit_ubicacion', 'climate.garage_kermit_clima', 'sensor.kermit_temperatura_exterior', 'sensor.kermit_autonomia', 'sensor.kermit_autonomia_3', 'sensor.kermit_odometro', 'sensor.kermit_today_s_model_average_consumption', 'sensor.kermit_today_s_energy_consumption', 'sensor.kermit_lifetime_average_ev_consumption', 'binary_sensor.kermit_bloqueado', 'binary_sensor.kermit_maletero', 'binary_sensor.kermit_frunk', 'binary_sensor.kermit_puertas_abiertas', 'binary_sensor.kermit_ventanas_abiertas'];
                 renderSimpleEntityList('list-kermit', kermitList, false);
             } else if (tabId === 'set-tab-servidor') {
-                var servidorList = ['sensor.ha_ip_interna', 'sensor.ram_libre', 'sensor.porcentaje_ram_usada', 'sensor.porcentaje_uso_procesador', 'sensor.porcentaje_usado_en_disco', 'sensor.ha_disco_usado', 'sensor.espacio_libre_en_disco'];
+                var servidorList = ['sensor.ha_ip_interna', 'sensor.ram_libre', 'sensor.porcentaje_ram_usada', 'sensor.porcentaje_uso_procesador', 'sensor.porcentaje_usado_en_disco', 'sensor.ha_disco_usado', 'sensor.espacio_libre_en_disco', 'binary_sensor.dashboard', 'sensor.ipad_hora', 'sensor.ipad_uptime', 'sensor.ipad_memoria', 'sensor.ipad_espacio', 'sensor.ipad_load'];
                 renderSimpleEntityList('list-servidor', servidorList, false);
             }
         }
@@ -4781,7 +4781,7 @@
                     var ent = entityStates[entId];
                     if (!ent) continue;
                     var name = (ent.attributes && ent.attributes.friendly_name) ? ent.attributes.friendly_name : entId;
-                    if (name === 'Command Sensor' || entId.includes('ipad')) {
+                    if (name === 'Command Sensor') {
                         name = 'iPad';
                     }
                     if (containerId === 'list-kermit') {
