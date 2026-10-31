@@ -3527,6 +3527,21 @@
             if (!texto || texto === '' || texto === 'unknown' || texto === 'unavailable') return;
             texto = texto.replace(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+\s*:\s*/i, '');
             texto = texto.replace(/\[/g, '').replace(/\]/g, '');
+            if (window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+                const ultimaNotiEnviada = localStorage.getItem('peluso_ultima_notif_sistema');
+                if (texto !== ultimaNotiEnviada) {
+                    localStorage.setItem('peluso_ultima_notif_sistema', texto);
+                    window.Capacitor.Plugins.LocalNotifications.schedule({
+                        notifications: [{
+                            title: "PelusoApp",
+                            body: texto,
+                            id: new Date().getTime(),
+                            sound: null,
+                            smallIcon: "icon"
+                        }]
+                    });
+                }
+            }
             if (activeNotifications.indexOf(texto) === -1) {
                 activeNotifications.push(texto);
             }
@@ -4968,11 +4983,8 @@
                 } else if (data.type === 'auth_ok') {
                     var statusText = document.getElementById('status-text');
                     var statusDot = document.getElementById('status-dot');
-                    
-                    // Pasa a online de forma inmediata al autenticar
                     if (statusText) statusText.innerText = "online";
                     if (statusDot) statusDot.classList.add('connected');
-
                     sendWS({ type: 'get_states' });
                     sendWS({ type: 'subscribe_events', event_type: 'state_changed' });
                     fetchHorarioCovadonga();
