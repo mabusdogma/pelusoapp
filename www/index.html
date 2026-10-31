@@ -3722,6 +3722,20 @@
             if (entityId && (entityId.includes('potencia') || entityId.includes('power') || entityId.includes('consumo'))) {
                 return val.toFixed(1) + (u ? ' ' + u : '');
             }
+            if (entityId === 'sensor.ipad_hora') {
+                return state; // Devuelve la hora directamente (ej. hh:mm:ss pm)
+            }
+            if (entityId === 'sensor.ipad_uptime') {
+                return state; // Devuelve el texto de uptime directamente (ej. 1 dia, 13h, 28 min)
+            }
+            if (entityId === 'sensor.ipad_espacio') {
+                var val = parseFloat(state);
+                return isNaN(val) ? state : val.toFixed(1) + ' GB'; // Muestra el valor con 1 decimal y 'GB'
+            }
+            if (entityId === 'sensor.ipad_load') {
+                var val = parseFloat(state);
+                return isNaN(val) ? state : val.toFixed(1) + ' %'; // Muestra el valor con 1 decimal y '%'
+            }
             return val.toFixed(1);
         }
 
