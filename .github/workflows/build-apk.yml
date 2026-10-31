@@ -8,6 +8,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: 1. Generar Llave Temporal (Paso único)
+        run: |
+          keytool -genkey -v -keystore temp.jks -keyalg RSA -keysize 2048 -validity 10000 -alias mi-alias -storepass miPassword123 -keypass miPassword123 -dname "CN=User, OU=Dev, O=Home, L=Local, S=Local, C=ES"
+          echo "--- COPIA EL SIGUIENTE TEXTO ---"
+          base64 temp.jks
+          echo "-------------------------------"
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
