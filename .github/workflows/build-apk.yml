@@ -27,7 +27,7 @@ jobs:
           version_name = data.get('version', '1.0.0')
           
           os.makedirs('www', exist_ok=True)
-          with open('ipad.html', 'r', encoding='utf-8') as f:
+          with open('index.html', 'r', encoding='utf-8') as f:
               content = f.read()
           
           content = content.replace('__VERSION_PLACEHOLDER__', version_name)
