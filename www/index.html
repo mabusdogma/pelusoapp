@@ -2814,6 +2814,7 @@
         const threshold = 100;
 		let cameraInterval = null;
         let lastActivity = Date.now();
+        var CURRENT_VERSION = "__VERSION_PLACEHOLDER__";
         var isDraggingAcSlider = false;
         var reconnectTimer = null;
         var LOCAL_HA_URL = 'http://192.168.1.132:8123';
@@ -3526,21 +3527,25 @@
         async function comprobarActualizacionApp() {
             try {
                 if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
-                const appInfo = await Capacitor.Plugins.App.getInfo();
-                const versionActualStr = appInfo.version; 
-                const response = function() {
-                    return fetch('http://192.168.1.132:8123/local/version.json?t=' + Date.now());
-                };
-                const res = await response();
-                if (!res.ok) return;
-                const remoteVersion = await res.json();
+
+                // Utiliza la versión inyectada por GitHub Actions en tiempo de compilación
+                const versionActualStr = (typeof CURRENT_VERSION !== 'undefined' && CURRENT_VERSION !== '__VERSION_PLACEHOLDER__') 
+                    ? CURRENT_VERSION 
+                    : '2.0.1';
+
+                const response = await fetch(HA_URL + '/local/version.json?t=' + Date.now());
+                if (!response.ok) return;
+
+                const remoteVersion = await response.json();
                 const parseVersion = (v) => {
                     if (!v) return 0;
                     const parts = v.split('.').map(n => parseInt(n, 10) || 0);
                     return (parts[0] * 10000) + (parts[1] * 100) + parts[2];
                 };
+
                 const currentCode = parseVersion(versionActualStr);
                 const remoteCode = parseVersion(remoteVersion.versionName);
+
                 if (remoteCode > currentCode) {
                     mostrarPopupActualizacion(remoteVersion.versionName, remoteVersion.apkUrl);
                 }
