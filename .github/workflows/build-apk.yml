@@ -3,6 +3,7 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -21,13 +22,12 @@ jobs:
       - name: Preparar Web Assets y Versionar HTML
         run: |
           python3 -c "
-          import json, os
+          import json
           with open('package.json', 'r') as f:
               data = json.load(f)
           version_name = data.get('version', '1.0.0')
           
-          os.makedirs('www', exist_ok=True)
-          with open('index.html', 'r', encoding='utf-8') as f:
+          with open('www/index.html', 'r', encoding='utf-8') as f:
               content = f.read()
           
           content = content.replace('__VERSION_PLACEHOLDER__', version_name)
