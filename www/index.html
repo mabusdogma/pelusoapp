@@ -2816,6 +2816,17 @@
 		let cameraInterval = null;
         let lastActivity = Date.now();
         var CURRENT_VERSION = "1.0.0";
+        var APP_VERSION_CODE = 206;
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+            window.Capacitor.Plugins.App.getInfo().then(function(info) {
+                if (info.build) {
+                    APP_VERSION_CODE = parseInt(info.build, 10);
+                    console.log("Versión detectada de la App nativa (code):", APP_VERSION_CODE);
+                }
+            }).catch(function(err) {
+                console.log("No se pudo leer la info de Capacitor:", err);
+            });
+        }
         var isDraggingAcSlider = false;
         var reconnectTimer = null;
         var LOCAL_HA_URL = 'http://192.168.1.132:8123';
@@ -3528,27 +3539,27 @@
         }
 
         function verificarActualizacionApp() {
-            var ua = navigator.userAgent;
-            if (/iPad|iPhone|iPod/.test(ua) || !/Android/.test(ua)) return;
-            var versionCheckUrl = HA_URL.replace(/\/$/, '') + '/local/version.json';
-        
-            fetch(versionCheckUrl, { cache: 'no-store' })
-                .then(function(response) {
-                    if (!response.ok) throw new Error('No se pudo verificar la versión');
-                    return response.json();
-                })
-                .then(function(data) {
-                    var remoteVersionCode = data.versionCode || 0;
-                    var currentVersionCode = 206; 
+    var ua = navigator.userAgent;
+    var esAppNativa = /AppLAN|Android.*wv/.test(ua) || (window.Capacitor !== undefined);
+    if (!esAppNativa) return;
+    var versionCheckUrl = HA_URL.replace(/\/$/, '') + '/local/version.json';
+    fetch(versionCheckUrl, { cache: 'no-store' })
+        .then(function(response) {
+            if (!response.ok) throw new Error('No se pudo verificar la versión');
+            return response.json();
+        })
+        .then(function(data) {
+            var remoteVersionCode = data.versionCode || 0;
+            var currentVersionCode = window.APP_VERSION_CODE || 206;
 
-                    if (remoteVersionCode > currentVersionCode) {
-                        mostrarPopupActualizacion(data.versionName, data.apkUrl);
-                    }
-                })
-                .catch(function(err) {
-                    console.log("Error comprobando actualizaciones:", err);
-                });
-        }
+            if (remoteVersionCode > currentVersionCode) {
+                mostrarPopupActualizacion(data.versionName, data.apkUrl);
+            }
+        })
+        .catch(function(err) {
+            console.log("Error comprobando actualizaciones:", err);
+        });
+}
 
         function updateEnergyPercentages() {
             var total = window._energyData.produccion;
