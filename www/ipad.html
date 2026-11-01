@@ -2816,12 +2816,11 @@
         const threshold = 100;
 		let cameraInterval = null;
         let lastActivity = Date.now();
-        var CURRENT_VERSION = (typeof __VERSION_PLACEHOLDER__ !== 'undefined') ? "__VERSION_PLACEHOLDER__" : "1.0.0";
-        var APP_VERSION_CODE = (typeof __VERSION_CODE_PLACEHOLDER__ !== 'undefined' && !isNaN(__VERSION_CODE_PLACEHOLDER__)) ? __VERSION_CODE_PLACEHOLDER__ : 206;
-
+        var CURRENT_VERSION = "1.0.0";
+        var APP_VERSION_CODE = 206;
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
             window.Capacitor.Plugins.App.getInfo().then(function(info) {
-                if (info && info.build) {
+                if (info.build) {
                     APP_VERSION_CODE = parseInt(info.build, 10);
                     console.log("Versión detectada de la App nativa (code):", APP_VERSION_CODE);
                 }
@@ -2835,10 +2834,8 @@
         var TAILSCALE_HA_URL = 'http://100.114.227.7:8123';
         var currentHost = window.location.hostname;
         var HA_URL = LOCAL_HA_URL;
-        var isAppEnv = (typeof window.Capacitor !== 'undefined') || 
-                       window.location.protocol === 'capacitor:' || 
-                       window.location.protocol === 'file:';
-        if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1' && currentHost !== '' && !isAppEnv) {
+
+        if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1' && currentHost !== '') {
             HA_URL = window.location.protocol + '//' + window.location.host;
         } else {
             HA_URL = localStorage.getItem('ha_url') || LOCAL_HA_URL;
@@ -3440,33 +3437,59 @@
                         window.location.hostname === 'localhost' ||
                         window.location.hostname === '127.0.0.1' ||
                         /Android.*(Capacitor|wv)/i.test(navigator.userAgent);
-
             if (networkTextEl) {
-                networkTextEl.innerText = isApp ? 'app local' : 'web';
+                networkTextEl.innerText = 'Desconocido';
             }
-            var savedUrl = localStorage.getItem('ha_url');
-            if (isApp) {
-                HA_URL = savedUrl || LOCAL_HA_URL;
-                localStorage.setItem('ha_url', HA_URL);
-                if (networkTextEl) networkTextEl.innerText = 'app LAN';
-                connectWS();
-                return;
-            }
-            if (typeof currentHost !== 'undefined' && currentHost.indexOf('100.') === 0) {
+
+            if (!isApp && typeof currentHost !== 'undefined' && currentHost.indexOf('100.') === 0) {
                 HA_URL = TAILSCALE_HA_URL;
                 localStorage.setItem('ha_url', HA_URL);
                 if (networkTextEl) networkTextEl.innerText = 'web Tail';
                 connectWS();
                 return;
-            } else if (typeof currentHost !== 'undefined' && currentHost.indexOf('192.168.') === 0) {
+            } else if (!isApp && typeof currentHost !== 'undefined' && (currentHost.indexOf('192.168.') === 0)) {
                 HA_URL = LOCAL_HA_URL;
                 localStorage.setItem('ha_url', HA_URL);
                 if (networkTextEl) networkTextEl.innerText = 'web LAN';
                 connectWS();
                 return;
             }
-            HA_URL = savedUrl || LOCAL_HA_URL;
-            connectWS();
+            var testUrl = LOCAL_HA_URL + '/manifest.json';
+            var timedOut = false;
+            var timer = setTimeout(function() {
+                if (timedOut) return;
+                timedOut = true;
+                HA_URL = TAILSCALE_HA_URL;
+                localStorage.setItem('ha_url', HA_URL);
+                if (networkTextEl) {
+                    networkTextEl.innerText = isApp ? 'app Tail' : 'web Tail';
+                }
+                connectWS();
+            }, 2000);
+
+            fetch(testUrl, { mode: 'no-cors', cache: 'no-store' })
+                .then(function(response) {
+                    if (timedOut) return;
+                    timedOut = true;
+                    clearTimeout(timer);
+                    HA_URL = LOCAL_HA_URL;
+                    localStorage.setItem('ha_url', HA_URL);
+                    if (networkTextEl) {
+                        networkTextEl.innerText = isApp ? 'app LAN' : 'web LAN';
+                    }
+                    connectWS();
+                })
+                .catch(function(err) {
+                    if (timedOut) return;
+                    timedOut = true;
+                    clearTimeout(timer);
+                    HA_URL = TAILSCALE_HA_URL;
+                    localStorage.setItem('ha_url', HA_URL);
+                    if (networkTextEl) {
+                        networkTextEl.innerText = isApp ? 'app Tail' : 'web Tail';
+                    }
+                    connectWS();
+                });
         }
 		
         function cargarVersionModal() {
@@ -3525,11 +3548,9 @@
                 .then(function(data) {
                     var remoteVersionCode = parseInt(data.versionCode || 0, 10);
                     var currentVersionCode = parseInt(window.APP_VERSION_CODE || 206, 10);
-                    
                     console.log("Versión actual (Local):", currentVersionCode, "| Versión en servidor (Remota):", remoteVersionCode);
-                    
                     if (remoteVersionCode > currentVersionCode) {
-                        console.log("¡Actualización disponible! Mostrando popup...");
+                        console.log("¡Actualización disponible! Mostrando popup con datos de depuración...");
                         if (typeof mostrarPopupActualizacion === 'function') {
                             mostrarPopupActualizacion(data.versionName, data.apkUrl);
                         }
