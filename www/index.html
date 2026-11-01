@@ -1027,9 +1027,6 @@
         <symbol id="icon-floor-lamp-torchiere-outline" viewBox="0 0 24 24">
             <path fill="currentColor" d="M14 4L12.7 7H11.3L10 4H14M17 2H7L10 9H14L17 2M13 20H16V22H8V20H11V10H13V20Z" />
         </symbol>
-        <symbol id="icon-home-battery-outline" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M15 9H16V7.5H20V9H21C21.55 9 22 9.45 22 10V21C22 21.55 21.55 22 21 22H15C14.45 22 14 21.55 14 21V10C14 9.45 14.45 9 15 9M16 11V14H20V11H16M12 5.69L7 10.19V18H12V20H5V12H2L12 3L14.78 5.5H14V7.17L13.76 7.27L12 5.69Z" />
-        </symbol>
         <symbol id="icon-table-chair" viewBox="0 0 24 24">
             <path fill="currentColor" d="M12 22H6A2 2 0 0 1 8 20V8H2V5H16V8H10V20A2 2 0 0 1 12 22M22 2V22H20V15H15V22H13V14A2 2 0 0 1 15 12H20V2Z" />
         </symbol>
@@ -2812,6 +2809,9 @@
 
     <!-- LÓGICA JAVASCRIPT -->
     <script>
+        let touchStartY = 0;
+        let pulling = false;
+        const threshold = 100;
 		let cameraInterval = null;
         let lastActivity = Date.now();
         var isDraggingAcSlider = false;
@@ -3523,24 +3523,36 @@
             }
         }
 
-        function showNotification(texto) {
+        async function showNotification(texto) {
             if (!texto || texto === '' || texto === 'unknown' || texto === 'unavailable') return;
             texto = texto.replace(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+\s*:\s*/i, '');
             texto = texto.replace(/\[/g, '').replace(/\]/g, '');
-            if (window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+
+            var isNative = window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
+
+            if (isNative) {
                 const ultimaNotiEnviada = localStorage.getItem('peluso_ultima_notif_sistema');
                 if (texto !== ultimaNotiEnviada) {
                     localStorage.setItem('peluso_ultima_notif_sistema', texto);
-                    window.Capacitor.Plugins.LocalNotifications.schedule({
-                        notifications: [{
-                            title: "PelusoApp",
-                            body: texto,
-                            id: new Date().getTime(),
-                            sound: null,
-                            smallIcon: "icon"
-                        }]
-                    });
+                    try {
+                        const permStatus = await window.Capacitor.Plugins.LocalNotifications.checkPermissions();
+                        if (permStatus.display !== 'granted') {
+                            await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
+                        }
+                        await window.Capacitor.Plugins.LocalNotifications.schedule({
+                            notifications: [{
+                                title: "PelusoApp",
+                                body: texto,
+                                id: new Date().getTime(),
+                                sound: null,
+                                // smallIcon: "icon"
+                            }]
+                        });
+                    } catch (e) {
+                        console.error("Error al programar notificación nativa:", e);
+                    }
                 }
+                return;
             }
             if (activeNotifications.indexOf(texto) === -1) {
                 activeNotifications.push(texto);
@@ -5195,7 +5207,7 @@
             red: 0
         };
 
-        window.addEventListener('click', function (event) {
+window.addEventListener('click', function (event) {
             const cameraModal = document.getElementById('camera-modal');
             const alarmModal = document.getElementById('alarm-pin-modal');
             if (event.target === cameraModal) {
@@ -5208,6 +5220,33 @@
                 alarmModal.style.display = 'none';
             }
         });
+
+        window.addEventListener('touchstart', (e) => {
+            if (window.scrollY === 0) {
+                touchStartY = e.touches[0].clientY;
+                pulling = true;
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!pulling) return;
+            const currentY = e.touches[0].clientY;
+            const diff = currentY - touchStartY;
+            if (diff < 0) {
+                pulling = false;
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', (e) => {
+            if (!pulling) return;
+            const currentY = e.changedTouches[0].clientY;
+            const diff = currentY - touchStartY;
+            if (diff > threshold && window.scrollY === 0) {
+                window.location.reload();
+            }
+            pulling = false;
+        }, { passive: true });
+
     </script>
 </body>
 </html>
