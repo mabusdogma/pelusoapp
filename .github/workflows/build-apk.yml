@@ -31,7 +31,6 @@ jobs:
           
           os.makedirs('www', exist_ok=True)
           
-          # Detecta si tu archivo fuente es ipad.html en la raíz o ya está en www/
           source_path = 'ipad.html' if os.path.exists('ipad.html') else ('www/ipad.html' if os.path.exists('www/ipad.html') else 'www/index.html')
           target_path = 'www/index.html'
           
@@ -43,7 +42,7 @@ jobs:
           
           with open(target_path, 'w', encoding='utf-8') as f:
               f.write(content)
-          print(f'Versión {version_name} (code: {version_code}) inyectada desde {source_path} hacia {target_path}')
+          print(f'Versión {version_name} inyectada desde {source_path}')
           "
 
       - name: Set up JDK 17
@@ -57,25 +56,36 @@ jobs:
           npx cap add android || true
           npx cap sync android
 
-      - name: Habilitar Depuración WebView en MainActivity
+      - name: Habilitar Depuración WebView en MainActivity (Robusto)
         run: |
           python3 -c "
           import glob
           main_files = glob.glob('android/app/src/main/java/**/MainActivity.java', recursive=True)
+          print('Archivos MainActivity encontrados:', main_files)
           if main_files:
               path = main_files[0]
               with open(path, 'r', encoding='utf-8') as f:
                   content = f.read()
               
+              print('--- CONTENIDO ORIGINAL DE MAINACTIVITY ---')
+              print(content)
+              print('-----------------------------------------')
+
               if 'setWebContentsDebuggingEnabled' not in content:
                   if 'import android.webkit.WebView;' not in content:
                       content = content.replace('import com.getcapacitor.BridgeActivity;', 'import com.getcapacitor.BridgeActivity;\nimport android.webkit.WebView;')
                   
-                  content = content.replace('super.onCreate(savedInstanceState);', 'super.onCreate(savedInstanceState);\n        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {\n            WebView.setWebContentsDebuggingEnabled(true);\n        }')
+                  # Inyección segura después de la superclase onCreate
+                  target_str = 'super.onCreate(savedInstanceState);'
+                  if target_str in content:
+                      replacement = target_str + '\n        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {\n            WebView.setWebContentsDebuggingEnabled(true);\n        }'
+                      content = content.replace(target_str, replacement, 1)
                   
                   with open(path, 'w', encoding='utf-8') as f:
                       f.write(content)
-                  print('Depuración de WebView habilitada correctamente en MainActivity.java.')
+                  print('>>> Depuración de WebView inyectada correctamente en MainActivity.java <<<')
+              else:
+                  print('>>> La depuración ya estaba habilitada <<<')
           "
 
       - name: Configure Android Manifest and FileProvider automatically
@@ -144,7 +154,7 @@ jobs:
           content = re.sub(r'versionCode \d+', f'versionCode {version_code}', content)
           content = re.sub(r'versionName \".*?\"', f'versionName \"{version_name}\"', content)
 
-          with open(gradle_path, 'w') as f:
+          with open(gradle_path, 'w', encoding='utf-8') as f:
               f.write(content)
           "
 
