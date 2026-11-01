@@ -103,20 +103,33 @@ jobs:
           
           mv android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/build/outputs/apk/release/app-release.apk
 
-      - name: Crear version.json y empaquetar en ZIP
+      - name: Automatizar Version y Preparar Archivos
         run: |
-          echo '{' > version.json
-          echo '  "versionCode": 2,' >> version.json
-          echo '  "versionName": "2.0.0",' >> version.json
-          echo '  "apkUrl": "http://192.168.1.132:8123/local/peluso-app-v2.0.0.apk"' >> version.json
-          echo '}' >> version.json
+          python3 -c "
+          import json
+          with open('package.json', 'r') as f:
+              data = json.load(f)
+          version_name = data.get('version', '1.0.0')
+          parts = version_name.split('.')
+          version_code = int(parts[0]) * 10000 + int(parts[1]) * 100 + int(parts[2])
           
-          cp android/app/build/outputs/apk/release/app-release.apk peluso-app-v2.0.0.apk
+          with open('version.json', 'w') as f:
+              json.dump({
+                  'versionCode': version_code,
+                  'versionName': version_name,
+                  'apkUrl': f'http://192.168.1.132:8123/local/peluso-app-v{version_name}.apk'
+              }, f, indent=2)
           
-          zip actualizacion.zip peluso-app-v2.0.0.apk version.json
+          with open('version_env.sh', 'w') as f:
+              f.write(f'VERSION_NAME={version_name}\n')
+          "
+          source version_env.sh
+          cp android/app/build/outputs/apk/release/app-release.apk peluso-app-v$VERSION_NAME.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: peluso-apk
-          path: actualizacion.zip
+          name: actualizacion-app
+          path: |
+            peluso-app-v*.apk
+            version.json
