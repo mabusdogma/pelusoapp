@@ -1,6 +1,6 @@
 {
   "name": "peluso-app",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "PelusoApp Home Assistant Dashboard",
   "main": "index.js",
   "scripts": {
