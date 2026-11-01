@@ -1,7 +1,9 @@
 name: Build Android APK
+
 on:
   push:
     branches: [ main ]
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -27,6 +29,52 @@ jobs:
         run: |
           npx cap add android || true
           npx cap sync android
+
+      - name: Configure Android Manifest and FileProvider automatically
+        run: |
+          # 1. Crear el directorio xml si no existe
+          mkdir -p android/app/src/main/res/xml
+          
+          # 2. Crear el archivo file_paths.xml necesario para el actualizador
+          cat << 'EOF' > android/app/src/main/res/xml/file_paths.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <paths xmlns:android="http://schemas.android.com/apk/res/android">
+              <cache-path name="cached_files" path="." />
+              <external-cache-path name="external_cached_files" path="." />
+          </paths>
+          EOF
+
+          # 3. Inyectar permisos y el provider en el AndroidManifest.xml usando Python
+          python3 -c "
+          manifest_path = 'android/app/src/main/AndroidManifest.xml'
+          with open(manifest_path, 'r') as f:
+              content = f.read()
+
+          # Evitar duplicar si ya estuvieran
+          if 'REQUEST_INSTALL_PACKAGES' not in content:
+              permissions = '''
+              <uses-permission android:name=\"android.permission.INTERNET\" />
+              <uses-permission android:name=\"android.permission.REQUEST_INSTALL_PACKAGES\" />
+              '''
+              content = content.replace('<application', permissions + '\n<application')
+
+          if 'fileprovider' not in content:
+              provider = '''
+                  <provider
+                      android:name=\"androidx.core.content.FileProvider\"
+                      android:authorities=\"${applicationId}.fileprovider\"
+                      android:exported=\"false\"
+                      android:grantUriPermissions=\"true\">
+                      <meta-data
+                          android:name=\"android.support.FILE_PROVIDER_PATHS\"
+                          android:resource=\"@xml/file_paths\" />
+                  </provider>
+              '''
+              content = content.replace('<application', '<application\n' + provider)
+
+          with open(manifest_path, 'w') as f:
+              f.write(content)
+          "
 
       - name: Generate App Icons and Splash
         run: |
