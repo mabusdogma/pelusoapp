@@ -3409,12 +3409,8 @@
 
         function getIOSVersionInfo() {
             var ua = navigator.userAgent;
-            // Comprueba si es un dispositivo iOS (iPad, iPhone, iPod)
             var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            
             if (!isIOS) return null;
-
-            // Intenta extraer el número de versión de iOS (ej. "OS 16_4_1" o "CPU OS 15_7 like Mac OS X")
             var match = ua.match(/OS (\d+)_(\d+)(?:_(\d+))?/);
             if (match) {
                 var major = match[1];
@@ -3439,8 +3435,6 @@
                         window.location.hostname === 'localhost' ||
                         window.location.hostname === '127.0.0.1' ||
                         /Android.*(Capacitor|wv)/i.test(navigator.userAgent);
-
-            // Función auxiliar interna para detectar iOS y su versión
             function getIOSVersionInfo() {
                 var ua = navigator.userAgent;
                 var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -5054,27 +5048,25 @@
 
         async function verificarActualizacionSimple() {
             try {
-                const respuesta = await fetch('/local/pelusoapp.apk', { method: 'HEAD' });
+                const urlApk = HA_URL + '/local/pelusoapp.apk';
+                const respuesta = await fetch(urlApk, { method: 'HEAD' });
                 if (!respuesta.ok) return;
-
                 const fechaServidor = respuesta.headers.get('Last-Modified');
                 const fechaGuardada = localStorage.getItem('pelusoapp_apk_fecha');
-
                 if (!fechaGuardada) {
                     localStorage.setItem('pelusoapp_apk_fecha', fechaServidor);
                     return;
                 }
-
                 if (fechaServidor !== fechaGuardada) {
                     console.log("¡Nueva APK detectada en el servidor!");
-                    mostrarPopupActualizacionSimple();
+                    mostrarPopupActualizacionSimple(urlApk);
                 }
             } catch (e) {
                 console.log("No se pudo comprobar la actualización", e);
             }
         }
 
-        function mostrarPopupActualizacionSimple() {
+        function mostrarPopupActualizacionSimple(apkUrl) {
             if (document.getElementById('update-modal-simple')) return;
             var modal = document.createElement('div');
             modal.id = 'update-modal-simple';
@@ -5089,15 +5081,12 @@
                 '<button id="btn-accept-simple" style="flex: 1; padding: 10px; background: var(--accent); border: none; color: #000; border-radius: 10px; font-weight: bold; cursor: pointer;">Actualizar</button>' +
                 '</div>' +
                 '</div>';
-
             document.body.appendChild(modal);
-
             document.getElementById('btn-cancel-simple').onclick = function() {
                 modal.remove();
             };
             document.getElementById('btn-accept-simple').onclick = function() {
-                // Aquí ocurre el salto para descargar e iniciar el APK automáticamente en Android WebView
-                window.location.href = '/local/pelusoapp.apk';
+                window.location.href = apkUrl;
                 modal.remove();
             };
         }
