@@ -3527,11 +3527,21 @@
             try {
                 if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
                 const appInfo = await Capacitor.Plugins.App.getInfo();
-                const versionCodeActual = parseInt(appInfo.build, 10) || 0; 
-                const response = await fetch('http://192.168.1.132:8123/local/version.json?t=' + Date.now());
-                if (!response.ok) return;    
-                const remoteVersion = await response.json();    
-                if (remoteVersion.versionCode > versionCodeActual) {
+                const versionActualStr = appInfo.version; 
+                const response = function() {
+                    return fetch('http://192.168.1.132:8123/local/version.json?t=' + Date.now());
+                };
+                const res = await response();
+                if (!res.ok) return;
+                const remoteVersion = await res.json();
+                const parseVersion = (v) => {
+                    if (!v) return 0;
+                    const parts = v.split('.').map(n => parseInt(n, 10) || 0);
+                    return (parts[0] * 10000) + (parts[1] * 100) + parts[2];
+                };
+                const currentCode = parseVersion(versionActualStr);
+                const remoteCode = parseVersion(remoteVersion.versionName);
+                if (remoteCode > currentCode) {
                     mostrarPopupActualizacion(remoteVersion.versionName, remoteVersion.apkUrl);
                 }
             } catch (e) {
