@@ -95,7 +95,7 @@ jobs:
 
       - name: Generate App Icons and Splash
         run: |
-          npx capacitor-assets generate --android
+          npx --yes capacitor-assets generate --android
 
       - name: Actualizar version en Gradle desde package.json
         run: |
@@ -162,11 +162,10 @@ jobs:
                   'versionName': version_name,
                   'apkUrl': f'http://192.168.1.132:8123/local/peluso-app-v{version_name}.apk'
               }, f, indent=2)
-          
-          with open('version_env.sh', 'w') as f:
-              f.write(f'VERSION_NAME={version_name}\n')
+
+          with open('$GITHUB_ENV', 'a') as env_file:
+              env_file.write(f'VERSION_NAME={version_name}\n')
           "
-          source version_env.sh
           cp android/app/build/outputs/apk/release/app-release.apk peluso-app-v$VERSION_NAME.apk
 
       - name: Upload APK Artifact
