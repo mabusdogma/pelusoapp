@@ -2774,11 +2774,12 @@
     </div>
 
 <!-- MODAL CONFIGURACIÓN SERVIDOR Y TOKEN (CON PASSWORD OCULTO) -->
-    <div id="config-modal" class="modal-camera" style="z-index: 2000;">
-        <div style="background: var(--sidebar-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
-            <h3 style="margin-bottom: 15px; color: var(--text-primary); font-size: 18px;">Configuración</h3>
-            <div id="config-version-label" style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">Versión: Cargando...</div>
-            <div style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">URL local de Home Assistant:</div>
+<div id="config-modal" class="modal-camera" style="z-index: 2000;">
+    <div style="background: var(--sidebar-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+        <h3 style="margin-bottom: 15px; color: var(--text-primary); font-size: 18px;">Configuración</h3>
+        <div id="config-version-label" style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">Versión: Cargando...</div>
+        <div id="config-debug-info" style="text-align: left; margin-bottom: 12px; font-size: 11px; color: #a0a0a0;">Diagnóstico: Comprobando...</div>
+        <div style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">URL local de Home Assistant:</div>
             <input type="text" id="config-url-input" 
                 style="width: 100%; font-size: 14px; padding: 10px; border-radius: 10px; border: 1px solid var(--card-border); background: #000; color: #fff; margin-bottom: 14px; outline: none;">
             <div style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">Contraseña:</div>
@@ -3537,12 +3538,7 @@
                 });
         }
 
-        function verificarActualizacionApp() {
-            var esAppNativa = (typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform()) || /Android.*wv/.test(navigator.userAgent);
-            if (!esAppNativa) {
-                console.log("Ejecutándose en entorno web. Omitiendo comprobación de APK.");
-                return;
-            }
+       function verificarActualizacionApp() {
             var versionCheckUrl = HA_URL.replace(/\/$/, '') + '/local/version.json?t=' + new Date().getTime();
             fetch(versionCheckUrl, { cache: 'no-store' })
                 .then(function(response) {
@@ -3552,14 +3548,14 @@
                 .then(function(data) {
                     var remoteVersionCode = parseInt(data.versionCode || 0, 10);
                     var currentVersionCode = parseInt(window.APP_VERSION_CODE || 206, 10);
-                    console.log("Versión actual (App):", currentVersionCode, "| Versión en servidor:", remoteVersionCode);
+                    console.log("Versión actual (Local):", currentVersionCode, "| Versión en servidor (Remota):", remoteVersionCode);
                     if (remoteVersionCode > currentVersionCode) {
-                        console.log("¡Actualización disponible en la App! Mostrando popup...");
+                        console.log("¡Actualización disponible! Mostrando popup con datos de depuración...");
                         if (typeof mostrarPopupActualizacion === 'function') {
-                            mostrarPopupActualizacion(data.apkUrl, data.versionName);
+                            mostrarPopupActualizacion(data.versionName, data.apkUrl);
                         }
                     } else {
-                        console.log("La aplicación está al día.");
+                        console.log("La aplicación está totalmente actualizada.");
                     }
                 })
                 .catch(function(err) {
@@ -3654,7 +3650,6 @@
                 'position: fixed; top: 0; left: 0; width: 100%; height: 100%;' +
                 'background: rgba(0,0,0,0.7); display: flex; align-items: center;' +
                 'justify-content: center; z-index: 10000; font-family: sans-serif;';
-
             modal.innerHTML = 
                 '<div style="background: #222; color: #fff; padding: 25px; border-radius: 12px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">' +
                 '<h3 style="margin-top: 0; color: #ff9800;">¡Nueva actualización!</h3>' +
@@ -5078,6 +5073,11 @@
             }
             if (tokenInput) {
                 tokenInput.value = (typeof HA_TOKEN !== 'undefined') ? HA_TOKEN : '';
+            }
+            var debugInfoEl = document.getElementById('config-debug-info');
+            if (debugInfoEl) {
+                var localCode = typeof APP_VERSION_CODE !== 'undefined' ? APP_VERSION_CODE : 206;
+                debugInfoEl.innerText = "Diagnóstico: App local (" + localCode + ")";
             }
             var configModal = document.getElementById('config-modal');
             if (configModal) {
