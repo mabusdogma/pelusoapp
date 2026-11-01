@@ -3450,16 +3450,22 @@
 				});
 		}
 		
-        function cargarVersiónModal() {
+        function cargarVersionModal() {
             var labelVersion = document.getElementById('config-version-label');
             if (!labelVersion) return;
-            var urlInput = document.getElementById('config-url-input');
-            var baseUrl = urlInput ? urlInput.value.trim() : '';
-            if (!baseUrl) {
-                baseUrl = (typeof HA_URL !== 'undefined' && HA_URL) ? HA_URL : 'http://192.168.1.132:8123';
-            }
-            var fetchUrl = baseUrl.replace(/\/$/, '') + '/local/version.json';
+            var fetchUrl = '/local/version.json';
             fetch(fetchUrl)
+                .then(function(response) {
+                    if (!response.ok) {
+                        var urlInput = document.getElementById('config-url-input');
+                        var baseUrl = urlInput ? urlInput.value.trim() : '';
+                        if (!baseUrl) {
+                            baseUrl = (typeof HA_URL !== 'undefined' && HA_URL) ? HA_URL : 'http://192.168.1.132:8123';
+                        }
+                        return fetch(baseUrl.replace(/\/$/, '') + '/local/version.json');
+                    }
+                    return response;
+                })
                 .then(function(response) {
                     if (!response.ok) throw new Error('No se pudo obtener el archivo');
                     return response.json();
@@ -5002,7 +5008,7 @@
             if (configModal) {
                 configModal.style.display = 'flex';
             }
-            cargarVersiónModal();
+            cargarVersionModal();
         }
 
         function closeConfigModal() {
