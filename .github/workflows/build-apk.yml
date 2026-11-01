@@ -148,6 +148,9 @@ jobs:
 
       - name: Automatizar Version y Preparar Archivos
         run: |
+          VERSION_NAME=$(node -p "require('./package.json').version")
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          
           python3 -c "
           import json
           with open('package.json', 'r') as f:
@@ -162,10 +165,8 @@ jobs:
                   'versionName': version_name,
                   'apkUrl': f'http://192.168.1.132:8123/local/peluso-app-v{version_name}.apk'
               }, f, indent=2)
-
-          with open('$GITHUB_ENV', 'a') as env_file:
-              env_file.write(f'VERSION_NAME={version_name}\n')
           "
+          
           cp android/app/build/outputs/apk/release/app-release.apk peluso-app-v$VERSION_NAME.apk
 
       - name: Upload APK Artifact
