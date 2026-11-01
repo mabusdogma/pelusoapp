@@ -2773,10 +2773,11 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIGURACIÓN SERVIDOR Y TOKEN (CON PASSWORD OCULTO) -->
+<!-- MODAL CONFIGURACIÓN SERVIDOR Y TOKEN (CON PASSWORD OCULTO) -->
     <div id="config-modal" class="modal-camera" style="z-index: 2000;">
         <div style="background: var(--sidebar-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
             <h3 style="margin-bottom: 15px; color: var(--text-primary); font-size: 18px;">Configuración</h3>
+            <div id="config-version-label" style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">Versión: Cargando...</div>
             <div style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">URL local de Home Assistant:</div>
             <input type="text" id="config-url-input" 
                 style="width: 100%; font-size: 14px; padding: 10px; border-radius: 10px; border: 1px solid var(--card-border); background: #000; color: #fff; margin-bottom: 14px; outline: none;">
@@ -3449,6 +3450,28 @@
 				});
 		}
 		
+        function cargarVersiónModal() {
+            var labelVersion = document.getElementById('config-version-label');
+            if (!labelVersion) return;
+            var baseUrl = document.getElementById('config-url-input').value.trim();
+            var fetchUrl = (baseUrl ? baseUrl.replace(/\/$/, '') : '') + '/local/version.json';
+            
+            fetch(fetchUrl)
+                .then(function(response) {
+                    if (!response.ok) throw new Error('No se pudo obtener el archivo');
+                    return response.json();
+                })
+                .then(function(data) {
+                    // Agregamos data.versionName para que lea correctamente tu JSON
+                    var versionVal = data.versionName || data.version || data.name || 'Desconocida';
+                    labelVersion.innerText = 'Versión: ' + versionVal;
+                })
+                .catch(function(err) {
+                    console.error('Error al cargar la versión:', err);
+                    labelVersion.innerText = 'Versión: No disponible';
+                });
+        }
+
         function updateEnergyPercentages() {
             var total = window._energyData.produccion;
             var fvCardEl = document.getElementById('val-fv-dia-card');
@@ -4968,6 +4991,7 @@
             document.getElementById('config-url-input').value = HA_URL;
             document.getElementById('config-token-input').value = HA_TOKEN;
             document.getElementById('config-modal').style.display = 'flex';
+            cargarVersiónModal(); // <-- ¡Añade esta línea aquí!
         }
 
         function closeConfigModal() {
