@@ -57,6 +57,27 @@ jobs:
           npx cap add android || true
           npx cap sync android
 
+      - name: Habilitar Depuración WebView en MainActivity
+        run: |
+          python3 -c "
+          import glob
+          main_files = glob.glob('android/app/src/main/java/**/MainActivity.java', recursive=True)
+          if main_files:
+              path = main_files[0]
+              with open(path, 'r', encoding='utf-8') as f:
+                  content = f.read()
+              
+              if 'setWebContentsDebuggingEnabled' not in content:
+                  if 'import android.webkit.WebView;' not in content:
+                      content = content.replace('import com.getcapacitor.BridgeActivity;', 'import com.getcapacitor.BridgeActivity;\nimport android.webkit.WebView;')
+                  
+                  content = content.replace('super.onCreate(savedInstanceState);', 'super.onCreate(savedInstanceState);\n        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {\n            WebView.setWebContentsDebuggingEnabled(true);\n        }')
+                  
+                  with open(path, 'w', encoding='utf-8') as f:
+                      f.write(content)
+                  print('Depuración de WebView habilitada correctamente en MainActivity.java.')
+          "
+
       - name: Configure Android Manifest and FileProvider automatically
         run: |
           mkdir -p android/app/src/main/res/xml
