@@ -21,8 +21,9 @@ jobs:
 
       - name: Preparar Web Assets y Versionar HTML
         run: |
-          python3 -c "
+          cat << 'EOF' > version_script.py
           import json, os
+
           with open('package.json', 'r') as f:
               data = json.load(f)
           version_name = data.get('version', '1.0.0')
@@ -43,7 +44,9 @@ jobs:
           with open(target_path, 'w', encoding='utf-8') as f:
               f.write(content)
           print(f'Versión {version_name} inyectada desde {source_path}')
-          "
+          EOF
+          python3 version_script.py
+          rm version_script.py
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -56,10 +59,11 @@ jobs:
           npx cap add android || true
           npx cap sync android
 
-      - name: Habilitar Depuración WebView en MainActivity (Definitivo)
+      - name: Habilitar Depuración WebView en MainActivity
         run: |
-          python3 -c "
+          cat << 'EOF' > enable_debug.py
           import glob
+
           main_files = glob.glob('android/app/src/main/java/**/MainActivity.java', recursive=True)
           print('Archivos MainActivity encontrados:', main_files)
           if main_files:
@@ -72,20 +76,18 @@ jobs:
               print('-----------------------------------------')
 
               if 'setWebContentsDebuggingEnabled' not in content:
-                  # Si la clase está vacía, la reescribimos con onCreate y depuración habilitada
                   if 'public class MainActivity extends BridgeActivity {}' in content:
                       new_body = '''public class MainActivity extends BridgeActivity {
-    @Override
-    public void onCreate(android.os.Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-            android.webkit.WebView.setWebContentsDebuggingEnabled(true);
-        }
-    }
-}'''
+      @Override
+      public void onCreate(android.os.Bundle savedInstanceState) {
+          super.onCreate(savedInstanceState);
+          if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+              android.webkit.WebView.setWebContentsDebuggingEnabled(true);
+          }
+      }
+  }'''
                       content = content.replace('public class MainActivity extends BridgeActivity {}', new_body)
                   else:
-                      # Si ya tuviera contenido por alguna razón, inyectamos de forma segura
                       target_str = 'super.onCreate(savedInstanceState);'
                       if target_str in content:
                           replacement = target_str + '\n        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {\n            android.webkit.WebView.setWebContentsDebuggingEnabled(true);\n        }'
@@ -96,7 +98,9 @@ jobs:
                   print('>>> Depuración de WebView inyectada correctamente en MainActivity.java <<<')
               else:
                   print('>>> La depuración ya estaba habilitada <<<')
-          "
+          EOF
+          python3 enable_debug.py
+          rm enable_debug.py
 
       - name: Configure Android Manifest and FileProvider automatically
         run: |
@@ -110,38 +114,40 @@ jobs:
           </paths>
           EOF
 
-          python3 -c "
+          cat << 'EOF' > update_manifest.py
           manifest_path = 'android/app/src/main/AndroidManifest.xml'
           with open(manifest_path, 'r') as f:
               content = f.read()
 
           if 'REQUEST_INSTALL_PACKAGES' not in content:
               permissions = '''
-              <uses-permission android:name=\"android.permission.INTERNET\" />
-              <uses-permission android:name=\"android.permission.REQUEST_INSTALL_PACKAGES\" />
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
               '''
               content = content.replace('<application', permissions + '\n<application')
 
           if 'usesCleartextTraffic' not in content:
-              content = content.replace('<application', '<application android:usesCleartextTraffic=\"true\"')
+              content = content.replace('<application', '<application android:usesCleartextTraffic="true"')
 
           if 'fileprovider' not in content:
               provider = '''
                   <provider
-                      android:name=\"androidx.core.content.FileProvider\"
-                      android:authorities=\"${applicationId}.fileprovider\"
-                      android:exported=\"false\"
-                      android:grantUriPermissions=\"true\">
+                      android:name="androidx.core.content.FileProvider"
+                      android:authorities="${applicationId}.fileprovider"
+                      android:exported="false"
+                      android:grantUriPermissions="true">
                       <meta-data
-                          android:name=\"android.support.FILE_PROVIDER_PATHS\"
-                          android:resource=\"@xml/file_paths\" />
+                          android:name="android.support.FILE_PROVIDER_PATHS"
+                          android:resource="@xml/file_paths" />
                   </provider>
               '''
               content = content.replace('<application', '<application\n' + provider)
 
           with open(manifest_path, 'w') as f:
               f.write(content)
-          "
+          EOF
+          python3 update_manifest.py
+          rm update_manifest.py
 
       - name: Generate App Icons and Splash
         run: |
@@ -149,8 +155,9 @@ jobs:
 
       - name: Actualizar version en Gradle desde package.json
         run: |
-          python3 -c "
+          cat << 'EOF' > update_gradle.py
           import json, re
+
           with open('package.json', 'r') as f:
               data = json.load(f)
           version_name = data.get('version', '1.0.0')
@@ -166,7 +173,9 @@ jobs:
 
           with open(gradle_path, 'w', encoding='utf-8') as f:
               f.write(content)
-          "
+          EOF
+          python3 update_gradle.py
+          rm update_gradle.py
 
       - name: Decode Keystore from Secrets
         run: |
