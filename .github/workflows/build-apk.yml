@@ -30,7 +30,7 @@ jobs:
           version_code = int(parts[0]) * 10000 + int(parts[1]) * 100 + int(parts[2])
           
           # Asegúrate de cambiar 'ipad.html' por la ruta real donde tengas tu archivo en el repo (ej: 'www/ipad.html')
-          html_path = 'www/ipad.html' 
+          html_path = 'www/index.html' 
           with open(html_path, 'r', encoding='utf-8') as f:
               content = f.read()
           
