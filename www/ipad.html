@@ -3407,12 +3407,31 @@
             }
         };
 
+        function getIOSVersionInfo() {
+            var ua = navigator.userAgent;
+            // Comprueba si es un dispositivo iOS (iPad, iPhone, iPod)
+            var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            
+            if (!isIOS) return null;
+
+            // Intenta extraer el número de versión de iOS (ej. "OS 16_4_1" o "CPU OS 15_7 like Mac OS X")
+            var match = ua.match(/OS (\d+)_(\d+)(?:_(\d+))?/);
+            if (match) {
+                var major = match[1];
+                var minor = match[2];
+                var patch = match[3] ? '.' + match[3] : '';
+                return 'ios ' + major + '.' + minor + patch;
+            }
+            return 'ios';
+        }
+
 		function checkNetworkAndConnect() {
             var networkTextEl = document.getElementById('status-network');
             if (!HA_TOKEN) {
                 openConfigModal();
                 return;
             }
+
             var isApp = (typeof window.Capacitor !== 'undefined') || 
                         (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
                         window.location.protocol === 'capacitor:' || 
@@ -3420,23 +3439,47 @@
                         window.location.hostname === 'localhost' ||
                         window.location.hostname === '127.0.0.1' ||
                         /Android.*(Capacitor|wv)/i.test(navigator.userAgent);
+
+            // Función auxiliar interna para detectar iOS y su versión
+            function getIOSVersionInfo() {
+                var ua = navigator.userAgent;
+                var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                if (!isIOS) return null;
+
+                var match = ua.match(/OS (\d+)_(\d+)(?:_(\d+))?/);
+                if (match) {
+                    var major = match[1];
+                    var minor = match[2];
+                    var patch = match[3] ? '.' + match[3] : '';
+                    return 'ios ' + major + '.' + minor + patch;
+                }
+                return 'ios';
+            }
+
+            var iosInfo = getIOSVersionInfo();
+
             if (networkTextEl) {
-                networkTextEl.innerText = 'Desconocido';
+                networkTextEl.innerText = iosInfo ? iosInfo : 'Desconocido';
             }
 
             if (!isApp && typeof currentHost !== 'undefined' && currentHost.indexOf('100.') === 0) {
                 HA_URL = TAILSCALE_HA_URL;
                 localStorage.setItem('ha_url', HA_URL);
-                if (networkTextEl) networkTextEl.innerText = 'web Tail';
+                if (networkTextEl) {
+                    networkTextEl.innerText = iosInfo ? iosInfo : 'web Tail';
+                }
                 connectWS();
                 return;
             } else if (!isApp && typeof currentHost !== 'undefined' && (currentHost.indexOf('192.168.') === 0)) {
                 HA_URL = LOCAL_HA_URL;
                 localStorage.setItem('ha_url', HA_URL);
-                if (networkTextEl) networkTextEl.innerText = 'web LAN';
+                if (networkTextEl) {
+                    networkTextEl.innerText = iosInfo ? iosInfo : 'web LAN';
+                }
                 connectWS();
                 return;
             }
+
             var testUrl = LOCAL_HA_URL + '/manifest.json';
             var timedOut = false;
             var timer = setTimeout(function() {
@@ -3445,7 +3488,7 @@
                 HA_URL = TAILSCALE_HA_URL;
                 localStorage.setItem('ha_url', HA_URL);
                 if (networkTextEl) {
-                    networkTextEl.innerText = isApp ? 'app Tail' : 'web Tail';
+                    networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app Tail' : 'web Tail');
                 }
                 connectWS();
             }, 2000);
@@ -3458,7 +3501,7 @@
                     HA_URL = LOCAL_HA_URL;
                     localStorage.setItem('ha_url', HA_URL);
                     if (networkTextEl) {
-                        networkTextEl.innerText = isApp ? 'app LAN' : 'web LAN';
+                        networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app LAN' : 'web LAN');
                     }
                     connectWS();
                 })
@@ -3469,7 +3512,7 @@
                     HA_URL = TAILSCALE_HA_URL;
                     localStorage.setItem('ha_url', HA_URL);
                     if (networkTextEl) {
-                        networkTextEl.innerText = isApp ? 'app Tail' : 'web Tail';
+                        networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app Tail' : 'web Tail');
                     }
                     connectWS();
                 });
