@@ -31,10 +31,8 @@ jobs:
 
       - name: Configure Android Manifest and FileProvider automatically
         run: |
-          # 1. Crear el directorio xml si no existe
           mkdir -p android/app/src/main/res/xml
           
-          # 2. Crear el archivo file_paths.xml necesario para el actualizador
           cat << 'EOF' > android/app/src/main/res/xml/file_paths.xml
           <?xml version="1.0" encoding="utf-8"?>
           <paths xmlns:android="http://schemas.android.com/apk/res/android">
@@ -43,13 +41,11 @@ jobs:
           </paths>
           EOF
 
-          # 3. Inyectar permisos y el provider en el AndroidManifest.xml usando Python
           python3 -c "
           manifest_path = 'android/app/src/main/AndroidManifest.xml'
           with open(manifest_path, 'r') as f:
               content = f.read()
 
-          # Evitar duplicar si ya estuvieran
           if 'REQUEST_INSTALL_PACKAGES' not in content:
               permissions = '''
               <uses-permission android:name=\"android.permission.INTERNET\" />
@@ -97,7 +93,7 @@ jobs:
             --ks-key-alias ${{ secrets.KEY_ALIAS }} \
             --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
             --key-pass pass:${{ secrets.KEY_PASSWORD }} \
-            --app-release-unsigned.apk android/app/build/outputs/apk/release/app-release-unsigned.apk || \
+            android/app/build/outputs/apk/release/app-release-unsigned.apk || \
           $BUILD_TOOLS/apksigner sign \
             --ks android/app/keystore.jks \
             --ks-key-alias ${{ secrets.KEY_ALIAS }} \
@@ -107,8 +103,20 @@ jobs:
           
           mv android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/build/outputs/apk/release/app-release.apk
 
+      - name: Crear version.json y empaquetar en ZIP
+        run: |
+          echo '{' > version.json
+          echo '  "versionCode": 2,' >> version.json
+          echo '  "versionName": "2.0.0",' >> version.json
+          echo '  "apkUrl": "http://192.168.1.132:8123/local/peluso-app-v2.0.0.apk"' >> version.json
+          echo '}' >> version.json
+          
+          cp android/app/build/outputs/apk/release/app-release.apk peluso-app-v2.0.0.apk
+          
+          zip actualizacion.zip peluso-app-v2.0.0.apk version.json
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: peluso-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          path: actualizacion.zip
