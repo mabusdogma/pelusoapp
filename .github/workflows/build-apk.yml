@@ -72,6 +72,9 @@ jobs:
               '''
               content = content.replace('<application', permissions + '\n<application')
 
+          if 'usesCleartextTraffic' not in content:
+              content = content.replace('<application', '<application android:usesCleartextTraffic=\"true\"')
+
           if 'fileprovider' not in content:
               provider = '''
                   <provider
