@@ -59,48 +59,27 @@ jobs:
           npx cap add android || true
           npx cap sync android
 
-      - name: Habilitar Depuración WebView en MainActivity
+      - name: Crear MainActivity con Depuración WebView
         run: |
-          cat << 'EOF' > enable_debug.py
-          import glob
+          mkdir -p android/app/src/main/java/com/peluso/app
+          cat << 'EOF' > android/app/src/main/java/com/peluso/app/MainActivity.java
+          package com.peluso.app;
 
-          main_files = glob.glob('android/app/src/main/java/**/MainActivity.java', recursive=True)
-          print('Archivos MainActivity encontrados:', main_files)
-          if main_files:
-              path = main_files[0]
-              with open(path, 'r', encoding='utf-8') as f:
-                  content = f.read()
-              
-              print('--- CONTENIDO ORIGINAL DE MAINACTIVITY ---')
-              print(content)
-              print('-----------------------------------------')
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import com.getcapacitor.BridgeActivity;
 
-              if 'setWebContentsDebuggingEnabled' not in content:
-                  if 'public class MainActivity extends BridgeActivity {}' in content:
-                      new_body = '''public class MainActivity extends BridgeActivity {
-      @Override
-      public void onCreate(android.os.Bundle savedInstanceState) {
-          super.onCreate(savedInstanceState);
-          if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-              android.webkit.WebView.setWebContentsDebuggingEnabled(true);
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                      WebView.setWebContentsDebuggingEnabled(true);
+                  }
+              }
           }
-      }
-  }'''
-                      content = content.replace('public class MainActivity extends BridgeActivity {}', new_body)
-                  else:
-                      target_str = 'super.onCreate(savedInstanceState);'
-                      if target_str in content:
-                          replacement = target_str + '\n        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {\n            android.webkit.WebView.setWebContentsDebuggingEnabled(true);\n        }'
-                          content = content.replace(target_str, replacement, 1)
-
-                  with open(path, 'w', encoding='utf-8') as f:
-                      f.write(content)
-                  print('>>> Depuración de WebView inyectada correctamente en MainActivity.java <<<')
-              else:
-                  print('>>> La depuración ya estaba habilitada <<<')
           EOF
-          python3 enable_debug.py
-          rm enable_debug.py
+          echo ">>> MainActivity.java creado con depuración webview habilitada <<<"
 
       - name: Configure Android Manifest and FileProvider automatically
         run: |
