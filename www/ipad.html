@@ -2777,8 +2777,6 @@
 <div id="config-modal" class="modal-camera" style="z-index: 2000;">
     <div style="background: var(--sidebar-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
         <h3 style="margin-bottom: 15px; color: var(--text-primary); font-size: 18px;">Configuración</h3>
-        <div id="config-version-label" style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">Versión nueva: Cargando...</div>
-        <div id="config-debug-info" style="text-align: left; margin-bottom: 12px; font-size: 11px; color: #a0a0a0;">Versión actual: Comprobando...</div>
         <div style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">URL local de Home Assistant:</div>
             <input type="text" id="config-url-input" 
                 style="width: 100%; font-size: 14px; padding: 10px; border-radius: 10px; border: 1px solid var(--card-border); background: #000; color: #fff; margin-bottom: 14px; outline: none;">
@@ -2816,8 +2814,6 @@
         const threshold = 100;
 		let cameraInterval = null;
         let lastActivity = Date.now();
-        var CURRENT_VERSION = "1.0.0";
-        var APP_VERSION_CODE = 20006;
         var isDraggingAcSlider = false;
         var reconnectTimer = null;
         var LOCAL_HA_URL = 'http://192.168.1.132:8123';
@@ -3476,82 +3472,6 @@
                         networkTextEl.innerText = isApp ? 'app Tail' : 'web Tail';
                     }
                     connectWS();
-                });
-        }
-		
-        function cargarVersionModal() {
-            var labelVersion = document.getElementById('config-version-label');
-            if (!labelVersion) return;
-            checkVersionFileFallback(labelVersion);
-        }
-
-        function checkVersionFileFallback(labelVersion) {
-            var fetchUrl = './version.json';  
-            fetch(fetchUrl, { cache: 'no-store' })
-                .then(function(response) {
-                    if (!response.ok) throw new Error('No se pudo obtener el archivo local');
-                    return response.json();
-                })
-                .then(function(data) {
-                    var versionVal = data.versionName || data.version || data.name || '1.0.0';
-                    labelVersion.innerText = 'Versión nueva: ' + versionVal;
-                })
-                .catch(function(err) {
-                    var fallbackUrl = (typeof HA_URL !== 'undefined' ? HA_URL : LOCAL_HA_URL).replace(/\/$/, '') + '/local/version.json';
-                    fetch(fallbackUrl, { cache: 'no-store' })
-                        .then(function(res) {
-                            if (!res.ok) throw new Error('No se pudo obtener de HA');
-                            return res.json();
-                        })
-                        .then(function(data) {
-                            var versionVal = data.versionName || data.version || data.name || '1.0.0';
-                            labelVersion.innerText = 'Versión nueva: ' + versionVal;
-                        })
-                        .catch(function() {
-                            labelVersion.innerText = 'Versión nueva: ' + CURRENT_VERSION;
-                        });
-                });
-        }
-
-        function initAppVersionAndCheck() {
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-                window.Capacitor.Plugins.App.getInfo().then(function(info) {
-                    if (info.build) {
-                        APP_VERSION_CODE = parseInt(info.build, 10);
-                        console.log("Versión detectada de la App nativa (code):", APP_VERSION_CODE);
-                    }
-                    verificarActualizacionApp();
-                }).catch(function(err) {
-                    console.log("No se pudo leer la info de Capacitor:", err);
-                    verificarActualizacionApp();
-                });
-            } else {
-                verificarActualizacionApp();
-            }
-        }
-
-       function verificarActualizacionApp() {
-            var versionCheckUrl = HA_URL.replace(/\/$/, '') + '/local/version.json?t=' + new Date().getTime();
-            fetch(versionCheckUrl, { cache: 'no-store' })
-                .then(function(response) {
-                    if (!response.ok) throw new Error('No se pudo verificar la versión');
-                    return response.json();
-                })
-                .then(function(data) {
-                    var remoteVersionCode = parseInt(data.versionCode || 0, 10);
-                    var currentVersionCode = parseInt(window.APP_VERSION_CODE || APP_VERSION_CODE, 10);
-                    console.log("Versión actual (Local):", currentVersionCode, "| Versión en servidor (Remota):", remoteVersionCode);
-                    if (remoteVersionCode > currentVersionCode) {
-                        console.log("¡Actualización disponible! Mostrando popup...");
-                        if (typeof mostrarPopupActualizacion === 'function') {
-                            mostrarPopupActualizacion(data.versionName, data.apkUrl);
-                        }
-                    } else {
-                        console.log("La aplicación está totalmente actualizada.");
-                    }
-                })
-                .catch(function(err) {
-                    console.log("Error comprobando actualizaciones:", err);
                 });
         }
 
@@ -5066,16 +4986,10 @@
             if (tokenInput) {
                 tokenInput.value = (typeof HA_TOKEN !== 'undefined') ? HA_TOKEN : '';
             }
-            var debugInfoEl = document.getElementById('config-debug-info');
-            if (debugInfoEl) {
-                var localCode = typeof APP_VERSION_CODE !== 'undefined' ? APP_VERSION_CODE : 20006;
-                debugInfoEl.innerText = "Versión actual: (" + localCode + ")";
-            }
             var configModal = document.getElementById('config-modal');
             if (configModal) {
                 configModal.style.display = 'flex';
             }
-            cargarVersionModal();
         }
 
         function closeConfigModal() {
@@ -5093,6 +5007,56 @@
             } else {
                 alert('Por favor, rellena ambos campos.');
             }
+        }
+
+        async function verificarActualizacionSimple() {
+            try {
+                const respuesta = await fetch('/local/pelusoapp.apk', { method: 'HEAD' });
+                if (!respuesta.ok) return;
+
+                const fechaServidor = respuesta.headers.get('Last-Modified');
+                const fechaGuardada = localStorage.getItem('pelusoapp_apk_fecha');
+
+                if (!fechaGuardada) {
+                    localStorage.setItem('pelusoapp_apk_fecha', fechaServidor);
+                    return;
+                }
+
+                if (fechaServidor !== fechaGuardada) {
+                    console.log("¡Nueva APK detectada en el servidor!");
+                    mostrarPopupActualizacionSimple();
+                }
+            } catch (e) {
+                console.log("No se pudo comprobar la actualización", e);
+            }
+        }
+
+        function mostrarPopupActualizacionSimple() {
+            if (document.getElementById('update-modal-simple')) return;
+            var modal = document.createElement('div');
+            modal.id = 'update-modal-simple';
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000; font-family: sans-serif;';
+            modal.innerHTML = 
+                '<div style="background: #1e1e1e; color: #fff; padding: 24px; border-radius: 16px; width: 85%; max-width: 320px; text-align: center; border: 1px solid var(--card-border); box-shadow: 0 10px 30px rgba(0,0,0,0.8);">' +
+                '<div style="font-size: 32px; margin-bottom: 8px;">📦</div>' +
+                '<h3 style="margin: 0 0 10px 0; color: var(--accent); font-size: 18px;">Actualización disponible</h3>' +
+                '<p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">Hay una nueva versión de PelusoApp lista para instalar.</p>' +
+                '<div style="display: flex; gap: 10px;">' +
+                '<button id="btn-cancel-simple" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: #fff; border-radius: 10px; font-weight: bold; cursor: pointer;">Cancelar</button>' +
+                '<button id="btn-accept-simple" style="flex: 1; padding: 10px; background: var(--accent); border: none; color: #000; border-radius: 10px; font-weight: bold; cursor: pointer;">Actualizar</button>' +
+                '</div>' +
+                '</div>';
+
+            document.body.appendChild(modal);
+
+            document.getElementById('btn-cancel-simple').onclick = function() {
+                modal.remove();
+            };
+            document.getElementById('btn-accept-simple').onclick = function() {
+                // Aquí ocurre el salto para descargar e iniciar el APK automáticamente en Android WebView
+                window.location.href = '/local/pelusoapp.apk';
+                modal.remove();
+            };
         }
 
         function escapeHtml(str) {
@@ -5200,8 +5164,8 @@
                     if (statusDot) statusDot.classList.add('connected');
                     sendWS({ type: 'get_states' });
                     sendWS({ type: 'subscribe_events', event_type: 'state_changed' });
-                    initAppVersionAndCheck();
                     fetchHorarioCovadonga();
+                    verificarActualizacionSimple();
                 } else if (data.type === 'result' && data.success && data.result) {
                     if (Array.isArray(data.result)) {
                         for (var i = 0; i < data.result.length; i++) {
