@@ -3521,7 +3521,6 @@
                     labelVersion.innerText = 'Versión: ' + versionVal;
                 })
                 .catch(function(err) {
-                    // 3. Último recurso: consultar directamente al servidor de Home Assistant
                     var fallbackUrl = (typeof HA_URL !== 'undefined' ? HA_URL : LOCAL_HA_URL).replace(/\/$/, '') + '/local/version.json';
                     fetch(fallbackUrl, { cache: 'no-store' })
                         .then(function(res) {
@@ -3539,27 +3538,34 @@
         }
 
         function verificarActualizacionApp() {
-    var ua = navigator.userAgent;
-    var esAppNativa = /AppLAN|Android.*wv/.test(ua) || (window.Capacitor !== undefined);
-    if (!esAppNativa) return;
-    var versionCheckUrl = HA_URL.replace(/\/$/, '') + '/local/version.json';
-    fetch(versionCheckUrl, { cache: 'no-store' })
-        .then(function(response) {
-            if (!response.ok) throw new Error('No se pudo verificar la versión');
-            return response.json();
-        })
-        .then(function(data) {
-            var remoteVersionCode = data.versionCode || 0;
-            var currentVersionCode = window.APP_VERSION_CODE || 206;
-
-            if (remoteVersionCode > currentVersionCode) {
-                mostrarPopupActualizacion(data.versionName, data.apkUrl);
+            var esAppNativa = (typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform()) || /Android.*wv/.test(navigator.userAgent);
+            if (!esAppNativa) {
+                console.log("Ejecutándose en entorno web. Omitiendo comprobación de APK.");
+                return;
             }
-        })
-        .catch(function(err) {
-            console.log("Error comprobando actualizaciones:", err);
-        });
-}
+            var versionCheckUrl = HA_URL.replace(/\/$/, '') + '/local/version.json?t=' + new Date().getTime();
+            fetch(versionCheckUrl, { cache: 'no-store' })
+                .then(function(response) {
+                    if (!response.ok) throw new Error('No se pudo verificar la versión');
+                    return response.json();
+                })
+                .then(function(data) {
+                    var remoteVersionCode = parseInt(data.versionCode || 0, 10);
+                    var currentVersionCode = parseInt(window.APP_VERSION_CODE || 206, 10);
+                    console.log("Versión actual (App):", currentVersionCode, "| Versión en servidor:", remoteVersionCode);
+                    if (remoteVersionCode > currentVersionCode) {
+                        console.log("¡Actualización disponible en la App! Mostrando popup...");
+                        if (typeof mostrarPopupActualizacion === 'function') {
+                            mostrarPopupActualizacion(data.apkUrl, data.versionName);
+                        }
+                    } else {
+                        console.log("La aplicación está al día.");
+                    }
+                })
+                .catch(function(err) {
+                    console.log("Error comprobando actualizaciones:", err);
+                });
+        }
 
         function updateEnergyPercentages() {
             var total = window._energyData.produccion;
@@ -3637,14 +3643,11 @@
         }
 
         function mostrarPopupActualizacion(versionName, apkUrl) {
-            // Si es iPad, iPhone o no es Android, salir inmediatamente y no hacer nada
             var ua = navigator.userAgent;
             if (/iPad|iPhone|iPod/.test(ua) || !/Android/.test(ua)) {
                 return;
             }
-
             if (document.getElementById('update-modal')) return;
-
             var modal = document.createElement('div');
             modal.id = 'update-modal';
             modal.style.cssText = 
@@ -3668,24 +3671,19 @@
             document.getElementById('btn-cancel-update').onclick = function() {
                 modal.remove();
             };
-
             document.getElementById('btn-accept-update').onclick = function() {
                 var progressEl = document.getElementById('update-progress');
                 progressEl.style.display = 'block';
                 document.getElementById('btn-accept-update').disabled = true;
                 document.getElementById('btn-cancel-update').disabled = true;
-
                 try {
                     progressEl.innerText = "Descargando APK...";
-                    
                     var capacitorPlugins = (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins : null;
                     var Filesystem = capacitorPlugins ? capacitorPlugins.Filesystem : null;
                     var FileOpener = capacitorPlugins ? capacitorPlugins.FileOpener : null;
-
                     if (!Filesystem || !FileOpener) {
                         throw new Error("Plugins nativos no encontrados");
                     }
-
                     Filesystem.downloadFile({
                         url: apkUrl,
                         path: 'pelusoapp.apk',
@@ -3734,7 +3732,6 @@
                                 body: texto,
                                 id: new Date().getTime(),
                                 sound: null,
-                                // smallIcon: "icon"
                             }]
                         });
                     } catch (e) {
@@ -3923,18 +3920,18 @@
                 return val.toFixed(1) + (u ? ' ' + u : '');
             }
             if (entityId === 'sensor.ipad_hora') {
-                return state; // Devuelve la hora directamente (ej. hh:mm:ss pm)
+                return state;
             }
             if (entityId === 'sensor.ipad_uptime') {
-                return state; // Devuelve el texto de uptime directamente (ej. 1 dia, 13h, 28 min)
+                return state;
             }
             if (entityId === 'sensor.ipad_espacio') {
                 var val = parseFloat(state);
-                return isNaN(val) ? state : val.toFixed(1) + ' GB'; // Muestra el valor con 1 decimal y 'GB'
+                return isNaN(val) ? state : val.toFixed(1) + ' GB';
             }
             if (entityId === 'sensor.ipad_load') {
                 var val = parseFloat(state);
-                return isNaN(val) ? state : val.toFixed(1) + ' %'; // Muestra el valor con 1 decimal y '%'
+                return isNaN(val) ? state : val.toFixed(1) + ' %';
             }
             return val.toFixed(1);
         }
