@@ -13,7 +13,7 @@
     "@capacitor/local-notifications": "^5.0.0",
     "@capacitor/app": "^5.0.0",
     "@capacitor/filesystem": "^5.0.0",
-    "@capacitor-community/file-opener": "^4.2.0"
+    "@capacitor-community/file-opener": "^1.0.5"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5"
