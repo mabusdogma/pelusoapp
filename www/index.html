@@ -3453,16 +3453,18 @@
         function cargarVersiónModal() {
             var labelVersion = document.getElementById('config-version-label');
             if (!labelVersion) return;
-            var baseUrl = document.getElementById('config-url-input').value.trim();
-            var fetchUrl = (baseUrl ? baseUrl.replace(/\/$/, '') : '') + '/local/version.json';
-            
+            var urlInput = document.getElementById('config-url-input');
+            var baseUrl = urlInput ? urlInput.value.trim() : '';
+            if (!baseUrl) {
+                baseUrl = (typeof HA_URL !== 'undefined' && HA_URL) ? HA_URL : 'http://192.168.1.132:8123';
+            }
+            var fetchUrl = baseUrl.replace(/\/$/, '') + '/local/version.json';
             fetch(fetchUrl)
                 .then(function(response) {
                     if (!response.ok) throw new Error('No se pudo obtener el archivo');
                     return response.json();
                 })
                 .then(function(data) {
-                    // Agregamos data.versionName para que lea correctamente tu JSON
                     var versionVal = data.versionName || data.version || data.name || 'Desconocida';
                     labelVersion.innerText = 'Versión: ' + versionVal;
                 })
@@ -4988,10 +4990,19 @@
         }
 
         function openConfigModal() {
-            document.getElementById('config-url-input').value = HA_URL;
-            document.getElementById('config-token-input').value = HA_TOKEN;
-            document.getElementById('config-modal').style.display = 'flex';
-            cargarVersiónModal(); // <-- ¡Añade esta línea aquí!
+            var urlInput = document.getElementById('config-url-input');
+            var tokenInput = document.getElementById('config-token-input');
+            if (urlInput) {
+                urlInput.value = (typeof HA_URL !== 'undefined' && HA_URL) ? HA_URL : 'http://192.168.1.132:8123';
+            }
+            if (tokenInput) {
+                tokenInput.value = (typeof HA_TOKEN !== 'undefined') ? HA_TOKEN : '';
+            }
+            var configModal = document.getElementById('config-modal');
+            if (configModal) {
+                configModal.style.display = 'flex';
+            }
+            cargarVersiónModal();
         }
 
         function closeConfigModal() {
@@ -5270,6 +5281,10 @@
             var camModal = document.getElementById('camera-modal');
             if (camModal) camModal.style.display = 'none';
             currentModalCameraEntity = null;
+            var savedUrl = localStorage.getItem('ha_url');
+            if (savedUrl && typeof HA_URL !== 'undefined') {
+                HA_URL = savedUrl;
+            }
         });
 
         document.addEventListener('DOMContentLoaded', function() {
