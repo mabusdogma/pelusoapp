@@ -22,24 +22,28 @@ jobs:
       - name: Preparar Web Assets y Versionar HTML
         run: |
           python3 -c "
-          import json
+          import json, os
           with open('package.json', 'r') as f:
               data = json.load(f)
           version_name = data.get('version', '1.0.0')
           parts = version_name.split('.')
           version_code = int(parts[0]) * 10000 + int(parts[1]) * 100 + int(parts[2])
           
-          # Asegúrate de cambiar 'index.html' por la ruta real donde tengas tu archivo en el repo (ej: 'www/index.html')
-          html_path = 'www/index.html' 
-          with open(html_path, 'r', encoding='utf-8') as f:
+          os.makedirs('www', exist_ok=True)
+          
+          # Detecta si tu archivo fuente es ipad.html en la raíz o ya está en www/
+          source_path = 'ipad.html' if os.path.exists('ipad.html') else ('www/ipad.html' if os.path.exists('www/ipad.html') else 'www/index.html')
+          target_path = 'www/index.html'
+          
+          with open(source_path, 'r', encoding='utf-8') as f:
               content = f.read()
           
           content = content.replace('__VERSION_PLACEHOLDER__', version_name)
           content = content.replace('__VERSION_CODE_PLACEHOLDER__', str(version_code))
           
-          with open(html_path, 'w', encoding='utf-8') as f:
+          with open(target_path, 'w', encoding='utf-8') as f:
               f.write(content)
-          print(f'Versión {version_name} (code: {version_code}) inyectada correctamente en {html_path}')
+          print(f'Versión {version_name} (code: {version_code}) inyectada desde {source_path} hacia {target_path}')
           "
 
       - name: Set up JDK 17
