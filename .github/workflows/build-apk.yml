@@ -75,6 +75,27 @@ jobs:
         run: |
           npx capacitor-assets generate --android
 
+      - name: Actualizar version en Gradle desde package.json
+        run: |
+          python3 -c "
+          import json, re
+          with open('package.json', 'r') as f:
+              data = json.load(f)
+          version_name = data.get('version', '1.0.0')
+          parts = version_name.split('.')
+          version_code = int(parts[0]) * 10000 + int(parts[1]) * 100 + int(parts[2])
+
+          gradle_path = 'android/app/build.gradle'
+          with open(gradle_path, 'r') as f:
+              content = f.read()
+
+          content = re.sub(r'versionCode \d+', f'versionCode {version_code}', content)
+          content = re.sub(r'versionName \".*?\"', f'versionName \"{version_name}\"', content)
+
+          with open(gradle_path, 'w') as f:
+              f.write(content)
+          "
+
       - name: Decode Keystore from Secrets
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
