@@ -2777,8 +2777,8 @@
 <div id="config-modal" class="modal-camera" style="z-index: 2000;">
     <div style="background: var(--sidebar-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
         <h3 style="margin-bottom: 15px; color: var(--text-primary); font-size: 18px;">Configuración</h3>
-        <div id="config-version-label" style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">Versión: Cargando...</div>
-        <div id="config-debug-info" style="text-align: left; margin-bottom: 12px; font-size: 11px; color: #a0a0a0;">Diagnóstico: Comprobando...</div>
+        <div id="config-version-label" style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">Versión nueva: Cargando...</div>
+        <div id="config-debug-info" style="text-align: left; margin-bottom: 12px; font-size: 11px; color: #a0a0a0;">Versión actual: Comprobando...</div>
         <div style="text-align: left; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary);">URL local de Home Assistant:</div>
             <input type="text" id="config-url-input" 
                 style="width: 100%; font-size: 14px; padding: 10px; border-radius: 10px; border: 1px solid var(--card-border); background: #000; color: #fff; margin-bottom: 14px; outline: none;">
@@ -2817,7 +2817,7 @@
 		let cameraInterval = null;
         let lastActivity = Date.now();
         var CURRENT_VERSION = "1.0.0";
-        var APP_VERSION_CODE = 206;
+        var APP_VERSION_CODE = 20006;
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
             window.Capacitor.Plugins.App.getInfo().then(function(info) {
                 if (info.build) {
@@ -3498,7 +3498,7 @@
             if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
                 window.Capacitor.Plugins.App.getInfo().then(function(info) {
                     if (info && (info.version || info.build)) {
-                        labelVersion.innerText = 'Versión: ' + (info.version || info.build);
+                        labelVersion.innerText = 'Versión nueva: ' + (info.version || info.build);
                     } else {
                         checkVersionFileFallback(labelVersion);
                     }
@@ -3519,7 +3519,7 @@
                 })
                 .then(function(data) {
                     var versionVal = data.versionName || data.version || data.name || '1.0.0';
-                    labelVersion.innerText = 'Versión: ' + versionVal;
+                    labelVersion.innerText = 'Versión nueva: ' + versionVal;
                 })
                 .catch(function(err) {
                     var fallbackUrl = (typeof HA_URL !== 'undefined' ? HA_URL : LOCAL_HA_URL).replace(/\/$/, '') + '/local/version.json';
@@ -3530,10 +3530,10 @@
                         })
                         .then(function(data) {
                             var versionVal = data.versionName || data.version || data.name || '1.0.0';
-                            labelVersion.innerText = 'Versión: ' + versionVal;
+                            labelVersion.innerText = 'Versión nueva: ' + versionVal;
                         })
                         .catch(function() {
-                            labelVersion.innerText = 'Versión: ' + CURRENT_VERSION;
+                            labelVersion.innerText = 'Versión nueva: ' + CURRENT_VERSION;
                         });
                 });
         }
@@ -3547,7 +3547,7 @@
                 })
                 .then(function(data) {
                     var remoteVersionCode = parseInt(data.versionCode || 0, 10);
-                    var currentVersionCode = parseInt(window.APP_VERSION_CODE || 206, 10);
+                    var currentVersionCode = parseInt(window.APP_VERSION_CODE || 20006, 10);
                     console.log("Versión actual (Local):", currentVersionCode, "| Versión en servidor (Remota):", remoteVersionCode);
                     if (remoteVersionCode > currentVersionCode) {
                         console.log("¡Actualización disponible! Mostrando popup con datos de depuración...");
@@ -5076,8 +5076,8 @@
             }
             var debugInfoEl = document.getElementById('config-debug-info');
             if (debugInfoEl) {
-                var localCode = typeof APP_VERSION_CODE !== 'undefined' ? APP_VERSION_CODE : 206;
-                debugInfoEl.innerText = "Diagnóstico: App local (" + localCode + ")";
+                var localCode = typeof APP_VERSION_CODE !== 'undefined' ? APP_VERSION_CODE : 20006;
+                debugInfoEl.innerText = "Versión actual: (" + localCode + ")";
             }
             var configModal = document.getElementById('config-modal');
             if (configModal) {
