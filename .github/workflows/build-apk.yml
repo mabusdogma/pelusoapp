@@ -1,4 +1,5 @@
 name: Build Android APK
+
 on:
   push:
     branches: [ main ]
@@ -17,6 +18,25 @@ jobs:
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+
+      - name: Preparar Web Assets y Versionar HTML
+        run: |
+          python3 -c "
+          import json, os
+          with open('package.json', 'r') as f:
+              data = json.load(f)
+          version_name = data.get('version', '1.0.0')
+          
+          os.makedirs('www', exist_ok=True)
+          with open('ipad_7.html', 'r', encoding='utf-8') as f:
+              content = f.read()
+          
+          content = content.replace('__VERSION_PLACEHOLDER__', version_name)
+          
+          with open('www/index.html', 'w', encoding='utf-8') as f:
+              f.write(content)
+          print(f'Versión {version_name} inyectada correctamente en www/index.html')
+          "
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
