@@ -3426,18 +3426,19 @@
                         window.location.hostname === '127.0.0.1' ||
                         /Android.*(Capacitor|wv)/i.test(navigator.userAgent);
             if (networkTextEl) {
-                networkTextEl.innerText = isApp ? 'app Desconocido' : 'Desconocido';
+                networkTextEl.innerText = 'Desconocido';
             }
+
             if (!isApp && typeof currentHost !== 'undefined' && currentHost.indexOf('100.') === 0) {
                 HA_URL = TAILSCALE_HA_URL;
                 localStorage.setItem('ha_url', HA_URL);
-                if (networkTextEl) networkTextEl.innerText = 'Tailscale';
+                if (networkTextEl) networkTextEl.innerText = 'web Tail';
                 connectWS();
                 return;
             } else if (!isApp && typeof currentHost !== 'undefined' && (currentHost.indexOf('192.168.') === 0)) {
                 HA_URL = LOCAL_HA_URL;
                 localStorage.setItem('ha_url', HA_URL);
-                if (networkTextEl) networkTextEl.innerText = 'LAN';
+                if (networkTextEl) networkTextEl.innerText = 'web LAN';
                 connectWS();
                 return;
             }
@@ -3449,7 +3450,7 @@
                 HA_URL = TAILSCALE_HA_URL;
                 localStorage.setItem('ha_url', HA_URL);
                 if (networkTextEl) {
-                    networkTextEl.innerText = isApp ? 'app Tailscale' : 'Tailscale';
+                    networkTextEl.innerText = isApp ? 'app Tail' : 'web Tail';
                 }
                 connectWS();
             }, 2000);
@@ -3462,7 +3463,7 @@
                     HA_URL = LOCAL_HA_URL;
                     localStorage.setItem('ha_url', HA_URL);
                     if (networkTextEl) {
-                        networkTextEl.innerText = isApp ? 'app LAN' : 'LAN';
+                        networkTextEl.innerText = isApp ? 'app LAN' : 'web LAN';
                     }
                     connectWS();
                 })
@@ -3473,7 +3474,7 @@
                     HA_URL = TAILSCALE_HA_URL;
                     localStorage.setItem('ha_url', HA_URL);
                     if (networkTextEl) {
-                        networkTextEl.innerText = isApp ? 'app Tailscale' : 'Tailscale';
+                        networkTextEl.innerText = isApp ? 'app Tail' : 'web Tail';
                     }
                     connectWS();
                 });
@@ -3523,6 +3524,29 @@
                         .catch(function() {
                             labelVersion.innerText = 'Versión: ' + CURRENT_VERSION;
                         });
+                });
+        }
+
+        function verificarActualizacionApp() {
+            var ua = navigator.userAgent;
+            if (/iPad|iPhone|iPod/.test(ua) || !/Android/.test(ua)) return;
+            var versionCheckUrl = HA_URL.replace(/\/$/, '') + '/local/version.json';
+        
+            fetch(versionCheckUrl, { cache: 'no-store' })
+                .then(function(response) {
+                    if (!response.ok) throw new Error('No se pudo verificar la versión');
+                    return response.json();
+                })
+                .then(function(data) {
+                    var remoteVersionCode = data.versionCode || 0;
+                    var currentVersionCode = 206; 
+
+                    if (remoteVersionCode > currentVersionCode) {
+                        mostrarPopupActualizacion(data.versionName, data.apkUrl);
+                    }
+                })
+                .catch(function(err) {
+                    console.log("Error comprobando actualizaciones:", err);
                 });
         }
 
@@ -5176,6 +5200,7 @@
                     if (statusDot) statusDot.classList.add('connected');
                     sendWS({ type: 'get_states' });
                     sendWS({ type: 'subscribe_events', event_type: 'state_changed' });
+                    verificarActualizacionApp();
                     fetchHorarioCovadonga();
                 } else if (data.type === 'result' && data.success && data.result) {
                     if (Array.isArray(data.result)) {
