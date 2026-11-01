@@ -155,33 +155,13 @@ jobs:
           
           mv android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/build/outputs/apk/release/app-release.apk
 
-      - name: Automatizar Version y Preparar Archivos
+      - name: Preparar Archivo APK Fijo
         run: |
-          VERSION_NAME=$(node -p "require('./package.json').version")
-          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
-          
-          python3 -c "
-          import json
-          with open('package.json', 'r') as f:
-              data = json.load(f)
-          version_name = data.get('version', '1.0.0')
-          parts = version_name.split('.')
-          version_code = int(parts[0]) * 10000 + int(parts[1]) * 100 + int(parts[2])
-          
-          with open('version.json', 'w') as f:
-              json.dump({
-                  'versionCode': version_code,
-                  'versionName': version_name,
-                  'apkUrl': f'http://192.168.1.132:8123/local/peluso-app-v{version_name}.apk'
-              }, f, indent=2)
-          "
-          
-          cp android/app/build/outputs/apk/release/app-release.apk peluso-app-v$VERSION_NAME.apk
+          cp android/app/build/outputs/apk/release/app-release.apk pelusoapp.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: actualizacion-app
           path: |
-            peluso-app-v*.apk
-            version.json
+            pelusoapp.apk
