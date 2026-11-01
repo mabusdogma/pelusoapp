@@ -56,7 +56,7 @@ jobs:
           npx cap add android || true
           npx cap sync android
 
-      - name: Habilitar Depuración WebView en MainActivity (Robusto)
+      - name: Habilitar Depuración WebView en MainActivity (Definitivo)
         run: |
           python3 -c "
           import glob
@@ -72,15 +72,25 @@ jobs:
               print('-----------------------------------------')
 
               if 'setWebContentsDebuggingEnabled' not in content:
-                  if 'import android.webkit.WebView;' not in content:
-                      content = content.replace('import com.getcapacitor.BridgeActivity;', 'import com.getcapacitor.BridgeActivity;\nimport android.webkit.WebView;')
-                  
-                  # Inyección segura después de la superclase onCreate
-                  target_str = 'super.onCreate(savedInstanceState);'
-                  if target_str in content:
-                      replacement = target_str + '\n        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {\n            WebView.setWebContentsDebuggingEnabled(true);\n        }'
-                      content = content.replace(target_str, replacement, 1)
-                  
+                  # Si la clase está vacía, la reescribimos con onCreate y depuración habilitada
+                  if 'public class MainActivity extends BridgeActivity {}' in content:
+                      new_body = '''public class MainActivity extends BridgeActivity {
+    @Override
+    public void onCreate(android.os.Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            android.webkit.WebView.setWebContentsDebuggingEnabled(true);
+        }
+    }
+}'''
+                      content = content.replace('public class MainActivity extends BridgeActivity {}', new_body)
+                  else:
+                      # Si ya tuviera contenido por alguna razón, inyectamos de forma segura
+                      target_str = 'super.onCreate(savedInstanceState);'
+                      if target_str in content:
+                          replacement = target_str + '\n        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {\n            android.webkit.WebView.setWebContentsDebuggingEnabled(true);\n        }'
+                          content = content.replace(target_str, replacement, 1)
+
                   with open(path, 'w', encoding='utf-8') as f:
                       f.write(content)
                   print('>>> Depuración de WebView inyectada correctamente en MainActivity.java <<<')
