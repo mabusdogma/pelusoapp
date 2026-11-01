@@ -1,10 +1,9 @@
-import { App } from '@capacitor/app';
-import { Filesystem, Directory } from '@capacitor/filesystem';
-import { FileOpener } from '@capacitor-community/file-opener';
-
 async function checkForUpdates() {
     try {
-        // 1. Obtener la versión de la app que corre en Android
+        // 1. Obtener la referencia al plugin App de forma segura
+        const App = window.Capacitor?.Plugins?.App;
+        if (!App) return; // Si no está en entorno nativo Capacitor, salir
+
         const appInfo = await App.getInfo();
         const currentVersionCode = appInfo.build ? parseInt(appInfo.build, 10) : 1;
 
@@ -62,10 +61,17 @@ function showUpdateModal(versionName, apkUrl) {
         try {
             progressEl.innerText = "Descargando APK...";
             
+            const Filesystem = window.Capacitor?.Plugins?.Filesystem;
+            const FileOpener = window.Capacitor?.Plugins?.FileOpener;
+
+            if (!Filesystem || !FileOpener) {
+                throw new Error("Plugins nativos no encontrados");
+            }
+
             const downloadResult = await Filesystem.downloadFile({
                 url: apkUrl,
                 path: 'pelusoapp.apk',
-                directory: Directory.Cache
+                directory: 'CACHE'
             });
 
             progressEl.innerText = "Abriendo instalador...";
@@ -86,8 +92,6 @@ function showUpdateModal(versionName, apkUrl) {
 }
 
 // Inicializar la comprobación automática a los 3 segundos de arrancar la app
-export function initUpdater() {
-    window.addEventListener('load', () => {
-        setTimeout(checkForUpdates, 3000);
-    });
-}
+window.addEventListener('load', () => {
+    setTimeout(checkForUpdates, 3000);
+});
