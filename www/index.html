@@ -3423,7 +3423,6 @@
 			var timedOut = false;
 			var timer = setTimeout(function() {
 				timedOut = true;
-				console.log('LAN timeout, cambiando a Tailscale');
 				HA_URL = TAILSCALE_HA_URL;
 				localStorage.setItem('ha_url', HA_URL);
 				if (networkTextEl) networkTextEl.innerText = 'Tailscale';
@@ -3436,13 +3435,11 @@
 					HA_URL = LOCAL_HA_URL;
 					localStorage.setItem('ha_url', HA_URL);
 					if (networkTextEl) networkTextEl.innerText = 'LAN';
-					console.log('LAN accesible, usando red local');
 					connectWS();
 				})
 				.catch(function(err) {
 					if (timedOut) return;
 					clearTimeout(timer);
-					console.log('LAN no disponible, cambiando a Tailscale');
 					HA_URL = TAILSCALE_HA_URL;
 					localStorage.setItem('ha_url', HA_URL);
 					if (networkTextEl) networkTextEl.innerText = 'Tailscale';
@@ -3453,19 +3450,9 @@
         function cargarVersionModal() {
             var labelVersion = document.getElementById('config-version-label');
             if (!labelVersion) return;
-            var fetchUrl = '/local/version.json';
+            var baseUrl = (typeof HA_URL !== 'undefined' && HA_URL) ? HA_URL : 'http://192.168.1.132:8123';
+            var fetchUrl = baseUrl.replace(/\/$/, '') + '/local/version.json';  
             fetch(fetchUrl)
-                .then(function(response) {
-                    if (!response.ok) {
-                        var urlInput = document.getElementById('config-url-input');
-                        var baseUrl = urlInput ? urlInput.value.trim() : '';
-                        if (!baseUrl) {
-                            baseUrl = (typeof HA_URL !== 'undefined' && HA_URL) ? HA_URL : 'http://192.168.1.132:8123';
-                        }
-                        return fetch(baseUrl.replace(/\/$/, '') + '/local/version.json');
-                    }
-                    return response;
-                })
                 .then(function(response) {
                     if (!response.ok) throw new Error('No se pudo obtener el archivo');
                     return response.json();
@@ -3475,8 +3462,11 @@
                     labelVersion.innerText = 'Versión: ' + versionVal;
                 })
                 .catch(function(err) {
-                    console.error('Error al cargar la versión:', err);
-                    labelVersion.innerText = 'Versión: No disponible';
+                    if (typeof CURRENT_VERSION !== 'undefined' && CURRENT_VERSION && CURRENT_VERSION !== '__VERSION_PLACEHOLDER__') {
+                        labelVersion.innerText = 'Versión: ' + CURRENT_VERSION;
+                    } else {
+                        labelVersion.innerText = 'Versión: No disponible';
+                    }
                 });
         }
 
@@ -3618,14 +3608,12 @@
                     }).then(function() {
                         modal.remove();
                     }).catch(function(e) {
-                        console.error("Error al actualizar:", e);
                         progressEl.innerText = "Error al actualizar. Inténtalo de nuevo.";
                         document.getElementById('btn-accept-update').disabled = false;
                         document.getElementById('btn-cancel-update').disabled = false;
                     });
 
                 } catch (e) {
-                    console.error("Error al actualizar:", e);
                     progressEl.innerText = "Error al actualizar. Inténtalo de nuevo.";
                     document.getElementById('btn-accept-update').disabled = false;
                     document.getElementById('btn-cancel-update').disabled = false;
@@ -3659,7 +3647,6 @@
                             }]
                         });
                     } catch (e) {
-                        console.error("Error al programar notificación nativa:", e);
                     }
                 }
                 return;
