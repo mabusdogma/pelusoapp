@@ -2822,10 +2822,9 @@
         var TAILSCALE_HA_URL = 'http://100.114.227.7:8123';
         var currentHost = window.location.hostname;
         var HA_URL = LOCAL_HA_URL;
-        if (currentHost.indexOf('100.') === 0) {
-            HA_URL = TAILSCALE_HA_URL;
-        } else if (currentHost.indexOf('192.168.') === 0) {
-            HA_URL = LOCAL_HA_URL;
+
+        if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1' && currentHost !== '') {
+            HA_URL = window.location.protocol + '//' + window.location.host;
         } else {
             HA_URL = localStorage.getItem('ha_url') || LOCAL_HA_URL;
         }
@@ -3419,6 +3418,29 @@
 				openConfigModal();
 				return;
 			}
+			var isApp = (typeof window.Capacitor !== 'undefined') || window.location.protocol === 'capacitor:' || window.location.protocol === 'file:';
+
+			if (isApp) {
+				if (networkTextEl) networkTextEl.innerText = 'App';
+			} else if (currentHost.indexOf('100.') === 0) {
+				HA_URL = TAILSCALE_HA_URL;
+				localStorage.setItem('ha_url', HA_URL);
+				if (networkTextEl) networkTextEl.innerText = 'Tailscale';
+				connectWS();
+				return;
+			} else if (currentHost.indexOf('192.168.') === 0 || currentHost === 'localhost' || currentHost === '127.0.0.1') {
+				HA_URL = LOCAL_HA_URL;
+				localStorage.setItem('ha_url', HA_URL);
+				if (networkTextEl) networkTextEl.innerText = 'LAN';
+				connectWS();
+				return;
+			} else {
+				HA_URL = LOCAL_HA_URL;
+				localStorage.setItem('ha_url', HA_URL);
+				if (networkTextEl) networkTextEl.innerText = 'Web?';
+				connectWS();
+				return;
+			}
 			var testUrl = LOCAL_HA_URL + '/manifest.json';
 			var timedOut = false;
 			var timer = setTimeout(function() {
@@ -3427,14 +3449,14 @@
 				localStorage.setItem('ha_url', HA_URL);
 				if (networkTextEl) networkTextEl.innerText = 'Tailscale';
 				connectWS();
-			}, 2500);
+			}, 2000);
 			fetch(testUrl, { mode: 'no-cors', cache: 'no-store' })
 				.then(function(response) {
 					if (timedOut) return;
 					clearTimeout(timer);
 					HA_URL = LOCAL_HA_URL;
 					localStorage.setItem('ha_url', HA_URL);
-					if (networkTextEl) networkTextEl.innerText = 'LAN';
+					if (networkTextEl) networkTextEl.innerText = 'Local';
 					connectWS();
 				})
 				.catch(function(err) {
@@ -3450,9 +3472,14 @@
         function cargarVersionModal() {
             var labelVersion = document.getElementById('config-version-label');
             if (!labelVersion) return;
-            var baseUrl = (typeof HA_URL !== 'undefined' && HA_URL) ? HA_URL : 'http://192.168.1.132:8123';
-            var fetchUrl = baseUrl.replace(/\/$/, '') + '/local/version.json';  
-            fetch(fetchUrl)
+            
+            if (typeof CURRENT_VERSION !== 'undefined' && CURRENT_VERSION && CURRENT_VERSION !== '__VERSION_PLACEHOLDER__') {
+                labelVersion.innerText = 'Versión: ' + CURRENT_VERSION;
+                return;
+            }
+
+            var fetchUrl = './version.json';  
+            fetch(fetchUrl, { cache: 'no-store' })
                 .then(function(response) {
                     if (!response.ok) throw new Error('No se pudo obtener el archivo');
                     return response.json();
@@ -3462,11 +3489,19 @@
                     labelVersion.innerText = 'Versión: ' + versionVal;
                 })
                 .catch(function(err) {
-                    if (typeof CURRENT_VERSION !== 'undefined' && CURRENT_VERSION && CURRENT_VERSION !== '__VERSION_PLACEHOLDER__') {
-                        labelVersion.innerText = 'Versión: ' + CURRENT_VERSION;
-                    } else {
-                        labelVersion.innerText = 'Versión: No disponible';
-                    }
+                    var fallbackUrl = HA_URL.replace(/\/$/, '') + '/local/version.json';
+                    fetch(fallbackUrl, { cache: 'no-store' })
+                        .then(function(res) {
+                            if (!res.ok) throw new Error();
+                            return res.json();
+                        })
+                        .then(function(data) {
+                            var versionVal = data.versionName || data.version || data.name || 'Desconocida';
+                            labelVersion.innerText = 'Versión: ' + versionVal;
+                        })
+                        .catch(function() {
+                            labelVersion.innerText = 'Versión: No disponible';
+                        });
                 });
         }
 
