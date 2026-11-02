@@ -1372,6 +1372,10 @@
                 </div>
             </div>
 
+			<button onclick="probarNotificacionNativa()" class="btn-prueba-noti">
+				🔔 Probar Notificación Local
+			</button>
+
             <!-- SIRENAS Y ABRIR PUERTA -->
 			<div class="grid-2-col">
 				<div class="card card-clickable" id="card-sirena"
@@ -3335,21 +3339,17 @@
                     var unit = (a && a.unit_of_measurement) ? a.unit_of_measurement : 'kW';
                     var textState = '';
                     var iconId = '#icon-leaf';
-                    var dynamicColor = '#66BB6A';
+                    var dynamicColor = getVertidoColor(value);
                     if (absVal === '0.0') {
                         textState = '';
                         iconId = '#icon-leaf';
-                        dynamicColor = '#66BB6A';
                     } else if (value > 0) {
                         textState = 'Exporta';
                         iconId = '#icon-transmission-tower-import';
-                        dynamicColor = '#4fc3f7';
                     } else if (value < 0) {
                         textState = 'Importa';
                         iconId = '#icon-transmission-tower-export';
-                        dynamicColor = 'orange';
                     }
-
                     var stateEl = document.getElementById('val-state-red');
                     if (stateEl) {
                         stateEl.innerText = textState ? (textState + ' ') : '';
@@ -3632,41 +3632,93 @@
             };
         }
 
+		async function probarNotificacionNativa() {
+			try {
+				const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
+				if (!LocalNotifications) {
+					alert("Capacitor LocalNotifications no está disponible en este entorno.");
+					return;
+				}
+
+				const perm = await LocalNotifications.checkPermissions();
+				if (perm.display !== 'granted') {
+					const req = await LocalNotifications.requestPermissions();
+					if (req.display !== 'granted') {
+						alert("Permiso de notificaciones denegado.");
+						return;
+					}
+				}
+
+				await LocalNotifications.createChannel({
+					id: 'peluso_canal_urgente',
+					name: 'PelusoApp Alertas Urgentes',
+					importance: 5,
+					sound: 'default',
+					vibration: true
+				});
+
+				await LocalNotifications.schedule({
+					notifications: [{
+						title: "Prueba PelusoApp",
+						body: "¡Funciona! Esto es una prueba directa desde el botón local.",
+						id: 999,
+						sound: 'default',
+						channelId: 'peluso_canal_urgente'
+					}]
+				});
+				
+				console.log("Notificación de prueba programada con éxito.");
+			} catch (e) {
+				console.error("Error en prueba local:", e);
+				alert("Error: " + JSON.stringify(e));
+			}
+		}
+
         async function showNotification(texto) {
-            if (!texto || texto === '' || texto === 'unknown' || texto === 'unavailable') return;
-            texto = texto.replace(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+\s*:\s*/i, '');
-            texto = texto.replace(/\[/g, '').replace(/\]/g, '');
-
-            var isNative = window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
-
-            if (isNative) {
-                const ultimaNotiEnviada = localStorage.getItem('peluso_ultima_notif_sistema');
-                if (texto !== ultimaNotiEnviada) {
-                    localStorage.setItem('peluso_ultima_notif_sistema', texto);
-                    try {
-                        const permStatus = await window.Capacitor.Plugins.LocalNotifications.checkPermissions();
-                        if (permStatus.display !== 'granted') {
-                            await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
-                        }
-                        await window.Capacitor.Plugins.LocalNotifications.schedule({
+			if (!texto || texto === '' || texto === 'unknown' || texto === 'unavailable') return;
+			texto = texto.replace(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+\s*:\s*/i, '');
+			texto = texto.replace(/\[/g, '').replace(/\]/g, '');
+			var isNative = window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
+			if (isNative) {
+				const ultimaNotiEnviada = localStorage.getItem('peluso_ultima_notif_sistema');
+				if (texto !== ultimaNotiEnviada) {
+					localStorage.setItem('peluso_ultima_notif_sistema', texto);
+					try {
+						const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
+						const permStatus = await LocalNotifications.checkPermissions();
+						if (permStatus.display !== 'granted') {
+							const req = await LocalNotifications.requestPermissions();
+							if (req.display !== 'granted') return;
+						}
+						await LocalNotifications.createChannel({
+							id: 'peluso_canal_urgente',
+							name: 'PelusoApp Alertas Urgentes',
+							description: 'Canal de alta prioridad para avisos de Home Assistant',
+							importance: 5,
+							visibility: 1,
+							sound: 'default',
+							vibration: true
+						});
+						await LocalNotifications.schedule({
 							notifications: [{
 								title: "PelusoApp",
 								body: texto,
-								id: new Date().getTime(),
+								id: new Date().getTime() % 2147483647,
 								sound: 'default',
-								channelId: 'default' 
+								channelId: 'peluso_canal_urgente'
 							}]
 						});
-                    } catch (e) {
-                    }
-                }
-                return;
-            }
-            if (activeNotifications.indexOf(texto) === -1) {
-                activeNotifications.push(texto);
-            }
-            renderNotifications();
-        }
+					} catch (e) {
+						console.error("Error en notificaciones nativas:", e);
+					}
+				}
+				return;
+			}
+			if (activeNotifications.indexOf(texto) === -1) {
+				activeNotifications.push(texto);
+			}
+			renderNotifications();
+		}
 
 		async function requestNotificationPermission() {
 			if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
@@ -4045,168 +4097,138 @@
             modal.style.display = 'flex';
         }
 
+        function interpolateColor(color1, color2, factor) {
+            var c1 = parseInt(color1.slice(1), 16);
+            var c2 = parseInt(color2.slice(1), 16);
+            var r1 = (c1 >> 16) & 255, g1 = (c1 >> 8) & 255, b1 = c1 & 255;
+            var r2 = (c2 >> 16) & 255, g2 = (c2 >> 8) & 255, b2 = c2 & 255;
+            var r = Math.round(r1 + factor * (r2 - r1));
+            var g = Math.round(g1 + factor * (g2 - g1));
+            var b = Math.round(b1 + factor * (b2 - b1));
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        function getGraduatedColor(val, minVal, maxVal, colorStops) {
+            if (val <= minVal) return colorStops[0];
+            if (val >= maxVal) return colorStops[colorStops.length - 1];
+            var normalized = (val - minVal) / (maxVal - minVal);
+            var scaled = normalized * (colorStops.length - 1);
+            var index = Math.floor(scaled);
+            var factor = scaled - index;
+            if (index >= colorStops.length - 1) return colorStops[colorStops.length - 1];
+            return interpolateColor(colorStops[index], colorStops[index + 1], factor);
+        }
+
+        function getPiecewiseColor(val, minVal, centerVal, maxVal, stopsLow, stopsHigh) {
+            if (val <= minVal) return stopsLow[0];
+            if (val >= maxVal) return stopsHigh[stopsHigh.length - 1];
+
+            if (val <= centerVal) {
+                var norm = (val - minVal) / (centerVal - minVal);
+                var scaled = norm * (stopsLow.length - 1);
+                var idx = Math.floor(scaled);
+                var fac = scaled - idx;
+                if (idx >= stopsLow.length - 1) return stopsLow[stopsLow.length - 1];
+                return interpolateColor(stopsLow[idx], stopsLow[idx + 1], fac);
+            } else {
+                var norm = (val - centerVal) / (maxVal - centerVal);
+                var scaled = norm * (stopsHigh.length - 1);
+                var idx = Math.floor(scaled);
+                var fac = scaled - idx;
+                if (idx >= stopsHigh.length - 1) return stopsHigh[stopsHigh.length - 1];
+                return interpolateColor(stopsHigh[idx], stopsHigh[idx + 1], fac);
+            }
+        }
+
+        function getMultiStopColor(val, stops) {
+            var value = parseFloat(val);
+            if (isNaN(value)) return '#808080';
+            if (value <= stops[0][0]) return stops[0][1];
+            if (value >= stops[stops.length - 1][0]) return stops[stops.length - 1][1];
+
+            for (var i = 0; i < stops.length - 1; i++) {
+                var v1 = stops[i][0], c1 = stops[i][1];
+                var v2 = stops[i + 1][0], c2 = stops[i + 1][1];
+                if (value >= v1 && value <= v2) {
+                    var factor = (value - v1) / (v2 - v1);
+                    return interpolateColor(c1, c2, factor);
+                }
+            }
+            return stops[stops.length - 1][1];
+        }
+
+        var batteryPalette = [
+            '#7f0000', '#b71c1c', '#d32f2f', '#f44336', '#ff5722', '#ff8a65', '#ff9800', '#ffb74d',
+            '#ffcc80', '#fff59d', '#dce775', '#aed581', '#81c784', '#4caf50', '#388e3c', '#2e7d32', '#1b5e20'
+        ];
+
+        var negativeRedToWhite = [
+            '#b71c1c', '#c62828', '#d32f2f', '#f44336', '#e57373', '#ef9a9a', '#ffcdd2', '#ffffff'
+        ];
+
+        var whiteToPositiveBlue = [
+            '#ffffff', '#bbdefb', '#64b5f6', '#2196f3', '#1976d2', '#1565c0', '#0d47a1'
+        ];
+
         function getAirColor(value) {
-			var val = parseFloat(value);
-			if (isNaN(val)) return '#808080';
-			if (val <= 12.0) return '#0d47a1';
-			if (val <= 12.5) return '#114fa8';
-			if (val <= 13.0) return '#1565c0';
-			if (val <= 13.5) return '#176eb9';
-			if (val <= 14.0) return '#1976d2';
-			if (val <= 14.5) return '#3f8ee0';
-			if (val <= 15.0) return '#4ea3eb';
-			if (val <= 15.5) return '#58aaf1';
-			if (val <= 16.0) return '#64b5f6';
-			if (val <= 16.5) return '#8ac6f8';
-			if (val <= 17.0) return '#9ed1f9';
-			if (val <= 17.5) return '#addafa';
-			if (val <= 18.0) return '#bbdefb';
-			if (val <= 18.5) return '#d0e7fc';
-			if (val <= 19.0) return '#e1effd';
-			if (val <= 19.5) return '#f2f7fe';
-			if (val <= 20.5) return '#ffffff';
-			if (val <= 21.0) return '#fff4f0';
-			if (val <= 21.5) return '#ffe5e0';
-			if (val <= 22.0) return '#ffd8ce';
-			if (val <= 22.5) return '#ffccbc';
-			if (val <= 23.0) return '#ffbcab';
-			if (val <= 23.5) return '#ffaa98';
-			if (val <= 24.0) return '#ff9a7e';
-			if (val <= 24.5) return '#ff8a65';
-			if (val <= 25.0) return '#fa654f';
-			if (val <= 25.5) return '#f65442';
-			if (val <= 26.0) return '#f44336';
-			if (val <= 26.5) return '#e43932';
-			if (val <= 27.0) return '#d32f2f';
-			if (val <= 27.5) return '#cb2727';
-			if (val <= 28.0) return '#c22020';
-			if (val <= 28.5) return '#bc1e1e';
-			if (val <= 29.0) return '#b71c1c';
-			if (val <= 30.0) return '#9e1515';
-			if (val <= 32.0) return '#850e0e';
-			return '#6a0808';
-		}
+            var val = parseFloat(value);
+            if (isNaN(val)) return '#808080';
+            var stops = [
+                '#0d47a1', '#114fa8', '#1565c0', '#176eb9', '#1976d2', '#3f8ee0', '#4ea3eb', '#58aaf1',
+                '#64b5f6', '#8ac6f8', '#9ed1f9', '#addafa', '#bbdefb', '#d0e7fc', '#e1effd', '#f2f7fe',
+                '#ffffff', '#fff4f0', '#ffe5e0', '#ffd8ce', '#ffccbc', '#ffbcab', '#ffaa98', '#ff9a7e',
+                '#ff8a65', '#fa654f', '#f65442', '#f44336', '#e43932', '#d32f2f', '#cb2727', '#c22020',
+                '#bc1e1e', '#b71c1c', '#9e1515', '#850e0e', '#6a0808'
+            ];
+            return getGraduatedColor(val, 12.0, 32.0, stops);
+        }
 
         function getFotovoltaicaColor(value) {
             var val = parseFloat(value);
             if (isNaN(val)) return '#808080';
-            if (val >= 5.6) return '#1b5e20';
-            if (val >= 5.2) return '#2e7d32';
-            if (val >= 4.8) return '#388e3c';
-            if (val >= 4.4) return '#4caf50';
-            if (val >= 4.0) return '#81c784';
-            if (val >= 3.6) return '#aed581';
-            if (val >= 3.2) return '#dce775';
-            if (val >= 2.8) return '#fff59d';
-            if (val >= 2.4) return '#ffcc80';
-            if (val >= 2.0) return '#ffb74d';
-            if (val >= 1.6) return '#ff9800';
-            if (val >= 1.2) return '#ff8a65';
-            if (val >= 0.8) return '#ff5722';
-            if (val >= 0.4) return '#f44336';
-            if (val >= 0.1) return '#d32f2f';
-            return '#7f0000';
+            return getGraduatedColor(val, 0.0, 6.0, batteryPalette);
         }
 
         function getConsumoColor(value) {
             var val = parseFloat(value);
             if (isNaN(val)) return '#808080';
-            if (val >= 5.6) return '#7f0000';
-            if (val >= 5.2) return '#d32f2f';
-            if (val >= 4.8) return '#f44336';
-            if (val >= 4.4) return '#ff5722';
-            if (val >= 4.0) return '#ff8a65';
-            if (val >= 3.6) return '#ff9800';
-            if (val >= 3.2) return '#ffb74d';
-            if (val >= 2.8) return '#ffcc80';
-            if (val >= 2.4) return '#fff59d';
-            if (val >= 2.0) return '#dce775';
-            if (val >= 1.6) return '#aed581';
-            if (val >= 1.2) return '#81c784';
-            if (val >= 0.8) return '#4caf50';
-            if (val >= 0.4) return '#388e3c';
-            if (val >= 0.1) return '#2e7d32';
-            return '#1b5e20';
+            if (val < 0.0) val = 0.0;
+            if (val > 6.0) val = 6.0;
+            return getFotovoltaicaColor(6.0 - val);
         }
 
         function getProductionRatioColor(value) {
             var val = parseFloat(value);
             if (isNaN(val)) return '#808080';
-            if (val >= 13.0) return '#0d47a1'; 
-            if (val >= 11.0) return '#1565c0'; 
-            if (val >= 9.0)  return '#1976d2'; 
-            if (val >= 7.0)  return '#2196f3'; 
-            if (val >= 4.5)  return '#64b5f6'; 
-            if (val >= 2.0)  return '#bbdefb'; 
-            if (val >= 1.0)  return '#ffffff'; 
-            if (val >= 0.85) return '#ffcdd2'; 
-            if (val >= 0.70) return '#ef9a9a'; 
-            if (val >= 0.50) return '#e57373'; 
-            if (val >= 0.30) return '#f44336'; 
-            if (val >= 0.15) return '#d32f2f'; 
-            if (val > 0.0)   return '#c62828'; 
-            return '#b71c1c';            
+            var stopsLow = [
+                '#b71c1c', '#bc1e1e', '#c22020', '#c62828', '#cb2727', '#d32f2f', 
+                '#e43932', '#f44336', '#f65442', '#fa654f', '#ff8a65', '#ff9a7e', 
+                '#ffaa98', '#ffbcab', '#ffccbc', '#ffe5e0', '#ffffff'
+            ];
+            var stopsHigh = [
+                '#ffffff', '#e1effd', '#d0e7fc', '#bbdefb', '#addafa', '#9ed1f9', 
+                '#8ac6f8', '#64b5f6', '#58aaf1', '#4ea3eb', '#3f8ee0', '#1976d2', 
+                '#176eb9', '#1565c0', '#114fa8', '#0d47a1'
+            ];
+            return getPiecewiseColor(val, 0.0, 1.0, 13.0, stopsLow, stopsHigh);
         }
 
         function getVertidoColor(value) {
             var val = parseFloat(value);
             if (isNaN(val)) return '#808080';
-            if (val >= 4.5) return '#0d47a1'; 
-            if (val >= 3.5) return '#1565c0'; 
-            if (val >= 2.5) return '#1976d2'; 
-            if (val >= 1.5) return '#2196f3'; 
-            if (val >= 0.8) return '#64b5f6'; 
-            if (val >= 0.3) return '#bbdefb'; 
-            if (val >= 0.0) return '#ffffff'; 
-            if (val >= -0.3) return '#ffcdd2'; 
-            if (val >= -0.8) return '#ef9a9a'; 
-            if (val >= -1.5) return '#e57373'; 
-            if (val >= -2.5) return '#f44336'; 
-            if (val >= -3.5) return '#d32f2f'; 
-            if (val >= -4.5) return '#c62828'; 
-            return '#b71c1c';                 
+            return getPiecewiseColor(val, -4.5, 0.0, 4.5, negativeRedToWhite, whiteToPositiveBlue);
         }
 
         function getBateriaColor(value) {
             var val = parseFloat(value);
             if (isNaN(val)) return '#808080';
-            if (val >= 95) return '#1b5e20';
-            if (val >= 89) return '#2e7d32';
-            if (val >= 83) return '#388e3c';
-            if (val >= 77) return '#4caf50';
-            if (val >= 71) return '#81c784';
-            if (val >= 65) return '#aed581';
-            if (val >= 59) return '#dce775';
-            if (val >= 53) return '#fff59d';
-            if (val >= 47) return '#ffcc80';
-            if (val >= 41) return '#ffb74d';
-            if (val >= 35) return '#ff9800';
-            if (val >= 29) return '#ff8a65';
-            if (val >= 23) return '#ff5722';
-            if (val >= 17) return '#f44336';
-            if (val >= 11) return '#d32f2f';
-            if (val >= 5)  return '#b71c1c';
-            return '#7f0000';
+            return getGraduatedColor(val, 5, 95, batteryPalette);
         }
 
         function getBatteryPowerColor(value) {
             var val = parseFloat(value);
             if (isNaN(val)) return '#808080';
-            if (val >= 2.14) return '#0d47a1'; 
-            if (val >= 1.79) return '#1565c0'; 
-            if (val >= 1.43) return '#1976d2'; 
-            if (val >= 1.07) return '#2196f3'; 
-            if (val >= 0.71) return '#64b5f6'; 
-            if (val >= 0.30) return '#bbdefb'; 
-            if (val >= 0.0)  return '#ffffff'; 
-            if (val >= -0.30) return '#ffcdd2'; 
-            if (val >= -0.71) return '#ef9a9a'; 
-            if (val >= -1.07) return '#e57373'; 
-            if (val >= -1.43) return '#f44336'; 
-            if (val >= -1.79) return '#d32f2f'; 
-            if (val >= -2.14) return '#c62828'; 
-            if (val > -2.5)   return '#c62828'; 
-            return '#b71c1c';
+            return getPiecewiseColor(val, -2.5, 0.0, 2.5, negativeRedToWhite, whiteToPositiveBlue);
         }
 
         function generarInformeWatchman() {
