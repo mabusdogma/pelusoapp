@@ -1730,45 +1730,45 @@
                 </div>
             </div>
 
-            <!-- TARJETA MOD LUCES CON CHIPS -->
-            <div class="card-mod-luces">
-                <div class="chips-container">
-                    <div class="chip-mini-grid">
-                        <div class="chip-mini" id="chip-switch.ikea" onclick="toggleEntity('switch.ikea')">
-                            <svg class="icon"><use xlink:href="#icon-floor-lamp-torchiere-outline" href="#icon-floor-lamp-torchiere-outline"></use></svg> Ikea
-                        </div>
-                        <div class="chip-mini" id="chip-light.techo" onclick="toggleEntity('light.techo')">
-                            <svg class="icon"><use xlink:href="#icon-wall-sconce-flat" href="#icon-wall-sconce-flat"></use></svg> Techo
-                        </div>
-                        <div class="chip-mini" id="chip-light.wled" onclick="toggleEntity('light.wled')">
-                            <svg class="icon"><use xlink:href="#icon-table-row" href="#icon-table-row"></use></svg> Led
-                        </div>
-                        <div class="chip-mini" id="chip-switch.chimenea" onclick="toggleEntity('script.encender_chimenea')">
-                            <svg class="icon"><use xlink:href="#icon-wall-fire" href="#icon-wall-fire"></use></svg> Chimenea
-                        </div>
-                        <div class="chip-mini" id="chip-light.mini2" onclick="toggleEntity('light.mini2')">
-                            <svg class="icon"><use xlink:href="#icon-table-chair" href="#icon-table-chair"></use></svg> Sala
-                        </div>
-                    </div>
-                    <div class="chip-mini-grid">
-                        <div class="chip-mini" id="chip-switch.extra" onclick="toggleEntity('switch.extra')">
-                            <svg class="icon"><use xlink:href="#icon-led-strip" href="#icon-led-strip"></use></svg> Cocina
-                        </div>
-                        <div class="chip-mini" id="chip-light.luz_ventilador" onclick="toggleEntity('light.luz_ventilador')">
-                            <svg class="icon"><use xlink:href="#icon-ceiling-fan-light" href="#icon-ceiling-fan-light"></use></svg> BBQ
-                        </div>
-                        <div class="chip-mini" id="chip-light.bluentrada" onclick="toggleEntity('light.bluentrada')">
-                            <svg class="icon"><use xlink:href="#icon-door-sliding" href="#icon-door-sliding"></use></svg> Entrada
-                        </div>
-                        <div class="chip-mini" id="chip-switch.cochera" onclick="toggleEntity('switch.cochera')">
-                            <svg class="icon"><use xlink:href="#icon-car-brake-parking" href="#icon-car-brake-parking"></use></svg> Parking
-                        </div>
-                        <div class="chip-mini" id="chip-switch.peluso_privacy" onclick="toggleEntity('switch.peluso_privacy')">
-                            <svg class="icon"><use xlink:href="#icon-incognito" href="#icon-incognito"></use></svg> Privado
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- TARJETA MOD LUCES CON CHIPS (Válida para cualquier vista) -->
+			<div class="card-mod-luces">
+				<div class="chips-container">
+					<div class="chip-mini-grid">
+						<div class="chip-mini" data-entity="switch.ikea" onclick="toggleEntity('switch.ikea')">
+							<svg class="icon"><use xlink:href="#icon-floor-lamp-torchiere-outline" href="#icon-floor-lamp-torchiere-outline"></use></svg> Ikea
+						</div>
+						<div class="chip-mini" data-entity="light.techo" onclick="toggleEntity('light.techo')">
+							<svg class="icon"><use xlink:href="#icon-wall-sconce-flat" href="#icon-wall-sconce-flat"></use></svg> Techo
+						</div>
+						<div class="chip-mini" data-entity="light.wled" onclick="toggleEntity('light.wled')">
+							<svg class="icon"><use xlink:href="#icon-table-row" href="#icon-table-row"></use></svg> Led
+						</div>
+						<div class="chip-mini" data-entity="script.encender_chimenea" onclick="toggleEntity('script.encender_chimenea')">
+							<svg class="icon"><use xlink:href="#icon-wall-fire" href="#icon-wall-fire"></use></svg> Chimenea
+						</div>
+						<div class="chip-mini" data-entity="light.mini2" onclick="toggleEntity('light.mini2')">
+							<svg class="icon"><use xlink:href="#icon-table-chair" href="#icon-table-chair"></use></svg> Sala
+						</div>
+					</div>
+					<div class="chip-mini-grid">
+						<div class="chip-mini" data-entity="switch.extra" onclick="toggleEntity('switch.extra')">
+							<svg class="icon"><use xlink:href="#icon-led-strip" href="#icon-led-strip"></use></svg> Cocina
+						</div>
+						<div class="chip-mini" data-entity="light.luz_ventilador" onclick="toggleEntity('light.luz_ventilador')">
+							<svg class="icon"><use xlink:href="#icon-ceiling-fan-light" href="#icon-ceiling-fan-light"></use></svg> BBQ
+						</div>
+						<div class="chip-mini" data-entity="light.bluentrada_lan" onclick="toggleEntity('light.bluentrada_lan')">
+							<svg class="icon"><use xlink:href="#icon-door-sliding" href="#icon-door-sliding"></use></svg> Entrada
+						</div>
+						<div class="chip-mini" data-entity="switch.cochera" onclick="toggleEntity('switch.cochera')">
+							<svg class="icon"><use xlink:href="#icon-car-brake-parking" href="#icon-car-brake-parking"></use></svg> Parking
+						</div>
+						<div class="chip-mini" data-entity="switch.peluso_privacy" onclick="toggleEntity('switch.peluso_privacy')">
+							<svg class="icon"><use xlink:href="#icon-incognito" href="#icon-incognito"></use></svg> Privado
+						</div>
+					</div>
+				</div>
+			</div>
 
             <!-- GRID DE VÍDEOS DE CÁMARAS -->
             <div class="grid-2-col">
@@ -1906,149 +1906,149 @@
                 </div>
             </div>
 
-           <!-- AIRES ACONDICIONADOS -->
-            <div class="grid-2-col">
-                <!-- A/C Salón -->
-                <div class="card card-ac" id="card-ac-salon">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                        <span class="mush-primary" style="display: flex; align-items: center;">
-                            <svg class="icon" style="margin-right: 6px; color: var(--accent);"><use xlink:href="#icon-sofa" href="#icon-sofa"></use></svg> A/C Salón
-                        </span>
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <button class="btn-action btn-power" style="padding:6px 10px; display: inline-flex; align-items: center; justify-content: center;"
-                                onclick="toggleEntity('climate.aux_cloud_e8165636d7b6_ac')"><svg class="icon" style="margin: 0; width: 25px; height: 25px;">
-                                    <use xlink:href="#icon-power" href="#icon-power"></use>
-                                </svg></button>
-                            <div class="chip-mini" id="chip-input_boolean.a_c_salon_automatico" onclick="toggleEntity('input_boolean.a_c_salon_automatico')" style="padding: 6px 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03) !important; border-color: var(--card-border) !important;"><svg class="icon" id="icon-input_boolean.a_c_salon_automatico" style="margin: 0; width: 25px; height: 25px; color: #696969;"><use xlink:href="#icon-solar-power" href="#icon-solar-power"></use></svg></div>
-                        </div>
-                    </div>            
-                    
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                        <div class="mush-value" id="temp-ac-salon" style="font-size: 20px; min-width: 55px;">--°C</div>
-                        <div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-salon">
-                            <div id="pointer-target-ac-salon" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
-                            <div id="bar-ac-salon" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
-                            <div id="pointer-ac-salon" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
-                        </div>
-                        <div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-salon">--</span>°C</div>
-                    </div>
-                    <div class="chip-mini-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
-                        <div class="chip-mini" id="ac-salon-cool" onclick="setClimateMode('climate.aux_cloud_e8165636d7b6_ac', 'cool')">Frío</div>
-                        <div class="chip-mini" id="ac-salon-heat" onclick="setClimateMode('climate.aux_cloud_e8165636d7b6_ac', 'heat')">Calor</div>
-                        <div class="chip-mini" id="ac-salon-dry" onclick="setClimateMode('climate.aux_cloud_e8165636d7b6_ac', 'dry')">Seco</div>
-                        <div class="chip-mini" id="ac-salon-auto" onclick="setClimateMode('climate.aux_cloud_e8165636d7b6_ac', 'auto')">Auto</div>
-                    </div>
-                    <div style="display:flex; gap:6px; margin-top:8px;">
-                        <button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.aux_cloud_e8165636d7b6_ac', -1)">-1°</button>
-                        <button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.aux_cloud_e8165636d7b6_ac', 1)">+1°</button>
-                    </div>
-                </div>
+            <!-- AIRES ACONDICIONADOS -->
+			<div class="grid-2-col">
+				<!-- A/C Salón -->
+				<div class="card card-ac" id="card-ac-salon">
+					<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+						<span class="mush-primary" style="display: flex; align-items: center;">
+							<svg class="icon" style="margin-right: 6px; color: var(--accent);"><use xlink:href="#icon-sofa" href="#icon-sofa"></use></svg> A/C Salón
+						</span>
+						<div style="display: flex; gap: 6px; align-items: center;">
+							<button class="btn-action btn-power" style="padding:6px 10px; display: inline-flex; align-items: center; justify-content: center;"
+								onclick="toggleEntity('climate.aux_cloud_e8165636d7b6_ac')"><svg class="icon" style="margin: 0; width: 25px; height: 25px;">
+									<use xlink:href="#icon-power" href="#icon-power"></use>
+								</svg></button>
+							<div class="chip-mini" id="chip-input_boolean.a_c_salon_automatico" onclick="toggleEntity('input_boolean.a_c_salon_automatico')" style="padding: 6px 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03) !important; border-color: var(--card-border) !important;"><svg class="icon" id="icon-input_boolean.a_c_salon_automatico" style="margin: 0; width: 25px; height: 25px; color: #696969;"><use xlink:href="#icon-solar-power" href="#icon-solar-power"></use></svg></div>
+						</div>
+					</div>          
+					
+					<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+						<div class="mush-value" id="temp-ac-salon" style="font-size: 20px; min-width: 55px;">--°C</div>
+						<div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-salon">
+							<div id="pointer-target-ac-salon" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
+							<div id="bar-ac-salon" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
+							<div id="pointer-ac-salon" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
+						</div>
+						<div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-salon">--</span>°C</div>
+					</div>
+					<div class="chip-mini-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
+						<div class="chip-mini" id="ac-salon-cool" onclick="setClimateMode('climate.aux_cloud_e8165636d7b6_ac', 'cool')">Frío</div>
+						<div class="chip-mini" id="ac-salon-heat" onclick="setClimateMode('climate.aux_cloud_e8165636d7b6_ac', 'heat')">Calor</div>
+						<div class="chip-mini" id="ac-salon-dry" onclick="setClimateMode('climate.aux_cloud_e8165636d7b6_ac', 'dry')">Seco</div>
+						<div class="chip-mini" id="ac-salon-auto" onclick="setClimateMode('climate.aux_cloud_e8165636d7b6_ac', 'auto')">Auto</div>
+					</div>
+					<div style="display:flex; gap:6px; margin-top:8px;">
+						<button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.aux_cloud_e8165636d7b6_ac', -0.5)">-0.5°</button>
+						<button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.aux_cloud_e8165636d7b6_ac', 0.5)">+0.5°</button>
+					</div>
+				</div>
 
-                <!-- A/C Despacho -->
-                <div class="card card-ac" id="card-ac-despacho">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                        <span class="mush-primary" style="display: flex; align-items: center;">
-                            <svg class="icon" style="margin-right: 6px; color: var(--accent);"><use xlink:href="#icon-desk" href="#icon-desk"></use></svg> A/C Despacho
-                        </span>
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <button class="btn-action btn-power" style="padding:6px 10px; display: inline-flex; align-items: center; justify-content: center;"
-                                onclick="toggleEntity('climate.ac1_ac_despacho')"><svg class="icon" style="margin: 0; width: 25px; height: 25px;">
-                                    <use xlink:href="#icon-power" href="#icon-power"></use>
-                                </svg></button>
-                            <div class="chip-mini" id="chip-input_boolean.a_c_despacho_automatico" onclick="toggleEntity('input_boolean.a_c_despacho_automatico')" style="padding: 6px 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03) !important; border-color: var(--card-border) !important;"><svg class="icon" id="icon-input_boolean.a_c_despacho_automatico" style="margin: 0; width: 25px; height: 25px; color: #696969;"><use xlink:href="#icon-solar-power" href="#icon-solar-power"></use></svg></div>
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                        <div class="mush-value" id="temp-ac-despacho" style="font-size: 20px; min-width: 55px;">--°C</div>
-                        <div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-despacho">
-                            <div id="pointer-target-ac-despacho" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
-                            <div id="bar-ac-despacho" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
-                            <div id="pointer-ac-despacho" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
-                        </div>
-                        <div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-despacho">--</span>°C</div>
-                    </div>
-                    <div class="chip-mini-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
-                        <div class="chip-mini" id="ac-despacho-cool" onclick="setClimateMode('climate.ac1_ac_despacho', 'cool')">Frío</div>
-                        <div class="chip-mini" id="ac-despacho-heat" onclick="setClimateMode('climate.ac1_ac_despacho', 'heat')">Calor</div>
-                        <div class="chip-mini" id="ac-despacho-dry" onclick="setClimateMode('climate.ac1_ac_despacho', 'dry')">Seco</div>
-                        <div class="chip-mini" id="ac-despacho-heat_cool" onclick="setClimateMode('climate.ac1_ac_despacho', 'heat_cool')">Auto</div>
-                    </div>
-                    <div style="display:flex; gap:6px; margin-top:8px;">
-                        <button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac1_ac_despacho', -1)">-1°</button>
-                        <button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac1_ac_despacho', 1)">+1°</button>
-                    </div>
-                </div>
+				<!-- A/C Despacho -->
+				<div class="card card-ac" id="card-ac-despacho">
+					<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+						<span class="mush-primary" style="display: flex; align-items: center;">
+							<svg class="icon" style="margin-right: 6px; color: var(--accent);"><use xlink:href="#icon-desk" href="#icon-desk"></use></svg> A/C Despacho
+						</span>
+						<div style="display: flex; gap: 6px; align-items: center;">
+							<button class="btn-action btn-power" style="padding:6px 10px; display: inline-flex; align-items: center; justify-content: center;"
+								onclick="toggleEntity('climate.ac1_ac_despacho')"><svg class="icon" style="margin: 0; width: 25px; height: 25px;">
+									<use xlink:href="#icon-power" href="#icon-power"></use>
+								</svg></button>
+							<div class="chip-mini" id="chip-input_boolean.a_c_despacho_automatico" onclick="toggleEntity('input_boolean.a_c_despacho_automatico')" style="padding: 6px 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03) !important; border-color: var(--card-border) !important;"><svg class="icon" id="icon-input_boolean.a_c_despacho_automatico" style="margin: 0; width: 25px; height: 25px; color: #696969;"><use xlink:href="#icon-solar-power" href="#icon-solar-power"></use></svg></div>
+						</div>
+					</div>
+					<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+						<div class="mush-value" id="temp-ac-despacho" style="font-size: 20px; min-width: 55px;">--°C</div>
+						<div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-despacho">
+							<div id="pointer-target-ac-despacho" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
+							<div id="bar-ac-despacho" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
+							<div id="pointer-ac-despacho" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
+						</div>
+						<div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-despacho">--</span>°C</div>
+					</div>
+					<div class="chip-mini-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
+						<div class="chip-mini" id="ac-despacho-cool" onclick="setClimateMode('climate.ac1_ac_despacho', 'cool')">Frío</div>
+						<div class="chip-mini" id="ac-despacho-heat" onclick="setClimateMode('climate.ac1_ac_despacho', 'heat')">Calor</div>
+						<div class="chip-mini" id="ac-despacho-dry" onclick="setClimateMode('climate.ac1_ac_despacho', 'dry')">Seco</div>
+						<div class="chip-mini" id="ac-despacho-heat_cool" onclick="setClimateMode('climate.ac1_ac_despacho', 'heat_cool')">Auto</div>
+					</div>
+					<div style="display:flex; gap:6px; margin-top:8px;">
+						<button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac1_ac_despacho', -0.5)">-0.5°</button>
+						<button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac1_ac_despacho', 0.5)">+0.5°</button>
+					</div>
+				</div>
 
-                <!-- A/C Dormitorio -->
-                <div class="card card-ac" id="card-ac-dormitorio">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                        <span class="mush-primary" style="display: flex; align-items: center;">
-                            <svg class="icon" style="margin-right: 6px; color: var(--accent);"><use xlink:href="#icon-bed" href="#icon-bed"></use></svg> A/C Dormitorio
-                        </span>
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <button class="btn-action btn-power" style="padding:6px 10px; display: inline-flex; align-items: center; justify-content: center;"
-                                onclick="toggleEntity('climate.ac_dormitorio_ac_dormitorio')"><svg class="icon" style="margin: 0; width: 25px; height: 25px;">
-                                    <use xlink:href="#icon-power" href="#icon-power"></use>
-                                </svg></button>
-                            <div class="chip-mini" id="chip-input_boolean.a_c_dormitorio_automatico" onclick="toggleEntity('input_boolean.a_c_dormitorio_automatico')" style="padding: 6px 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03) !important; border-color: var(--card-border) !important;"><svg class="icon" id="icon-input_boolean.a_c_dormitorio_automatico" style="margin: 0; width: 25px; height: 25px; color: #696969;"><use xlink:href="#icon-solar-power" href="#icon-solar-power"></use></svg></div>
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                        <div class="mush-value" id="temp-ac-dormitorio" style="font-size: 20px; min-width: 55px;">--°C</div>
-                        <div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-dormitorio">
-                            <div id="pointer-target-ac-dormitorio" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
-                            <div id="bar-ac-dormitorio" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
-                            <div id="pointer-ac-dormitorio" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
-                        </div>
-                        <div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-dormitorio">--</span>°C</div>
-                    </div>
-                    <div class="chip-mini-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
-                        <div class="chip-mini" id="ac-dormitorio-cool" onclick="setClimateMode('climate.ac_dormitorio_ac_dormitorio', 'cool')">Frío</div>
-                        <div class="chip-mini" id="ac-dormitorio-heat" onclick="setClimateMode('climate.ac_dormitorio_ac_dormitorio', 'heat')">Calor</div>
-                        <div class="chip-mini" id="ac-dormitorio-dry" onclick="setClimateMode('climate.ac_dormitorio_ac_dormitorio', 'dry')">Seco</div>
-                        <div class="chip-mini" id="ac-dormitorio-heat_cool" onclick="setClimateMode('climate.ac_dormitorio_ac_dormitorio', 'heat_cool')">Auto</div>
-                    </div>
-                    <div style="display:flex; gap:6px; margin-top:8px;">
-                        <button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac_dormitorio_ac_dormitorio', -1)">-1°</button>
-                        <button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac_dormitorio_ac_dormitorio', 1)">+1°</button>
-                    </div>
-                </div>
+				<!-- A/C Dormitorio -->
+				<div class="card card-ac" id="card-ac-dormitorio">
+					<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+						<span class="mush-primary" style="display: flex; align-items: center;">
+							<svg class="icon" style="margin-right: 6px; color: var(--accent);"><use xlink:href="#icon-bed" href="#icon-bed"></use></svg> A/C Dormitorio
+						</span>
+						<div style="display: flex; gap: 6px; align-items: center;">
+							<button class="btn-action btn-power" style="padding:6px 10px; display: inline-flex; align-items: center; justify-content: center;"
+								onclick="toggleEntity('climate.ac_dormitorio_ac_dormitorio')"><svg class="icon" style="margin: 0; width: 25px; height: 25px;">
+									<use xlink:href="#icon-power" href="#icon-power"></use>
+								</svg></button>
+							<div class="chip-mini" id="chip-input_boolean.a_c_dormitorio_automatico" onclick="toggleEntity('input_boolean.a_c_dormitorio_automatico')" style="padding: 6px 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03) !important; border-color: var(--card-border) !important;"><svg class="icon" id="icon-input_boolean.a_c_dormitorio_automatico" style="margin: 0; width: 25px; height: 25px; color: #696969;"><use xlink:href="#icon-solar-power" href="#icon-solar-power"></use></svg></div>
+						</div>
+					</div>
+					<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+						<div class="mush-value" id="temp-ac-dormitorio" style="font-size: 20px; min-width: 55px;">--°C</div>
+						<div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-dormitorio">
+							<div id="pointer-target-ac-dormitorio" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
+							<div id="bar-ac-dormitorio" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
+							<div id="pointer-ac-dormitorio" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
+						</div>
+						<div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-dormitorio">--</span>°C</div>
+					</div>
+					<div class="chip-mini-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
+						<div class="chip-mini" id="ac-dormitorio-cool" onclick="setClimateMode('climate.ac_dormitorio_ac_dormitorio', 'cool')">Frío</div>
+						<div class="chip-mini" id="ac-dormitorio-heat" onclick="setClimateMode('climate.ac_dormitorio_ac_dormitorio', 'heat')">Calor</div>
+						<div class="chip-mini" id="ac-dormitorio-dry" onclick="setClimateMode('climate.ac_dormitorio_ac_dormitorio', 'dry')">Seco</div>
+						<div class="chip-mini" id="ac-dormitorio-heat_cool" onclick="setClimateMode('climate.ac_dormitorio_ac_dormitorio', 'heat_cool')">Auto</div>
+					</div>
+					<div style="display:flex; gap:6px; margin-top:8px;">
+						<button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac_dormitorio_ac_dormitorio', -0.5)">-0.5°</button>
+						<button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac_dormitorio_ac_dormitorio', 0.5)">+0.5°</button>
+					</div>
+				</div>
 
-                <!-- A/C Suite -->
-                <div class="card card-ac" id="card-ac-suite">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                        <span class="mush-primary" style="display: flex; align-items: center;">
-                            <svg class="icon" style="margin-right: 6px; color: var(--accent);"><use xlink:href="#icon-bed-king-outline" href="#icon-bed-king-outline"></use></svg> A/C Suite
-                        </span>
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <button class="btn-action btn-power" style="padding:6px 10px; display: inline-flex; align-items: center; justify-content: center;"
-                                onclick="toggleEntity('climate.ac2_ac_suite')"><svg class="icon" style="margin: 0; width: 25px; height: 25px;">
-                                    <use xlink:href="#icon-power" href="#icon-power"></use>
-                                </svg></button>
-                            <div class="chip-mini" id="chip-input_boolean.a_c_suite_automatico" onclick="toggleEntity('input_boolean.a_c_suite_automatico')" style="padding: 6px 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03) !important; border-color: var(--card-border) !important;"><svg class="icon" id="icon-input_boolean.a_c_suite_automatico" style="margin: 0; width: 25px; height: 25px; color: #696969;"><use xlink:href="#icon-solar-power" href="#icon-solar-power"></use></svg></div>
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                        <div class="mush-value" id="temp-ac-suite" style="font-size: 20px; min-width: 55px;">--°C</div>
-                        <div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-suite">
-                            <div id="pointer-target-ac-suite" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
-                            <div id="bar-ac-suite" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
-                            <div id="pointer-ac-suite" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
-                        </div>
-                        <div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-suite">--</span>°C</div>
-                    </div>
-                    <div class="chip-mini-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
-                        <div class="chip-mini" id="ac-suite-cool" onclick="setClimateMode('climate.ac2_ac_suite', 'cool')">Frío</div>
-                        <div class="chip-mini" id="ac-suite-heat" onclick="setClimateMode('climate.ac2_ac_suite', 'heat')">Calor</div>
-                        <div class="chip-mini" id="ac-suite-dry" onclick="setClimateMode('climate.ac2_ac_suite', 'dry')">Seco</div>
-                        <div class="chip-mini" id="ac-suite-heat_cool" onclick="setClimateMode('climate.ac2_ac_suite', 'heat_cool')">Auto</div>
-                    </div>
-                    <div style="display:flex; gap:6px; margin-top:8px;">
-                        <button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac2_ac_suite', -1)">-1°</button>
-                        <button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac2_ac_suite', 1)">+1°</button>
-                    </div>
-                </div>
-            </div>
+				<!-- A/C Suite -->
+				<div class="card card-ac" id="card-ac-suite">
+					<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+						<span class="mush-primary" style="display: flex; align-items: center;">
+							<svg class="icon" style="margin-right: 6px; color: var(--accent);"><use xlink:href="#icon-bed-king-outline" href="#icon-bed-king-outline"></use></svg> A/C Suite
+						</span>
+						<div style="display: flex; gap: 6px; align-items: center;">
+							<button class="btn-action btn-power" style="padding:6px 10px; display: inline-flex; align-items: center; justify-content: center;"
+								onclick="toggleEntity('climate.ac2_ac_suite')"><svg class="icon" style="margin: 0; width: 25px; height: 25px;">
+									<use xlink:href="#icon-power" href="#icon-power"></use>
+								</svg></button>
+							<div class="chip-mini" id="chip-input_boolean.a_c_suite_automatico" onclick="toggleEntity('input_boolean.a_c_suite_automatico')" style="padding: 6px 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03) !important; border-color: var(--card-border) !important;"><svg class="icon" id="icon-input_boolean.a_c_suite_automatico" style="margin: 0; width: 25px; height: 25px; color: #696969;"><use xlink:href="#icon-solar-power" href="#icon-solar-power"></use></svg></div>
+						</div>
+					</div>
+					<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+						<div class="mush-value" id="temp-ac-suite" style="font-size: 20px; min-width: 55px;">--°C</div>
+						<div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-suite">
+							<div id="pointer-target-ac-suite" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
+							<div id="bar-ac-suite" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
+							<div id="pointer-ac-suite" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
+						</div>
+						<div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-suite">--</span>°C</div>
+					</div>
+					<div class="chip-mini-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
+						<div class="chip-mini" id="ac-suite-cool" onclick="setClimateMode('climate.ac2_ac_suite', 'cool')">Frío extremo</div>
+						<div class="chip-mini" id="ac-suite-heat" onclick="setClimateMode('climate.ac2_ac_suite', 'heat')">Calor</div>
+						<div class="chip-mini" id="ac-suite-dry" onclick="setClimateMode('climate.ac2_ac_suite', 'dry')">Seco</div>
+						<div class="chip-mini" id="ac-suite-heat_cool" onclick="setClimateMode('climate.ac2_ac_suite', 'heat_cool')">Auto</div>
+					</div>
+					<div style="display:flex; gap:6px; margin-top:8px;">
+						<button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac2_ac_suite', -0.5)">-0.5°</button>
+						<button class="btn-action" style="flex:1" onclick="adjustClimateTemp('climate.ac2_ac_suite', 0.5)">+0.5°</button>
+					</div>
+				</div>
+			</div>
 
             <!-- TARJETA TABBED COMPACTA PARA VENTILADORES Y PURIFICADOR -->
             <div class="card" style="margin-bottom: 14px; padding: 12px;">
@@ -2062,7 +2062,6 @@
 						<div class="grid-2-col" style="margin-bottom: 0;">
 							<div class="card card-clickable" id="chip-fan.alivent_main_fan" onclick="toggleEntity('fan.alivent_main_fan')" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; margin-bottom: 0;">
 								<div style="display: flex; align-items: center;">
-									<!-- ID añadido aquí -->
 									<div class="mush-icon" id="icon-alivent-fan" style="width: 30px; height: 30px; font-size: 15px; margin-right: 8px; color: #999999;"><svg class="icon" style="fill: currentColor;"><use xlink:href="#icon-ceiling-fan"></use></svg></div>
 									<div class="mush-primary" style="font-size: 13px;">AliVent</div>
 								</div>
@@ -2070,7 +2069,6 @@
 							</div>
 							<div class="card card-clickable" id="chip-light.alivent_main_light" onclick="toggleEntity('light.alivent_main_light')" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; margin-bottom: 0;">
 								<div style="display: flex; align-items: center;">
-									<!-- ID añadido aquí -->
 									<div class="mush-icon" id="icon-alivent-light" style="width: 30px; height: 30px; font-size: 15px; margin-right: 8px; color: #999999;"><svg class="icon" style="fill: currentColor;"><use xlink:href="#icon-ceiling-fan-light"></use></svg></div>
 									<div class="mush-primary" style="font-size: 13px;">AliVent luz</div>
 								</div>
@@ -3408,109 +3406,89 @@
         };
 
         function getIOSVersionInfo() {
-            var ua = navigator.userAgent;
-            var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            if (!isIOS) return null;
-            var match = ua.match(/OS (\d+)_(\d+)(?:_(\d+))?/);
-            if (match) {
-                var major = match[1];
-                var minor = match[2];
-                var patch = match[3] ? '.' + match[3] : '';
-                return 'ios ' + major + '.' + minor + patch;
-            }
-            return 'ios';
-        }
+			var ua = navigator.userAgent;
+			var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+			if (!isIOS) return null;
+			var match = ua.match(/OS (\d+)_(\d+)(?:_(\d+))?/);
+			if (match) {
+				var major = match[1];
+				var minor = match[2];
+				var patch = match[3] ? '.' + match[3] : '';
+				return 'ios ' + major + '.' + minor + patch;
+			}
+			return 'ios';
+		}
 
 		function checkNetworkAndConnect() {
-            var networkTextEl = document.getElementById('status-network');
-            if (!HA_TOKEN) {
-                openConfigModal();
-                return;
-            }
-
-            var isApp = (typeof window.Capacitor !== 'undefined') || 
-                        (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
-                        window.location.protocol === 'capacitor:' || 
-                        window.location.protocol === 'file:' || 
-                        window.location.hostname === 'localhost' ||
-                        window.location.hostname === '127.0.0.1' ||
-                        /Android.*(Capacitor|wv)/i.test(navigator.userAgent);
-            function getIOSVersionInfo() {
-                var ua = navigator.userAgent;
-                var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-                if (!isIOS) return null;
-
-                var match = ua.match(/OS (\d+)_(\d+)(?:_(\d+))?/);
-                if (match) {
-                    var major = match[1];
-                    var minor = match[2];
-                    var patch = match[3] ? '.' + match[3] : '';
-                    return 'ios ' + major + '.' + minor + patch;
-                }
-                return 'ios';
-            }
-
-            var iosInfo = getIOSVersionInfo();
-
-            if (networkTextEl) {
-                networkTextEl.innerText = iosInfo ? iosInfo : 'Desconocido';
-            }
-
-            if (!isApp && typeof currentHost !== 'undefined' && currentHost.indexOf('100.') === 0) {
-                HA_URL = TAILSCALE_HA_URL;
-                localStorage.setItem('ha_url', HA_URL);
-                if (networkTextEl) {
-                    networkTextEl.innerText = iosInfo ? iosInfo : 'web Tail';
-                }
-                connectWS();
-                return;
-            } else if (!isApp && typeof currentHost !== 'undefined' && (currentHost.indexOf('192.168.') === 0)) {
-                HA_URL = LOCAL_HA_URL;
-                localStorage.setItem('ha_url', HA_URL);
-                if (networkTextEl) {
-                    networkTextEl.innerText = iosInfo ? iosInfo : 'web LAN';
-                }
-                connectWS();
-                return;
-            }
-
-            var testUrl = LOCAL_HA_URL + '/manifest.json';
-            var timedOut = false;
-            var timer = setTimeout(function() {
-                if (timedOut) return;
-                timedOut = true;
-                HA_URL = TAILSCALE_HA_URL;
-                localStorage.setItem('ha_url', HA_URL);
-                if (networkTextEl) {
-                    networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app Tail' : 'web Tail');
-                }
-                connectWS();
-            }, 2000);
-
-            fetch(testUrl, { mode: 'no-cors', cache: 'no-store' })
-                .then(function(response) {
-                    if (timedOut) return;
-                    timedOut = true;
-                    clearTimeout(timer);
-                    HA_URL = LOCAL_HA_URL;
-                    localStorage.setItem('ha_url', HA_URL);
-                    if (networkTextEl) {
-                        networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app LAN' : 'web LAN');
-                    }
-                    connectWS();
-                })
-                .catch(function(err) {
-                    if (timedOut) return;
-                    timedOut = true;
-                    clearTimeout(timer);
-                    HA_URL = TAILSCALE_HA_URL;
-                    localStorage.setItem('ha_url', HA_URL);
-                    if (networkTextEl) {
-                        networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app Tail' : 'web Tail');
-                    }
-                    connectWS();
-                });
-        }
+			var networkTextEl = document.getElementById('status-network');
+			if (!HA_TOKEN) {
+				openConfigModal();
+				return;
+			}
+			var isApp = (typeof window.Capacitor !== 'undefined') || 
+						(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
+						window.location.protocol === 'capacitor:' || 
+						window.location.protocol === 'file:' || 
+						window.location.hostname === 'localhost' ||
+						window.location.hostname === '127.0.0.1' ||
+						/Android.*(Capacitor|wv)/i.test(navigator.userAgent);
+			var iosInfo = getIOSVersionInfo();
+			if (networkTextEl) {
+				networkTextEl.innerText = iosInfo ? iosInfo : 'Desconocido';
+			}
+			if (!isApp && typeof currentHost !== 'undefined' && currentHost.indexOf('100.') === 0) {
+				HA_URL = TAILSCALE_HA_URL;
+				localStorage.setItem('ha_url', HA_URL);
+				if (networkTextEl) {
+					networkTextEl.innerText = iosInfo ? iosInfo : 'web Tail';
+				}
+				connectWS();
+				return;
+			} else if (!isApp && typeof currentHost !== 'undefined' && (currentHost.indexOf('192.168.') === 0)) {
+				HA_URL = LOCAL_HA_URL;
+				localStorage.setItem('ha_url', HA_URL);
+				if (networkTextEl) {
+					networkTextEl.innerText = iosInfo ? iosInfo : 'web LAN';
+				}
+				connectWS();
+				return;
+			}
+			var testUrl = LOCAL_HA_URL + '/manifest.json';
+			var timedOut = false;
+			var timer = setTimeout(function() {
+				if (timedOut) return;
+				timedOut = true;
+				HA_URL = TAILSCALE_HA_URL;
+				localStorage.setItem('ha_url', HA_URL);
+				if (networkTextEl) {
+					networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app Tail' : 'web Tail');
+				}
+				connectWS();
+			}, 2000);
+			fetch(testUrl, { mode: 'no-cors', cache: 'no-store' })
+				.then(function(response) {
+					if (timedOut) return;
+					timedOut = true;
+					clearTimeout(timer);
+					HA_URL = LOCAL_HA_URL;
+					localStorage.setItem('ha_url', HA_URL);
+					if (networkTextEl) {
+						networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app LAN' : 'web LAN');
+					}
+					connectWS();
+				})
+				.catch(function(err) {
+					if (timedOut) return;
+					timedOut = true;
+					clearTimeout(timer);
+					HA_URL = TAILSCALE_HA_URL;
+					localStorage.setItem('ha_url', HA_URL);
+					if (networkTextEl) {
+						networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app Tail' : 'web Tail');
+					}
+					connectWS();
+				});
+		}
 
         function updateEnergyPercentages() {
             var total = window._energyData.produccion;
@@ -3671,13 +3649,14 @@
                             await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
                         }
                         await window.Capacitor.Plugins.LocalNotifications.schedule({
-                            notifications: [{
-                                title: "PelusoApp",
-                                body: texto,
-                                id: new Date().getTime(),
-                                sound: null,
-                            }]
-                        });
+							notifications: [{
+								title: "PelusoApp",
+								body: texto,
+								id: new Date().getTime(),
+								sound: 'default',
+								channelId: 'default' 
+							}]
+						});
                     } catch (e) {
                     }
                 }
@@ -4053,20 +4032,46 @@
         }
 
         function getAirColor(value) {
-            var val = parseFloat(value);
-            if (isNaN(val)) return '#808080';
-            if (val <= 13) return '#0d47a1'; 
-            if (val <= 15) return '#1565c0'; 
-            if (val <= 17) return '#1976d2'; 
-            if (val <= 19) return '#64b5f6'; 
-            if (val <= 21) return '#bbdefb'; 
-            if (val <= 23) return '#ffffff'; 
-            if (val <= 25) return '#ffccbc'; 
-            if (val <= 27) return '#ff8a65'; 
-            if (val <= 29) return '#f44336'; 
-            if (val <= 31) return '#d32f2f';
-            return '#b71c1c';
-        }
+			var val = parseFloat(value);
+			if (isNaN(val)) return '#808080';
+			if (val <= 12.0) return '#0d47a1';
+			if (val <= 12.5) return '#114fa8';
+			if (val <= 13.0) return '#1565c0';
+			if (val <= 13.5) return '#176eb9';
+			if (val <= 14.0) return '#1976d2';
+			if (val <= 14.5) return '#3f8ee0';
+			if (val <= 15.0) return '#4ea3eb';
+			if (val <= 15.5) return '#58aaf1';
+			if (val <= 16.0) return '#64b5f6';
+			if (val <= 16.5) return '#8ac6f8';
+			if (val <= 17.0) return '#9ed1f9';
+			if (val <= 17.5) return '#addafa';
+			if (val <= 18.0) return '#bbdefb';
+			if (val <= 18.5) return '#d0e7fc';
+			if (val <= 19.0) return '#e1effd';
+			if (val <= 19.5) return '#f2f7fe';
+			if (val <= 20.5) return '#ffffff';
+			if (val <= 21.0) return '#fff4f0';
+			if (val <= 21.5) return '#ffe5e0';
+			if (val <= 22.0) return '#ffd8ce';
+			if (val <= 22.5) return '#ffccbc';
+			if (val <= 23.0) return '#ffbcab';
+			if (val <= 23.5) return '#ffaa98';
+			if (val <= 24.0) return '#ff9a7e';
+			if (val <= 24.5) return '#ff8a65';
+			if (val <= 25.0) return '#fa654f';
+			if (val <= 25.5) return '#f65442';
+			if (val <= 26.0) return '#f44336';
+			if (val <= 26.5) return '#e43932';
+			if (val <= 27.0) return '#d32f2f';
+			if (val <= 27.5) return '#cb2727';
+			if (val <= 28.0) return '#c22020';
+			if (val <= 28.5) return '#bc1e1e';
+			if (val <= 29.0) return '#b71c1c';
+			if (val <= 30.0) return '#9e1515';
+			if (val <= 32.0) return '#850e0e';
+			return '#6a0808';
+		}
 
         function getFotovoltaicaColor(value) {
             var val = parseFloat(value);
@@ -4387,11 +4392,11 @@
             var tempEl = document.getElementById('temp-' + prefixId);
             if (tempEl && ent.attributes && ent.attributes.temperature !== undefined) {
                 var targetTemp = ent.attributes.temperature;
-                tempEl.innerText = targetTemp + '°C';
+                tempEl.innerText = Number(targetTemp).toFixed(1) + '°C';
                 tempColor = getAirColor(targetTemp);
                 tempEl.style.color = tempColor;
             }
-            renderRangeSegments('bar-' + prefixId, 12, 32, 12, getAirColor);
+            renderRangeSegments('bar-' + prefixId, 12, 32, 40, getAirColor);
             if (ent.attributes.temperature !== undefined) {
                 var targetPointer = document.getElementById('pointer-target-' + prefixId);
                 if (targetPointer) {
@@ -4434,7 +4439,7 @@
             });
             var currentTempEl = document.getElementById('sensor-temp-' + prefixId);
             if (currentTempEl && ent.attributes && ent.attributes.current_temperature !== undefined) {
-                currentTempEl.innerText = ent.attributes.current_temperature;
+                currentTempEl.innerText = Number(ent.attributes.current_temperature).toFixed(1);
             }
         }
 
@@ -4522,24 +4527,23 @@
         function setupAcSliderDragging(containerId, entityId, minTemp, maxTemp, prefixId) {
             var container = document.getElementById(containerId);
             if (!container) return;
-
             var targetPointer = document.getElementById('pointer-target-' + prefixId);
             var tempValEl = document.getElementById('temp-' + prefixId);
-
             function calcTempAndPct(clientX) {
                 var rect = container.getBoundingClientRect();
                 var width = rect.width;
                 if (width <= 0) return null;
-                
                 var offsetX = clientX - rect.left;
                 var percentage = Math.max(0, Math.min(1, offsetX / width));
                 var rawTemp = minTemp + (percentage * (maxTemp - minTemp));
-                var targetTemp = Math.round(rawTemp);
+                var targetTemp = Math.round(rawTemp * 2) / 2;
                 var normPct = ((targetTemp - minTemp) / (maxTemp - minTemp)) * 100;
-
-                return { temp: targetTemp, pct: normPct };
+                return { 
+                    temp: targetTemp, 
+                    formattedTemp: targetTemp.toFixed(1), 
+                    pct: normPct 
+                };
             }
-
             function onPointerMove(clientX) {
                 var res = calcTempAndPct(clientX);
                 if (!res) return;
@@ -4548,11 +4552,10 @@
                     targetPointer.style.borderTopColor = getAirColor(res.temp);
                 }
                 if (tempValEl) {
-                    tempValEl.innerText = res.temp + '°C';
+                    tempValEl.innerText = res.formattedTemp + '°C';
                     tempValEl.style.color = getAirColor(res.temp);
                 }
             }
-
             function onPointerEnd(clientX) {
                 isDraggingAcSlider = false;
                 var res = calcTempAndPct(clientX);
@@ -4566,29 +4569,24 @@
                     });
                 }
             }
-
             container.addEventListener('touchstart', function(e) {
                 isDraggingAcSlider = true;
                 var touch = e.touches[0];
                 onPointerMove(touch.clientX);
             }, { passive: true });
-
             container.addEventListener('touchmove', function(e) {
                 if (!isDraggingAcSlider) return;
                 var touch = e.touches[0];
                 onPointerMove(touch.clientX);
             }, { passive: true });
-
             container.addEventListener('touchend', function(e) {
                 if (!isDraggingAcSlider) return;
                 var touch = e.changedTouches[0];
                 onPointerEnd(touch.clientX);
             });
-
             container.addEventListener('mousedown', function(e) {
                 isDraggingAcSlider = true;
                 onPointerMove(e.clientX);
-
                 function mouseMoveHandler(eMove) {
                     if (isDraggingAcSlider) onPointerMove(eMove.clientX);
                 }
@@ -4598,7 +4596,6 @@
                     window.removeEventListener('mousemove', mouseMoveHandler);
                     window.removeEventListener('mouseup', mouseUpHandler);
                 }
-
                 window.addEventListener('mousemove', mouseMoveHandler);
                 window.addEventListener('mouseup', mouseUpHandler);
             });
@@ -4608,13 +4605,20 @@
             if (!ent || !ent.entity_id) return;
             var id = ent.entity_id;
             var st = ent.state;
+			var elements = document.querySelectorAll('[data-entity="' + id + '"]');
+            elements.forEach(function(el) {
+                if (st === 'on') {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
             var autoAcMap = {
                 'input_boolean.a_c_salon_automatico': '#ff9800',
                 'input_boolean.a_c_despacho_automatico': '#4caf50', 
                 'input_boolean.a_c_dormitorio_automatico': '#FFB7D5',
                 'input_boolean.a_c_suite_automatico': '#3498db'
             };
-
             if (autoAcMap.hasOwnProperty(id)) {
                 var iconEl = document.getElementById('icon-' + id);
                 if (iconEl) {
@@ -4777,7 +4781,6 @@
             if (id === 'vacuum.covadonga_lan') {
                 var vacState = getCachedElement('state-vacuum');
                 if (vacState) vacState.innerText = translateState(st, id, ent.attributes);
-                
                 var iconVacuum = getCachedElement('icon-robot-vacuum');
                 if (iconVacuum) {
                     if (st === 'docked' || st === 'off') {
@@ -4823,17 +4826,19 @@
         }
 
         function adjustClimateTemp(entityId, delta) {
-            var ent = entityStates[entityId];
-            if (!ent || !ent.attributes || ent.attributes.temperature === undefined) return;
-            var newTemp = parseFloat(ent.attributes.temperature) + delta;
-            sendWS({
-                type: 'call_service',
-                domain: 'climate',
-                service: 'set_temperature',
-                target: { entity_id: entityId },
-                service_data: { temperature: newTemp }
-            });
-        }
+			var stateObj = states[entityId];
+			if (!stateObj) return;
+			var currentTemp = stateObj.attributes && stateObj.attributes.temperature !== undefined 
+				? parseFloat(stateObj.attributes.temperature) 
+				: 21.0;
+			var newTemp = currentTemp + delta;
+			if (newTemp < 12.0) newTemp = 12.0;
+			if (newTemp > 32.0) newTemp = 32.0;	
+			callService('climate', 'set_temperature', {
+				entity_id: entityId,
+				temperature: newTemp
+			});
+		}
 
         function switchSettingsTab(tabId, element) {
             var container = element.parentElement;
@@ -5048,6 +5053,11 @@
 
         async function verificarActualizacionSimple() {
             try {
+                var networkTextEl = document.getElementById('status-network');
+                var netType = networkTextEl ? networkTextEl.innerText : '';
+                if (netType !== 'app Tail' && netType !== 'app LAN') {
+                    return;
+                }
                 const urlApk = HA_URL + '/local/pelusoapp.apk';
                 const respuesta = await fetch(urlApk, { method: 'HEAD' });
                 if (!respuesta.ok) return;
@@ -5174,16 +5184,12 @@
             if (ws) {
                 try { ws.close(); } catch (e) {}
             }
-
             var wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
             var wsHost = HA_URL.replace(/^https?:\/\//, '');
             var wsUri = wsProtocol + wsHost + '/api/websocket';
-            
             ws = new WebSocket(wsUri);
-
             ws.onopen = function() {
             };    
-
             ws.onmessage = function(event) {
                 lastActivity = Date.now();
                 var data = JSON.parse(event.data);
@@ -5215,24 +5221,20 @@
                         queueEntityUpdate(ent);
                     }
                 }
-
                 if (data.id && wsCallbacks[data.id]) {
                     wsCallbacks[data.id](data);
                     delete wsCallbacks[data.id];
                 }
             };
-
             ws.onclose = function(event) {
                 var statusText = document.getElementById('status-text');
                 var statusDot = document.getElementById('status-dot');
                 if (statusText) statusText.innerText = "offline";
                 if (statusDot) statusDot.classList.remove('connected');
-
                 reconnectTimer = setTimeout(function() {
                     connectWS();
                 }, 150);
             };
-
             ws.onerror = function(error) {
                 try { ws.close(); } catch (e) {}
             };
