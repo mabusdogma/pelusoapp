@@ -2038,7 +2038,7 @@
 						<div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-suite">--</span>°C</div>
 					</div>
 					<div class="chip-mini-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10px;">
-						<div class="chip-mini" id="ac-suite-cool" onclick="setClimateMode('climate.ac2_ac_suite', 'cool')">Frío extremo</div>
+						<div class="chip-mini" id="ac-suite-cool" onclick="setClimateMode('climate.ac2_ac_suite', 'cool')">Frío</div>
 						<div class="chip-mini" id="ac-suite-heat" onclick="setClimateMode('climate.ac2_ac_suite', 'heat')">Calor</div>
 						<div class="chip-mini" id="ac-suite-dry" onclick="setClimateMode('climate.ac2_ac_suite', 'dry')">Seco</div>
 						<div class="chip-mini" id="ac-suite-heat_cool" onclick="setClimateMode('climate.ac2_ac_suite', 'heat_cool')">Auto</div>
@@ -4435,6 +4435,22 @@
             });
         }
 
+        function adjustClimateTemp(entityId, delta) {
+            var stateObj = (typeof states !== 'undefined' ? states[entityId] : null) || 
+                           (typeof entityStates !== 'undefined' ? entityStates[entityId] : null);
+            if (!stateObj) return;
+            var currentTemp = stateObj.attributes && stateObj.attributes.temperature !== undefined
+                ? parseFloat(stateObj.attributes.temperature)
+                : 21.0;
+            var newTemp = currentTemp + delta;
+            if (newTemp < 12.0) newTemp = 12.0;
+            if (newTemp > 32.0) newTemp = 32.0;
+            callService('climate', 'set_temperature', {
+                entity_id: entityId,
+                temperature: newTemp
+            });
+        }
+
         function updateClimateCard(ent, prefixId) {
             if (!ent) return;
             if (typeof activeDraggingCard !== 'undefined' && activeDraggingCard === prefixId) return;
@@ -4459,8 +4475,8 @@
                     targetPointer.style.borderTopColor = tempColor;
                 }
             }
-            var currentTemp = (ent.attributes.current_temperature !== undefined) 
-                ? ent.attributes.current_temperature 
+            var currentTemp = (ent.attributes.current_temperature !== undefined)
+                ? ent.attributes.current_temperature
                 : ent.attributes.temperature;
             if (currentTemp !== undefined) {
                 updatePointer('pointer-' + prefixId, currentTemp, 12, 32);
@@ -4877,21 +4893,6 @@
                 valEl.innerText = displaySt + unit;
             }
         }
-
-        function adjustClimateTemp(entityId, delta) {
-			var stateObj = states[entityId];
-			if (!stateObj) return;
-			var currentTemp = stateObj.attributes && stateObj.attributes.temperature !== undefined 
-				? parseFloat(stateObj.attributes.temperature) 
-				: 21.0;
-			var newTemp = currentTemp + delta;
-			if (newTemp < 12.0) newTemp = 12.0;
-			if (newTemp > 32.0) newTemp = 32.0;	
-			callService('climate', 'set_temperature', {
-				entity_id: entityId,
-				temperature: newTemp
-			});
-		}
 
         function switchSettingsTab(tabId, element) {
             var container = element.parentElement;
