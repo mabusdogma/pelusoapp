@@ -99,11 +99,12 @@ jobs:
               content = f.read()
 
           if 'REQUEST_INSTALL_PACKAGES' not in content:
-              permissions = '''
-              <uses-permission android:name="android.permission.INTERNET" />
-              <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-              '''
-              content = content.replace('<application', permissions + '\n<application')
+            permissions = '''
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+            <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+            '''
+            content = content.replace('<application', permissions + '\n<application')
 
           if 'usesCleartextTraffic' not in content:
               content = content.replace('<application', '<application android:usesCleartextTraffic="true"')
