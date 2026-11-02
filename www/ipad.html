@@ -3668,6 +3668,20 @@
             renderNotifications();
         }
 
+		async function requestNotificationPermission() {
+			if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+				try {
+					const perm = await window.Capacitor.Plugins.LocalNotifications.checkPermissions();
+					if (perm.display !== 'granted') {
+						await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
+					}
+				} catch (e) {
+					console.error("Error pidiendo permisos de notificación", e);
+				}
+			}
+		}
+		requestNotificationPermission();
+
         function renderNotifications() {
             var container = document.getElementById('popup-message');
             var modalEl = document.getElementById('popup-modal');
@@ -5203,6 +5217,18 @@
                     var statusDot = document.getElementById('status-dot');
                     if (statusText) statusText.innerText = "online";
                     if (statusDot) statusDot.classList.add('connected');
+					sendWS({
+						id: msgId++,
+						type: "subscribe_events",
+						event_type: "call_service"
+					}, function(event) {
+						if (event && event.event && event.event.data) {
+							var data = event.event.data;
+							if (data.service === 'create' && data.service_data && data.service_data.message) {
+								showNotification(data.service_data.message);
+							}
+						}
+					});
                     sendWS({ type: 'get_states' });
                     sendWS({ type: 'subscribe_events', event_type: 'state_changed' });
                     fetchHorarioCovadonga();
