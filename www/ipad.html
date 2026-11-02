@@ -5349,18 +5349,34 @@
         function closeAlarmModal() {
             document.getElementById('alarm-pin-modal').style.display = 'none';
         }
-
         document.addEventListener('DOMContentLoaded', function () {
-            var modalImg = document.getElementById('modal-cam-img');
-            if (modalImg) modalImg.src = '';
-            var camModal = document.getElementById('camera-modal');
-            if (camModal) camModal.style.display = 'none';
-            currentModalCameraEntity = null;
-            var savedUrl = localStorage.getItem('ha_url');
-            if (savedUrl && typeof HA_URL !== 'undefined') {
-                HA_URL = savedUrl;
-            }
-        });
+			var modalImg = document.getElementById('modal-cam-img');
+			if (modalImg) modalImg.src = '';
+			var camModal = document.getElementById('camera-modal');
+			if (camModal) camModal.style.display = 'none';
+			currentModalCameraEntity = null;
+			var savedUrl = localStorage.getItem('ha_url');
+			if (savedUrl && typeof HA_URL !== 'undefined') {
+				HA_URL = savedUrl;
+			}
+			async function initLocalNotifications() {
+				if (window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+					try {
+						let permStatus = await window.Capacitor.Plugins.LocalNotifications.checkPermissions();
+						
+						if (permStatus.display !== 'granted') {
+							permStatus = await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
+						}
+						if (permStatus.display !== 'granted') {
+							console.warn('El usuario no ha concedido permisos para las notificaciones.');
+						}
+					} catch (e) {
+						console.error('Error al gestionar permisos de notificación:', e);
+					}
+				}
+			}
+			initLocalNotifications();
+		});
 
         document.addEventListener('DOMContentLoaded', function() {
             setupAcSliderDragging('slider-container-ac-salon', 'climate.aux_cloud_e8165636d7b6_ac', 12, 32, 'ac-salon');
