@@ -133,6 +133,17 @@ jobs:
         run: |
           npx --yes capacitor-assets generate --android
 
+      - name: Copiar icono a color para notificaciones
+        run: |
+          mkdir -p android/app/src/main/res/drawable
+          if [ -f "assets/icon.png" ]; then
+            cp assets/icon.png android/app/src/main/res/drawable/ic_app_notification.png
+            echo ">>> Icono a color copiado desde assets/ <<<"
+          elif [ -f "icon.png" ]; then
+            cp icon.png android/app/src/main/res/drawable/ic_app_notification.png
+            echo ">>> Icono a color copiado desde la raíz! <<<"
+          fi
+
       - name: Actualizar version en Gradle desde package.json
         run: |
           cat << 'EOF' > update_gradle.py
