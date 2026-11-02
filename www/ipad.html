@@ -1372,10 +1372,6 @@
                 </div>
             </div>
 
-			<button onclick="probarNotificacionNativa()" class="btn-prueba-noti">
-				🔔 Probar Notificación Local
-			</button>
-
             <!-- SIRENAS Y ABRIR PUERTA -->
 			<div class="grid-2-col">
 				<div class="card card-clickable" id="card-sirena"
@@ -3675,64 +3671,88 @@
 		}
 
         async function showNotification(texto) {
-			if (!texto || texto === '' || texto === 'unknown' || texto === 'unavailable') return;
-			texto = texto.replace(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+\s*:\s*/i, '');
-			texto = texto.replace(/\[/g, '').replace(/\]/g, '');
-			var isNative = window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
-			if (isNative) {
-				const ultimaNotiEnviada = localStorage.getItem('peluso_ultima_notif_sistema');
-				if (texto !== ultimaNotiEnviada) {
-					localStorage.setItem('peluso_ultima_notif_sistema', texto);
-					try {
-						const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
-						const permStatus = await LocalNotifications.checkPermissions();
-						if (permStatus.display !== 'granted') {
-							const req = await LocalNotifications.requestPermissions();
-							if (req.display !== 'granted') return;
-						}
-						await LocalNotifications.createChannel({
-							id: 'peluso_canal_urgente',
-							name: 'PelusoApp Alertas Urgentes',
-							description: 'Canal de alta prioridad para avisos de Home Assistant',
-							importance: 5,
-							visibility: 1,
-							sound: 'default',
-							vibration: true
-						});
-						await LocalNotifications.schedule({
-							notifications: [{
-								title: "PelusoApp",
-								body: texto,
-								id: new Date().getTime() % 2147483647,
-								sound: 'default',
-								channelId: 'peluso_canal_urgente'
-							}]
-						});
-					} catch (e) {
-						console.error("Error en notificaciones nativas:", e);
-					}
-				}
-				return;
-			}
-			if (activeNotifications.indexOf(texto) === -1) {
-				activeNotifications.push(texto);
-			}
-			renderNotifications();
-		}
+            if (!texto || texto === '' || texto === 'unknown' || texto === 'unavailable') return;
+            texto = texto.replace(/\[/g, '').replace(/\]/g, '');
+            var timeMatch = texto.match(/\s+(\d{1,2}:\d{2}(?:am|pm)?\s+\d{1,2}\/\d{1,2}\/\d{2,4})$/i);
+            var timeText = '';
+            var cleanTexto = texto;
+            if (timeMatch) {
+                timeText = timeMatch[1];
+                cleanTexto = texto.replace(timeMatch[0], '').trim();
+            }
+            var title = "PelusoApp";
+            var body = cleanTexto;
+            var matchApp = cleanTexto.match(/^Termina ciclo (secadora|lavadora|lavaplatos)/i);
+            if (matchApp) {
+                var app = matchApp[1];
+                title = "Termina ciclo " + app;
+                body = cleanTexto.replace(matchApp[0], '').trim();
+                if (body.length > 0) {
+                    body = body.charAt(0).toUpperCase() + body.slice(1);
+                }
+            } else if (cleanTexto.indexOf('|') !== -1) {
+                var parts = cleanTexto.split('|');
+                title = parts[0].trim();
+                body = parts[1].trim();
+            }
+            if (timeText && body.indexOf(timeText) === -1) {
+                body += ' (' + timeText + ')';
+            }
+            var isNative = window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
+            if (isNative) {
+                const ultimaNotiEnviada = localStorage.getItem('peluso_ultima_notif_sistema');
+                if (texto !== ultimaNotiEnviada) {
+                    localStorage.setItem('peluso_ultima_notif_sistema', texto);
+                    try {
+                        const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
+                        const permStatus = await LocalNotifications.checkPermissions();
+                        if (permStatus.display !== 'granted') {
+                            const req = await LocalNotifications.requestPermissions();
+                            if (req.display !== 'granted') return;
+                        }
+                        await LocalNotifications.createChannel({
+                            id: 'peluso_canal_urgente',
+                            name: 'PelusoApp Alertas Urgentes',
+                            description: 'Canal de alta prioridad para avisos de Home Assistant',
+                            importance: 5,
+                            visibility: 1,
+                            sound: 'default',
+                            vibration: true
+                        });
+                        await LocalNotifications.schedule({
+                            notifications: [{
+                                title: title,
+                                body: body,
+                                id: new Date().getTime() % 2147483647,
+                                sound: 'default',
+                                channelId: 'peluso_canal_urgente'
+                            }]
+                        });
+                    } catch (e) {
+                        console.error("Error en notificaciones nativas:", e);
+                    }
+                }
+                return;
+            }
+            if (activeNotifications.indexOf(texto) === -1) {
+                activeNotifications.push(texto);
+            }
+            renderNotifications();
+        }
 
-		async function requestNotificationPermission() {
-			if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
-				try {
-					const perm = await window.Capacitor.Plugins.LocalNotifications.checkPermissions();
-					if (perm.display !== 'granted') {
-						await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
-					}
-				} catch (e) {
-					console.error("Error pidiendo permisos de notificación", e);
-				}
-			}
-		}
-		requestNotificationPermission();
+        async function requestNotificationPermission() {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+                try {
+                    const perm = await window.Capacitor.Plugins.LocalNotifications.checkPermissions();
+                    if (perm.display !== 'granted') {
+                        await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
+                    }
+                } catch (e) {
+                    console.error("Error pidiendo permisos de notificación", e);
+                }
+            }
+        }
+        requestNotificationPermission();
 
         function renderNotifications() {
             var container = document.getElementById('popup-message');
@@ -3753,17 +3773,22 @@
                 }
                 var title = msg;
                 var body = '';
-                var matchApp = msg.match(/^Termina ciclo (secadora|lavadora|lavaplatos)/i);
-                if (matchApp) {
-                    var app = matchApp[1];
-                    title = "Termina ciclo " + app;
-                    body = msg.replace(matchApp[0], '').trim();
-                    if (body.length > 0) {
-                        body = body.charAt(0).toUpperCase() + body.slice(1);
+                if (msg.indexOf('|') !== -1) {
+                    var parts = msg.split('|');
+                    title = parts[0].trim();
+                    body = parts[1].trim();
+                } else {
+                    var matchApp = msg.match(/^Termina ciclo (secadora|lavadora|lavaplatos)/i);
+                    if (matchApp) {
+                        var app = matchApp[1];
+                        title = "Termina ciclo " + app;
+                        body = msg.replace(matchApp[0], '').trim();
+                        if (body.length > 0) {
+                            body = body.charAt(0).toUpperCase() + body.slice(1);
+                        }
                     }
                 }
                 html += '<div style="padding: 12px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border-radius: 12px; border-left: 4px solid var(--accent); text-align: left; font-size: 15px; color: var(--text-primary);">';
- 
                 html += '<div style="font-weight: 600; font-size: 15px; line-height: 1.3;">' + escapeHtml(title) + '</div>';
                 if (body) {
                     html += '<div style="margin-top: 8px; font-size: 14px; line-height: 1.4; color: var(--text-primary);">' + escapeHtml(body);
