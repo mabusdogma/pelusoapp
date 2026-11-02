@@ -3696,7 +3696,7 @@
                 body = parts[1].trim();
             }
             if (timeText && body.indexOf(timeText) === -1) {
-                body += ' (' + timeText + ')';
+                body += ' ' + timeText;
             }
             var isNative = window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
             if (isNative) {
@@ -3717,7 +3717,8 @@
                             importance: 5,
                             visibility: 1,
                             sound: 'default',
-                            vibration: true
+                            vibration: true,
+                            smallIcon: 'ic_app_notification'
                         });
                         await LocalNotifications.schedule({
                             notifications: [{
@@ -3725,7 +3726,8 @@
                                 body: body,
                                 id: new Date().getTime() % 2147483647,
                                 sound: 'default',
-                                channelId: 'peluso_canal_urgente'
+                                channelId: 'peluso_canal_urgente',
+                                smallIcon: 'ic_app_notification'
                             }]
                         });
                     } catch (e) {
