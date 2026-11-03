@@ -1391,76 +1391,78 @@
             </div>
 
             <!-- SIRENAS Y ABRIR PUERTA -->
-			<div class="grid-2-col">
-				<div class="card card-clickable" id="card-sirena"
-					onclick="toggleEntityWithConfirm('switch.sirenas', '¿Deseas activar las sirenas?')">
-					<div class="mush-row">
-						<!-- ID añadido aquí -->
-						<div class="mush-icon" id="icon-sirena"><svg class="icon">
-								<use xlink:href="#icon-bullhorn" href="#icon-bullhorn"></use>
-							</svg></div>
-						<div class="mush-info">
-							<div class="mush-primary">Sirenas</div>
-							<div class="mush-secondary" id="state-sirena">En silencio</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="card card-clickable" id="card-abrir-puerta"
-					onclick="toggleEntityWithConfirm('script.abrir_puerta', '¿Deseas abrir la puerta principal?')">
-					<div class="mush-row">
-						<!-- ID añadido aquí -->
-						<div class="mush-icon" id="icon-abrir-puerta"><svg class="icon">
-								<use xlink:href="#icon-door-open" href="#icon-door-open"></use>
-							</svg></div>
-						<div class="mush-info">
-							<div class="mush-primary">Abrir puerta</div>
-							<div class="mush-secondary" id="state-abrir-puerta">Sin ejecutar</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-            <!-- PANEL DE ALARMA -->
-            <div class="card card-clickable" id="card-alarm" onclick="handleAlarmClick()" style="margin-bottom: 14px;">
-                <div class="mush-row">
-                    <div class="mush-icon" id="icon-alarm">
-                        <svg class="icon">
-                            <use xlink:href="#icon-shield-home" href="#icon-shield-home" id="use-alarm"></use>
-                        </svg>
-                    </div>
+        <div class="grid-2-col">
+            <div class="card card-clickable" id="card-sirena"
+                style="padding: 6px 10px;"
+                onclick="toggleEntityWithConfirm('switch.sirenas', '¿Deseas activar las sirenas?')">
+                <div class="mush-row" style="align-items: center;">
+                    <!-- ID añadido aquí -->
+                    <div class="mush-icon" id="icon-sirena" style="width: 36px; height: 36px;"><svg class="icon">
+                            <use xlink:href="#icon-bullhorn" href="#icon-bullhorn"></use>
+                        </svg></div>
                     <div class="mush-info">
-                        <div class="mush-primary">Alarma</div>
-                        <div class="mush-secondary" id="state-alarm">Cargando...</div>
+                        <div class="mush-primary">Sirenas</div>
+                        <div class="mush-secondary" id="state-sirena">En silencio</div>
                     </div>
                 </div>
             </div>
 
-            <!-- ARENERO Y REINICIAR -->
-            <div class="grid-2-col" style="margin-bottom: 12px;">
-                <div class="card">
-                    <div class="mush-row">
-                        <div class="mush-icon" style="color:#2196f3; background: rgba(33, 150, 243, 0.15);"><svg
-                                class="icon">
-                                <use xlink:href="#icon-cat" href="#icon-cat"></use>
-                            </svg></div>
-                        <div class="mush-info">
-                            <div class="mush-primary">Arenero</div>
-                            <div class="mush-secondary" id="val-arenero">-- uso(s)</div>
-                        </div>
+            <div class="card card-clickable" id="card-abrir-puerta"
+                style="padding: 6px 10px;"
+                onclick="toggleEntityWithConfirm('script.abrir_puerta', '¿Deseas abrir la puerta principal?')">
+                <div class="mush-row" style="align-items: center;">
+                    <!-- ID añadido aquí -->
+                    <div class="mush-icon" id="icon-abrir-puerta" style="width: 36px; height: 36px;"><svg class="icon">
+                            <use xlink:href="#icon-door-open" href="#icon-door-open"></use>
+                        </svg></div>
+                    <div class="mush-info">
+                        <div class="mush-primary">Abrir puerta</div>
+                        <div class="mush-secondary" id="state-abrir-puerta">Sin ejecutar</div>
                     </div>
                 </div>
-                <div class="card card-clickable"
-                    style="display: flex; align-items: center; justify-content: center; padding: 0;"
-                    onclick="resetAreneroCounter()">
-                    <button class="btn-action"
-                        style="width: 100%; height: 100%; font-weight: bold; border: none; background: transparent;">
-                        <svg class="icon">
-                            <use xlink:href="#icon-archive-refresh-outline" href="#icon-archive-refresh-outline"></use>
-                        </svg> Reiniciar contador
-                    </button>
+            </div>
+        </div>
+
+        <!-- PANEL DE ALARMA -->
+        <div class="card card-clickable" id="card-alarm" onclick="handleAlarmClick()" style="padding: 6px 10px; margin-bottom: 14px;">
+            <div class="mush-row" style="align-items: center;">
+                <div class="mush-icon" id="icon-alarm" style="width: 36px; height: 36px;">
+                    <svg class="icon">
+                        <use xlink:href="#icon-shield-home" href="#icon-shield-home" id="use-alarm"></use>
+                    </svg>
+                </div>
+                <div class="mush-info">
+                    <div class="mush-primary">Alarma</div>
+                    <div class="mush-secondary" id="state-alarm">Cargando...</div>
                 </div>
             </div>
+        </div>
+
+        <!-- ARENERO Y REINICIAR -->
+        <div class="grid-2-col" style="margin-bottom: 12px;">
+            <div class="card" style="padding: 6px 10px;">
+                <div class="mush-row" style="align-items: center;">
+                    <div class="mush-icon" style="width: 36px; height: 36px; color:#2196f3; background: rgba(33, 150, 243, 0.15);"><svg
+                            class="icon">
+                            <use xlink:href="#icon-cat" href="#icon-cat"></use>
+                        </svg></div>
+                    <div class="mush-info">
+                        <div class="mush-primary">Arenero</div>
+                        <div class="mush-secondary" id="val-arenero">-- uso(s)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-clickable"
+                style="display: flex; align-items: center; justify-content: center; padding: 4px 10px;"
+                onclick="resetAreneroCounter()">
+                <button class="btn-action"
+                    style="width: 100%; height: 100%; font-weight: bold; border: none; background: transparent; padding: 4px 0;">
+                    <svg class="icon">
+                        <use xlink:href="#icon-archive-refresh-outline" href="#icon-archive-refresh-outline"></use>
+                    </svg> Reiniciar contador
+                </button>
+            </div>
+        </div>
 
             <!-- MOD CARD: ENTIDADES DISTRIBUIDAS -->
             <div class="card-mod-entidades">
@@ -3988,7 +3990,7 @@
             }
             if (entityId === 'sensor.ipad_espacio') {
                 var val = parseFloat(state);
-                return isNaN(val) ? state : val.toFixed(1) + ' GB';
+                return isNaN(val) ? state : val.toFixed(1) + ' GiB';
             }
             if (entityId === 'sensor.ipad_load') {
                 var val = parseFloat(state);
@@ -4230,7 +4232,7 @@
         }
 
         var batteryPalette = [
-            '#7f0000', '#b71c1c', '#d32f2f', '#f44336', '#ff5722', '#ff8a65', '#ff9800', '#ffb74d',
+            '#b71c1c', '#c62828', '#d32f2f', '#f44336', '#ff5722', '#ff7043', '#ff9800', '#ffb74d',
             '#ffcc80', '#fff59d', '#dce775', '#aed581', '#81c784', '#4caf50', '#388e3c', '#2e7d32', '#1b5e20'
         ];
 
