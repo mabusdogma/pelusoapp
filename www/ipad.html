@@ -1249,6 +1249,24 @@
         <symbol id="icon-play-pause" viewBox="0 0 24 24">
             <path fill="currentColor" d="M3,5V19L11,12M13,19H16V5H13M18,5V19H21V5" />
         </symbol>
+        <symbol id="icon-music-circle-outline" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12,2C17.52,2 22,6.48 22,12C22,17.52 17.52,22 12,22C6.48,22 2,17.52 2,12C2,6.48 6.48,2 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M10,8V14.17C9.72,14.06 9.37,14 9,14C7.34,14 6,15.34 6,17C6,18.66 7.34,20 9,20C10.66,20 12,18.66 12,17V10H15V8H10Z" />
+        </symbol>
+        <symbol id="icon-skip-previous" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M6,6H8V18H6M18,6L9.5,12L18,18V6Z" />
+        </symbol>
+        <symbol id="icon-play" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M8,5.14V18.86L19,12L8,5.14Z" />
+        </symbol>
+        <symbol id="icon-pause" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
+        </symbol>
+        <symbol id="icon-skip-next" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M16,18H18V6H16M6,18L14.5,12L6,6V18Z" />
+        </symbol>
+        <symbol id="icon-close-circle-outline" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M8.41,7L12,10.59L15.59,7L17,8.41L13.41,12L17,15.59L15.59,17L12,13.41L8.41,17L7,15.59L10.59,12L7,8.41L8.41,7Z" />
+        </symbol>
         <symbol id="icon-stop" viewBox="0 0 24 24">
             <path fill="currentColor" d="M18,18H6V6H18V18Z" />
         </symbol>
@@ -1473,6 +1491,43 @@
                         <div class="chip-mini" id="chip-script.5_1_vol_2" onclick="toggleEntity('script.5_1_vol_2')">
                             <svg class="icon">
                                 <use xlink:href="#icon-volume-plus" href="#icon-volume-plus"></use>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="chip-mini-grid">
+                        <div class="chip-mini" onclick="callService('script', 'ipad_musica', { accion: 'open' })">
+                            <svg class="icon">
+                                <use xlink:href="#icon-music-circle-outline" href="#icon-music-circle-outline"></use>
+                            </svg> music
+                        </div>
+                        <div class="chip-mini" onclick="callService('script', 'ipad_musica', { accion: 'prev' })">
+                            <svg class="icon">
+                                <use xlink:href="#icon-skip-previous" href="#icon-skip-previous"></use>
+                            </svg>
+                        </div>
+                        <div class="chip-mini" onclick="callService('script', 'ipad_musica', { accion: 'play' })">
+                            <svg class="icon">
+                                <use xlink:href="#icon-play" href="#icon-play"></use>
+                            </svg>
+                        </div>
+                        <div class="chip-mini" onclick="callService('script', 'ipad_musica', { accion: 'pause' })">
+                            <svg class="icon">
+                                <use xlink:href="#icon-pause" href="#icon-pause"></use>
+                            </svg>
+                        </div>
+                        <div class="chip-mini" onclick="callService('script', 'ipad_musica', { accion: 'toggle' })">
+                            <svg class="icon">
+                                <use xlink:href="#icon-play-pause" href="#icon-play-pause"></use>
+                            </svg>
+                        </div>
+                        <div class="chip-mini" onclick="callService('script', 'ipad_musica', { accion: 'next' })">
+                            <svg class="icon">
+                                <use xlink:href="#icon-skip-next" href="#icon-skip-next"></use>
+                            </svg>
+                        </div>
+                        <div class="chip-mini" onclick="callService('script', 'ipad_musica', { accion: 'close' })">
+                            <svg class="icon">
+                                <use xlink:href="#icon-close-circle-outline" href="#icon-close-circle-outline"></use>
                             </svg>
                         </div>
                     </div>
