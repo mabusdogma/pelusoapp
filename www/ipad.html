@@ -5388,6 +5388,25 @@
             if (modalEl) modalEl.style.display = 'none';
         }
 
+        function callService(domain, service, serviceData, targetEntityId) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                console.warn("WebSocket no conectado.");
+                return;
+            }
+            var payload = {
+                type: 'call_service',
+                domain: domain,
+                service: service
+            };
+            if (serviceData) {
+                payload.service_data = serviceData;
+            }
+            if (targetEntityId) {
+                payload.target = { entity_id: targetEntityId };
+            }
+            sendWS(payload);
+        }
+
         function toggleEntity(entityId) {
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
             var domain = entityId.split('.')[0];
@@ -5398,6 +5417,7 @@
             } else if (domain === 'button') {
                 service = 'press';
             }
+            
             var targetDomain = domain;
             if (['script', 'light', 'switch', 'fan', 'input_boolean', 'automation', 'climate', 'button'].indexOf(domain) === -1) {
                 targetDomain = 'homeassistant';
