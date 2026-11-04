@@ -84,38 +84,6 @@ jobs:
 
           cd theos_project
 
-          # 1. Makefile de Theos nativo para macOS (incluyendo la referencia al Info.plist)
-          cat << 'EOF' > Makefile
-          THEOS_DEVICE_IP = localhost
-          ARCHS = arm64
-          TARGET = iphone:clang:latest:12.0
-
-          APPLICATION_NAME = PelusoApp
-          PelusoApp_FILES = main.mm
-          PelusoApp_FRAMEWORKS = UIKit Foundation
-          PelusoApp_INFO_PLIST = Info.plist
-          
-          # Ignorar advertencia de UIWebView para iOS 12
-          ADDITIONAL_CFLAGS = -Wno-error=deprecated-declarations
-          ADDITIONAL_OBJCFLAGS = -Wno-error=deprecated-declarations
-
-          include $(THEOS)/makefiles/common.mk
-          include $(THEOS)/makefiles/application.mk
-          EOF
-
-          # 2. Archivo control de Debian
-          cat << 'EOF' > control
-          Package: com.peluso.ipadapp
-          Name: PelusoApp
-          Version: 2.0.9
-          Architecture: iphoneos-arm
-          Description: PelusoApp Home Assistant Dashboard for iOS 12
-          Maintainer: Peluso <admin@peluso.local>
-          Author: Peluso
-          Section: Utilities
-          Depends: mobilesubstrate, uikittools
-          EOF
-
           # 3. Info.plist con CFBundleIcons optimizado para iOS 12 y SpringBoard
           cat << 'EOF' > Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
@@ -162,6 +130,41 @@ jobs:
               </array>
           </dict>
           </plist>
+          EOF
+
+          # 1. Makefile de Theos nativo para macOS (con regla forzada after-stage para asegurar el Info.plist)
+          cat << 'EOF' > Makefile
+          THEOS_DEVICE_IP = localhost
+          ARCHS = arm64
+          TARGET = iphone:clang:latest:12.0
+
+          APPLICATION_NAME = PelusoApp
+          PelusoApp_FILES = main.mm
+          PelusoApp_FRAMEWORKS = UIKit Foundation
+          PelusoApp_INFO_PLIST = Info.plist
+          
+          # Ignorar advertencia de UIWebView para iOS 12
+          ADDITIONAL_CFLAGS = -Wno-error=deprecated-declarations
+          ADDITIONAL_OBJCFLAGS = -Wno-error=deprecated-declarations
+
+          include $(THEOS)/makefiles/common.mk
+          include $(THEOS)/makefiles/application.mk
+
+          after-stage::
+          	cp Info.plist $(THEOS_STAGING_DIR)/Applications/PelusoApp.app/Info.plist
+          EOF
+
+          # 2. Archivo control de Debian
+          cat << 'EOF' > control
+          Package: com.peluso.ipadapp
+          Name: PelusoApp
+          Version: 2.0.9
+          Architecture: iphoneos-arm
+          Description: PelusoApp Home Assistant Dashboard for iOS 12
+          Maintainer: Peluso <admin@peluso.local>
+          Author: Peluso
+          Section: Utilities
+          Depends: mobilesubstrate, uikittools
           EOF
 
           # 4. Código fuente Objective-C
