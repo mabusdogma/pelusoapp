@@ -49,27 +49,32 @@ jobs:
           python3 version_script.py
           rm version_script.py
 
-      - name: Configurar Entorno Theos y SDK de iOS
+      - name: Configurar Entorno Theos, Toolchain y SDK de iOS
         run: |
-          sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git wget libxml2-utils
-          
-          # Limpiar instalaciones previas para evitar conflictos
+          sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git wget libxml2-utils llvm
+
+          # Idalus dagiti naglaon nga daan a folder
           rm -rf $HOME/theos
           
-          # Clonar Theos en el runner
+          # I-clone ti Theos
           git clone --recursive https://github.com/theos/theos.git $HOME/theos
           
-          # Limpiar y clonar SDKs oficiales de Theos
+          # I-clone dagiti SDKs
           rm -rf $HOME/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git $HOME/theos/sdks
 
-          # Instalar ldid manualmente para evitar errores en Ubuntu
+          # I-setup ti Linux Toolchain para iti Theos nga usaren ti clang ti system
+          mkdir -p $HOME/theos/toolchain/linux/iphone/bin
+          ln -sf $(which clang) $HOME/theos/toolchain/linux/iphone/bin/clang
+          ln -sf $(which clang++) $HOME/theos/toolchain/linux/iphone/bin/clang++
+          ln -sf $(which llvm-ar) $HOME/theos/toolchain/linux/iphone/bin/ar
+
+          # I-install ti ldid
           sudo wget -qO /usr/bin/ldid https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64 || \
           sudo wget -qO /usr/bin/ldid https://raw.githubusercontent.com/tihmstar/ldid/master/ldid || \
           sudo apt-get install -y ldid || true
           sudo chmod +x /usr/bin/ldid
 
-          # Configurar variables de entorno de Theos
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
           echo "$HOME/theos/bin" >> $GITHUB_PATH
 
@@ -77,7 +82,7 @@ jobs:
         run: |
           mkdir -p theos_project/Resources
           
-          # Copiar assets web a los recursos de Theos
+          # I-copy dagiti web assets
           cp www/index.html theos_project/Resources/index.html
           if [ -d "www/local" ]; then
             cp -r www/local theos_project/Resources/
@@ -86,7 +91,7 @@ jobs:
             cp -r local theos_project/Resources/
           fi
           
-          # Copiar icono si existe
+          # I-copy ti icon
           if [ -f "assets/icon.png" ]; then
             cp assets/icon.png theos_project/Resources/icon.png
           elif [ -f "icon.png" ]; then
@@ -95,7 +100,7 @@ jobs:
 
           cd theos_project
 
-          # 1. Makefile oficial de Theos usando 'latest' para iOS 12
+          # 1. Makefile ti Theos
           cat << 'EOF' > Makefile
           THEOS_DEVICE_IP = localhost
           ARCHS = arm64
@@ -109,7 +114,7 @@ jobs:
           include $(THEOS)/makefiles/application.mk
           EOF
 
-          # 2. Archivo control de Debian
+          # 2. Archivo control ti Debian
           cat << 'EOF' > control
           Package: com.peluso.ipadapp
           Name: PelusoApp
@@ -122,7 +127,7 @@ jobs:
           Depends: mobilesubstrate, uikittools
           EOF
 
-          # 3. Info.plist para iOS 12 y Activator
+          # 3. Info.plist para iti iOS 12 ken Activator
           cat << 'EOF' > Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -153,7 +158,7 @@ jobs:
           </plist>
           EOF
 
-          # 4. Código fuente Objective-C (Crea la app nativa y carga tu Home Assistant a pantalla completa)
+          # 4. Objective-C Code
           cat << 'EOF' > main.mm
           #import <UIKit/UIKit.h>
 
@@ -198,10 +203,10 @@ jobs:
           }
           EOF
 
-          # Compilar paquete .deb nativo usando Theos
+          # I-package ti .deb
           make package
 
-          # Copiar el resultado a la raíz para el artefacto
+          # I-copy ti paquete .deb
           cp packages/*.deb ../pelusoapp-ios.deb
           cd ..
 
