@@ -69,22 +69,20 @@ jobs:
           ln -sf $(which clang++) $HOME/theos/toolchain/linux/iphone/bin/clang++
           ln -sf $(which llvm-ar) $HOME/theos/toolchain/linux/iphone/bin/ar
 
-          # Descargar un lld64 / ld nativo compatible con Mach-O directamente
+          # Descargar lld64 / ld nativo compatible con Mach-O y darle permisos de ejecución
           sudo wget -qO /usr/bin/ld64.lld https://github.com/ProcursusTeam/llvm-project/releases/download/llvm-project-15.0.6-2/ld64.lld-linux_x86_64 || true
           
-          # Si no existe, usamos un enlace directo al enlazador de llvm o creamos un respaldo funcional
-          if [ ! -f /usr/bin/ld64.lld ]; then
+          if [ ! -f /usr/bin/ld64.lld ] || [ ! -s /usr/bin/ld64.lld ]; then
             sudo ln -sf $(which lld) /usr/bin/ld64.lld || sudo cp $(which clang) /usr/bin/ld64.lld
           fi
+          
+          # ¡CORRECCIÓN CLAVE!: Dar permisos de ejecución explícitos al enlazador
+          sudo chmod +x /usr/bin/ld64.lld
 
           # Crear script wrapper para ld apuntando al enlazador correcto
           cat << 'EOF' > $HOME/theos/toolchain/linux/iphone/bin/ld
           #!/bin/sh
-          if [ -f /usr/bin/ld64.lld ]; then
-              exec /usr/bin/ld64.lld "$@"
-          else
-              exec lld -flavor darwin "$@"
-          fi
+          exec /usr/bin/ld64.lld "$@"
           EOF
           chmod +x $HOME/theos/toolchain/linux/iphone/bin/ld
 
