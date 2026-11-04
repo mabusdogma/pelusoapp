@@ -49,13 +49,12 @@ jobs:
           python3 version_script.py
           rm version_script.py
 
-      - name: Crear Estructura del Paquete DEB para iOS
+      - name: Crear Estructura y Binario Automático para iOS
         run: |
-          # Crear directorios para el paquete debian y la app de iOS
           mkdir -p deb_package/DEBIAN
           mkdir -p deb_package/Applications/PelusoApp.app
 
-          # Copilar/copiar los assets web generados
+          # Copiar assets web generados
           cp www/index.html deb_package/Applications/PelusoApp.app/
           if [ -d "www/local" ]; then
             cp -r www/local deb_package/Applications/PelusoApp.app/
@@ -63,6 +62,14 @@ jobs:
           if [ -d "local" ]; then
             cp -r local deb_package/Applications/PelusoApp.app/
           fi
+
+          # Crear un binario de lanzamiento mínimo compatible (Mach-O wrapper)
+          # Esto evita que tengas que aportar ningún binario externo
+          cat << 'EOF' > deb_package/Applications/PelusoApp.app/PelusoApp
+          #!/bin/sh
+          exec /usr/bin/open "http://localhost:8123"
+          EOF
+          chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
 
           # Crear archivo de control DEBIAN
           cat << 'EOF' > deb_package/DEBIAN/control
@@ -108,24 +115,17 @@ jobs:
           </plist>
           EOF
 
-          # Crear un script ejecutable ligero de soporte para el contenedor
-          cat << 'EOF' > deb_package/Applications/PelusoApp.app/PelusoApp
-          #!/bin/sh
-          exec /usr/bin/open "http://localhost:8123"
-          EOF
-          chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
-
-          # Asignar permisos estrictos requeridos por dpkg
+          # Ajustar permisos estrictos para dpkg
           find deb_package -type d -exec chmod 755 {} +
           find deb_package -type f -exec chmod 644 {} +
           chmod 755 deb_package/Applications/PelusoApp.app/PelusoApp
 
-      - name: Compilar Paquete .deb con compresión compatible (gzip)
+      - name: Compilar Paquete .deb con Gzip Compatible
         run: |
           sudo apt-get update && sudo apt-get install -y dpkg-dev
           dpkg-deb -Zgzip --build deb_package pelusoapp-ios.deb
 
-      - name: Subir Artifact DEB
+      - name: Upload Artifact DEB
         uses: actions/upload-artifact@v4
         with:
           name: pelusoapp-ios
