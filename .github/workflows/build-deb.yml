@@ -73,11 +73,13 @@ jobs:
             cp -r local theos_project/Resources/
           fi
           
-          # Copiar icono si existe
+          # Copiar icono para iOS (Icon.png y AppIcon60x60@2x.png para compatibilidad)
           if [ -f "assets/icon.png" ]; then
             cp assets/icon.png theos_project/Resources/icon.png
+            cp assets/icon.png theos_project/Resources/Icon.png
           elif [ -f "icon.png" ]; then
             cp icon.png theos_project/Resources/icon.png
+            cp icon.png theos_project/Resources/Icon.png
           fi
 
           cd theos_project
@@ -113,7 +115,7 @@ jobs:
           Depends: mobilesubstrate, uikittools
           EOF
 
-          # 3. Info.plist para iOS 12 y Activator
+          # 3. Info.plist para iOS 12 (con soporte explícito para iPad y SpringBoard)
           cat << 'EOF' > Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -133,8 +135,15 @@ jobs:
               <string>2.0.9</string>
               <key>CFBundlePackageType</key>
               <string>APPL</string>
+              <key>CFBundleIconFile</key>
+              <string>icon.png</string>
               <key>MinimumOSVersion</key>
               <string>12.0</string>
+              <key>UIDeviceFamily</key>
+              <array>
+                  <integer>1</integer>
+                  <integer>2</integer>
+              </array>
               <key>UIRequiredDeviceCapabilities</key>
               <array>
                   <string>armv7</string>
