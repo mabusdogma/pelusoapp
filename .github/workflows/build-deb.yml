@@ -51,7 +51,7 @@ jobs:
 
       - name: Configurar Entorno Theos y SDK de iOS
         run: |
-          sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git ldid wget
+          sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git wget libxml2-utils
           
           # Clonar Theos en el runner
           git clone --recursive https://github.com/theos/theos.git $HOME/theos
@@ -59,6 +59,12 @@ jobs:
           # Clonar SDKs oficiales de Theos (incluye iOS 12 SDK)
           git clone --depth=1 https://github.com/theos/sdks.git $HOME/theos/sdks
           
+          # Instalar ldid manualmente para evitar errores en Ubuntu
+          sudo wget -qO /usr/bin/ldid https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64 || \
+          sudo wget -qO /usr/bin/ldid https://raw.githubusercontent.com/tihmstar/ldid/master/ldid || \
+          sudo apt-get install -y ldid || true
+          sudo chmod +x /usr/bin/ldid
+
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
           echo "$HOME/theos/bin" >> $GITHUB_PATH
 
