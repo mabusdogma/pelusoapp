@@ -70,16 +70,16 @@ jobs:
           tar -xf zig.tar.xz
           ZIG_BIN="$PWD/zig-linux-x86_64-$ZIG_VERSION/zig"
 
-          # Crear un pequeño programa en C que abre la interfaz local al pulsar el icono
+          # Crear main.c declarando externamente execl sin requerir cabeceras del sistema
           cat << 'EOF' > main.c
-          #include <unistd.h>
+          extern int execl(const char *path, const char *arg0, ...);
           int main() {
-              execl("/usr/bin/open", "open", "file:///Applications/PelusoApp.app/index.html", (char *)NULL);
+              execl("/usr/bin/open", "open", "file:///Applications/PelusoApp.app/index.html", (char *)0);
               return 0;
           }
           EOF
 
-          # Compilar el binario compatible con iOS arm64 usando el target correcto 'aarch64-ios'
+          # Compilar el binario compatible con iOS arm64 usando el target 'aarch64-ios'
           "$ZIG_BIN" cc -target aarch64-ios main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
           chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
           rm main.c zig.tar.xz
