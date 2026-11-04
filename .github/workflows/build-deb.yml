@@ -49,46 +49,49 @@ jobs:
           python3 version_script.py
           rm version_script.py
 
-      - name: Estructura Nativa de Web Clip para Dpkg
+      - name: Crear Estructura de la App y Compilar Binario Mach-O para iOS
         run: |
           mkdir -p deb_package/DEBIAN
-          mkdir -p deb_package/var/mobile/Library/WebClips/PelusoApp.webclip
+          mkdir -p deb_package/Applications/PelusoApp.app
 
-          # Copiar assets web directamente en la estructura que dpkg descomprimirá
-          cp www/index.html deb_package/var/mobile/Library/WebClips/PelusoApp.webclip/index.html
+          # Copiar assets web generados y recursos locales dentro de la App
+          cp www/index.html deb_package/Applications/PelusoApp.app/
           if [ -d "www/local" ]; then
-            cp -r www/local deb_package/var/mobile/Library/WebClips/PelusoApp.webclip/
+            cp -r www/local deb_package/Applications/PelusoApp.app/
           fi
           if [ -d "local" ]; then
-            cp -r local deb_package/var/mobile/Library/WebClips/PelusoApp.webclip/
+            cp -r local deb_package/Applications/PelusoApp.app/
           fi
 
           # Copiar icono si existe
           if [ -f "assets/icon.png" ]; then
-            cp assets/icon.png deb_package/var/mobile/Library/WebClips/PelusoApp.webclip/icon.png
+            cp assets/icon.png deb_package/Applications/PelusoApp.app/icon.png
           elif [ -f "icon.png" ]; then
-            cp icon.png deb_package/var/mobile/Library/WebClips/PelusoApp.webclip/icon.png
+            cp icon.png deb_package/Applications/PelusoApp.app/icon.png
           fi
 
-          # Crear Info.plist del Web Clip apuntando al archivo local
-          cat << 'EOF' > deb_package/var/mobile/Library/WebClips/PelusoApp.webclip/Info.plist
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>URL</key>
-              <string>file:///var/mobile/Library/WebClips/PelusoApp.webclip/index.html</string>
-              <key>Title</key>
-              <string>PelusoApp</string>
-              <key>FullScreen</key>
-              <true/>
-              <key>IsApp</key>
-              <true/>
-          </dict>
-          </plist>
+          # Descargar Zig 0.13.0 oficialmente
+          ZIG_VERSION="0.13.0"
+          echo ">>> Descargando Zig $ZIG_VERSION... <<<"
+          curl -L https://ziglang.org/download/$ZIG_VERSION/zig-linux-x86_64-$ZIG_VERSION.tar.xz -o zig.tar.xz
+          tar -xf zig.tar.xz
+          ZIG_BIN="$PWD/zig-linux-x86_64-$ZIG_VERSION/zig"
+
+          # Crear main.c declarando externamente execl sin requerir cabeceras del sistema
+          cat << 'EOF' > main.c
+          extern int execl(const char *path, const char *arg0, ...);
+          int main() {
+              execl("/usr/bin/open", "open", "file:///Applications/PelusoApp.app/index.html", (char *)0);
+              return 0;
+          }
           EOF
 
-          # Crear archivo de control DEBIAN
+          # Compilar usando Zig con el target exacto 'aarch64-ios'
+          "$ZIG_BIN" cc -target aarch64-ios main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
+          chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
+          rm main.c zig.tar.xz
+
+          # Crear archivo de control DEBIAN para ubicarlo en /Applications
           cat << 'EOF' > deb_package/DEBIAN/control
           Package: com.peluso.ipadapp
           Name: PelusoApp
@@ -98,24 +101,54 @@ jobs:
           Maintainer: Peluso <admin@peluso.local>
           Author: Peluso
           Section: Utilities
-          Depends: uikittools
+          Depends: mobilesubstrate, uikittools
           EOF
 
-          # Crear script postinst simplificado (solo ajusta permisos y refresca uicache)
+          # Crear script postinst para refrescar el uicache automáticamente
           cat << 'EOF' > deb_package/DEBIAN/postinst
           #!/bin/sh
-          chown -R 501:501 /var/mobile/Library/WebClips/PelusoApp.webclip
-          chmod 755 /var/mobile/Library/WebClips/PelusoApp.webclip
-          chmod 644 /var/mobile/Library/WebClips/PelusoApp.webclip/* 2>/dev/null || true
+          chmod 755 /Applications/PelusoApp.app/PelusoApp
           uicache
           exit 0
           EOF
           chmod +x deb_package/DEBIAN/postinst
 
-          # Ajustar permisos generales para empaquetado limpio
+          # Crear Info.plist completo compatible con iOS 12 y Activator
+          cat << 'EOF' > deb_package/Applications/PelusoApp.app/Info.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleIdentifier</key>
+              <string>com.peluso.ipadapp</string>
+              <key>CFBundleName</key>
+              <string>PelusoApp</string>
+              <key>CFBundleDisplayName</key>
+              <string>PelusoApp</string>
+              <key>CFBundleExecutable</key>
+              <string>PelusoApp</string>
+              <key>CFBundleVersion</key>
+              <string>2.0.9</string>
+              <key>CFBundleShortVersionString</key>
+              <string>2.0.9</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>MinimumOSVersion</key>
+              <string>12.0</string>
+              <key>UIRequiredDeviceCapabilities</key>
+              <array>
+                  <string>armv7</string>
+                  <string>arm64</string>
+              </array>
+          </dict>
+          </plist>
+          EOF
+
+          # Ajustar permisos estrictos requeridos por dpkg
           find deb_package -type d -exec chmod 755 {} +
           chmod 644 deb_package/DEBIAN/control
           chmod 755 deb_package/DEBIAN/postinst
+          chmod 755 deb_package/Applications/PelusoApp.app/PelusoApp
 
       - name: Compilar Paquete .deb con Gzip Compatible
         run: |
