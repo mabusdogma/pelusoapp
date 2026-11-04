@@ -83,18 +83,23 @@ jobs:
           Depends: uikittools
           EOF
 
-          # Crear script postinst para generar el Web Clip de manera segura durante la instalación
+          # Crear script postinst con manejo avanzado de permisos y bypass de sandbox para iOS 12
           cat << 'EOF' > deb_package/DEBIAN/postinst
           #!/bin/sh
           WEBCLIP_DIR="/var/mobile/Library/WebClips/PelusoApp.webclip"
-          mkdir -p "$WEBCLIP_DIR"
+
+          # Limpiar flags de sistema restrictivos si existen
+          chflags -R nouchg /var/mobile/Library/WebClips 2>/dev/null || true
+
+          # Crear directorio asegurando compatibilidad con el sandbox de iOS 12
+          mkdir -p "$WEBCLIP_DIR" || su mobile -c "mkdir -p '$WEBCLIP_DIR'"
 
           # Copiar icono si está disponible
           if [ -f "/usr/local/share/pelusoapp/icon.png" ]; then
-            cp /usr/local/share/pelusoapp/icon.png "$WEBCLIP_DIR/icon.png"
+            cp /usr/local/share/pelusoapp/icon.png "$WEBCLIP_DIR/icon.png" 2>/dev/null || su mobile -c "cp /usr/local/share/pelusoapp/icon.png '$WEBCLIP_DIR/icon.png'"
           fi
 
-          # Crear Info.plist del Web Clip apuntando a los archivos locales en el iPad
+          # Crear Info.plist del Web Clip
           cat << 'PLIST' > "$WEBCLIP_DIR/Info.plist"
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -112,10 +117,11 @@ jobs:
           </plist>
           PLIST
 
-          # Ajustar permisos para el usuario móvil de iOS (UID 501)
+          # Asignar propiedad estricta al usuario móvil de iOS (UID/GID 501)
           chown -R 501:501 "$WEBCLIP_DIR"
           chmod 755 "$WEBCLIP_DIR"
           chmod 644 "$WEBCLIP_DIR/Info.plist"
+          [ -f "$WEBCLIP_DIR/icon.png" ] && chmod 644 "$WEBCLIP_DIR/icon.png"
 
           # Refrescar caché del SpringBoard
           uicache
