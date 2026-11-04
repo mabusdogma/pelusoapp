@@ -169,7 +169,7 @@ jobs:
           </plist>
           EOF
 
-          # 4. Código fuente Objective-C
+          # 4. Código fuente Objective-C corregido
           cat << 'EOF' > main.mm
           #import <UIKit/UIKit.h>
 
@@ -185,7 +185,7 @@ jobs:
               
               NSString *path = [[NSBundle mainBundle] pathForResource:@"index" ofType:@"html"];
               if (!path) {
-                  path = `/Applications/PelusoApp.app/index.html`;
+                  path = @"/Applications/PelusoApp.app/index.html";
               }
               NSURL *url = [NSURL fileURLWithPath:path];
               [webView loadRequest:[NSURLRequest requestWithURL:url]];
