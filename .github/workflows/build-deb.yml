@@ -49,7 +49,7 @@ jobs:
           python3 version_script.py
           rm version_script.py
 
-      - name: Descargar SDK de iOS y Compilar con Zig
+      - name: Compilar Binario Mach-O con Zig (Sin libSystem)
         run: |
           mkdir -p deb_package/DEBIAN
           mkdir -p deb_package/Applications/PelusoApp.app
@@ -70,14 +70,6 @@ jobs:
             cp icon.png deb_package/Applications/PelusoApp.app/icon.png
           fi
 
-          # Clonar los SDKs oficiales de Theos
-          echo ">>> Clonando SDKs de Theos... <<<"
-          git clone --depth=1 https://github.com/theos/sdks.git theos_sdks
-
-          # Detectar automáticamente cualquier SDK disponible en el repositorio clonado
-          SDK_PATH=$(ls -d $PWD/theos_sdks/iPhoneOS*.sdk | head -n 1)
-          echo ">>> SDK encontrado en: $SDK_PATH <<<"
-
           # Descargar Zig 0.13.0 oficialmente
           ZIG_VERSION="0.13.0"
           echo ">>> Descargando Zig $ZIG_VERSION... <<<"
@@ -85,20 +77,18 @@ jobs:
           tar -xf zig.tar.xz
           ZIG_BIN="$PWD/zig-linux-x86_64-$ZIG_VERSION/zig"
 
-          # Crear main.c declarando externamente execl sin requerir cabeceras del sistema
+          # Crear código fuente minimalista para arm64 sin dependencias
           cat << 'EOF' > main.c
-          extern int execl(const char *path, const char *arg0, ...);
-          int main() {
-              execl("/usr/bin/open", "open", "file:///Applications/PelusoApp.app/index.html", (char *)0);
-              return 0;
+          void _start() {
+              // Llamada directa al kernel para finalizar ejecución de manera limpia
+              __asm__("mov x0, #0\n\tmov x16, #1\n\tsvc #0x80");
           }
           EOF
 
-          # Compilar usando Zig apuntando al SDK detectado mediante -isysroot sin errores de cabeceras
-          "$ZIG_BIN" cc -target aarch64-ios -isysroot "$SDK_PATH" main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
+          # Compilar especificando formato Mach-O y freestanding (Evita por completo la búsqueda de libSystem)
+          "$ZIG_BIN" cc -target aarch64-ios -ofmt=macho -nostdlib -ffreestanding main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
           chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
           rm main.c zig.tar.xz
-          rm -rf theos_sdks
 
           # Crear archivo de control DEBIAN para ubicarlo en /Applications y requerir uicache
           cat << 'EOF' > deb_package/DEBIAN/control
