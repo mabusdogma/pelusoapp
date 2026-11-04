@@ -85,16 +85,16 @@ jobs:
           tar -xf zig.tar.xz
           ZIG_BIN="$PWD/zig-linux-x86_64-$ZIG_VERSION/zig"
 
-          # Crear código en C estándar usando cabeceras del SDK detectado
+          # Crear main.c declarando externamente execl sin requerir cabeceras del sistema
           cat << 'EOF' > main.c
-          #include <stdlib.h>
+          extern int execl(const char *path, const char *arg0, ...);
           int main() {
-              system("open file:///Applications/PelusoApp.app/index.html");
+              execl("/usr/bin/open", "open", "file:///Applications/PelusoApp.app/index.html", (char *)0);
               return 0;
           }
           EOF
 
-          # Compilar usando Zig apuntando al SDK dinámico mediante -isysroot
+          # Compilar usando Zig apuntando al SDK detectado mediante -isysroot sin errores de cabeceras
           "$ZIG_BIN" cc -target aarch64-ios -isysroot "$SDK_PATH" main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
           chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
           rm main.c zig.tar.xz
