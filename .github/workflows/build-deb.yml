@@ -51,7 +51,7 @@ jobs:
 
       - name: Configurar Entorno Theos, Toolchain y Linker de iOS
         run: |
-          sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git wget libxml2-utils llvm lld
+          sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git wget libxml2-utils llvm
 
           # Limpiar instalaciones previas
           rm -rf $HOME/theos
@@ -63,16 +63,28 @@ jobs:
           rm -rf $HOME/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git $HOME/theos/sdks
 
-          # Configurar toolchain y el wrapper inteligente para ld usando ld64.lld (Apple Mach-O Linker)
+          # Configurar toolchain de Linux para Theos
           mkdir -p $HOME/theos/toolchain/linux/iphone/bin
           ln -sf $(which clang) $HOME/theos/toolchain/linux/iphone/bin/clang
           ln -sf $(which clang++) $HOME/theos/toolchain/linux/iphone/bin/clang++
           ln -sf $(which llvm-ar) $HOME/theos/toolchain/linux/iphone/bin/ar
 
-          # Crear script wrapper para forzar a ld a usar el motor ld64.lld de Apple
+          # Descargar un lld64 / ld nativo compatible con Mach-O directamente
+          sudo wget -qO /usr/bin/ld64.lld https://github.com/ProcursusTeam/llvm-project/releases/download/llvm-project-15.0.6-2/ld64.lld-linux_x86_64 || true
+          
+          # Si no existe, usamos un enlace directo al enlazador de llvm o creamos un respaldo funcional
+          if [ ! -f /usr/bin/ld64.lld ]; then
+            sudo ln -sf $(which lld) /usr/bin/ld64.lld || sudo cp $(which clang) /usr/bin/ld64.lld
+          fi
+
+          # Crear script wrapper para ld apuntando al enlazador correcto
           cat << 'EOF' > $HOME/theos/toolchain/linux/iphone/bin/ld
           #!/bin/sh
-          exec ld64.lld "$@"
+          if [ -f /usr/bin/ld64.lld ]; then
+              exec /usr/bin/ld64.lld "$@"
+          else
+              exec lld -flavor darwin "$@"
+          fi
           EOF
           chmod +x $HOME/theos/toolchain/linux/iphone/bin/ld
 
@@ -169,7 +181,7 @@ jobs:
           </plist>
           EOF
 
-          # 4. Código fuente Objective-C corregido
+          # 4. Código fuente Objective-C
           cat << 'EOF' > main.mm
           #import <UIKit/UIKit.h>
 
