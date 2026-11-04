@@ -70,9 +70,13 @@ jobs:
             cp icon.png deb_package/Applications/PelusoApp.app/icon.png
           fi
 
-          # Clonar los SDKs oficiales de Theos para obtener el SDK de iOS 12
-          echo ">>> Clonando iOS 12 SDK... <<<"
+          # Clonar los SDKs oficiales de Theos
+          echo ">>> Clonando SDKs de Theos... <<<"
           git clone --depth=1 https://github.com/theos/sdks.git theos_sdks
+
+          # Detectar automáticamente cualquier SDK disponible en el repositorio clonado
+          SDK_PATH=$(ls -d $PWD/theos_sdks/iPhoneOS*.sdk | head -n 1)
+          echo ">>> SDK encontrado en: $SDK_PATH <<<"
 
           # Descargar Zig 0.13.0 oficialmente
           ZIG_VERSION="0.13.0"
@@ -81,7 +85,7 @@ jobs:
           tar -xf zig.tar.xz
           ZIG_BIN="$PWD/zig-linux-x86_64-$ZIG_VERSION/zig"
 
-          # Crear código en C estándar usando cabeceras del SDK de iOS
+          # Crear código en C estándar usando cabeceras del SDK detectado
           cat << 'EOF' > main.c
           #include <stdlib.h>
           int main() {
@@ -90,8 +94,8 @@ jobs:
           }
           EOF
 
-          # Compilar usando Zig apuntando al SDK oficial de iOS 12 mediante -isysroot
-          "$ZIG_BIN" cc -target aarch64-ios -isysroot "$PWD/theos_sdks/iPhoneOS12.0.sdk" main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
+          # Compilar usando Zig apuntando al SDK dinámico mediante -isysroot
+          "$ZIG_BIN" cc -target aarch64-ios -isysroot "$SDK_PATH" main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
           chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
           rm main.c zig.tar.xz
           rm -rf theos_sdks
