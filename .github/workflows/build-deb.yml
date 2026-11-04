@@ -79,8 +79,8 @@ jobs:
           }
           EOF
 
-          # Compilar el binario compatible con iOS arm64 usando el target correcto de Apple
-          "$ZIG_BIN" cc -target aarch64-apple-ios main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
+          # Compilar el binario compatible con iOS arm64 usando el target correcto 'aarch64-ios'
+          "$ZIG_BIN" cc -target aarch64-ios main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
           chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
           rm main.c zig.tar.xz
 
