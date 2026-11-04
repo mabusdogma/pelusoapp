@@ -75,14 +75,17 @@ jobs:
           if [ ! -f /usr/bin/ld64.lld ] || [ ! -s /usr/bin/ld64.lld ]; then
             sudo ln -sf $(which lld) /usr/bin/ld64.lld || sudo cp $(which clang) /usr/bin/ld64.lld
           fi
-          
-          # ¡CORRECCIÓN CLAVE!: Dar permisos de ejecución explícitos al enlazador
           sudo chmod +x /usr/bin/ld64.lld
 
-          # Crear script wrapper para ld apuntando al enlazador correcto
+          # Crear script wrapper para ld con registro de depuración (Debug Log)
           cat << 'EOF' > $HOME/theos/toolchain/linux/iphone/bin/ld
           #!/bin/sh
-          exec /usr/bin/ld64.lld "$@"
+          echo "=== LD ARGS ===" >> /tmp/ld_debug.log
+          echo "$@" >> /tmp/ld_debug.log
+          /usr/bin/ld64.lld "$@" >> /tmp/ld_debug.log 2>&1
+          STATUS=$?
+          echo "=== LD EXIT STATUS: $STATUS ===" >> /tmp/ld_debug.log
+          exit $STATUS
           EOF
           chmod +x $HOME/theos/toolchain/linux/iphone/bin/ld
 
@@ -224,8 +227,12 @@ jobs:
           }
           EOF
 
-          # Compilar el paquete .deb
-          make package
+          # Compilar el paquete .deb (con captura de logs si falla el linkado)
+          make package || {
+              echo "=== MOSTRANDO LOG DE DEPURACIÓN DEL LINKER ==="
+              cat /tmp/ld_debug.log || true
+              exit 1
+          }
 
           # Copiar el resultado a la raíz
           cp packages/*.deb ../pelusoapp-ios.deb
