@@ -120,10 +120,10 @@ jobs:
           find deb_package -type f -exec chmod 644 {} +
           chmod 755 deb_package/Applications/PelusoApp.app/PelusoApp
 
-      - name: Compilar Paquete .deb
+      - name: Compilar Paquete .deb con compresión compatible (gzip)
         run: |
           sudo apt-get update && sudo apt-get install -y dpkg-dev
-          dpkg-deb --build deb_package pelusoapp-ios.deb
+          dpkg-deb -Zgzip --build deb_package pelusoapp-ios.deb
 
       - name: Subir Artifact DEB
         uses: actions/upload-artifact@v4
