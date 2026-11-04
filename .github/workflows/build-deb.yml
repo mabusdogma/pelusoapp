@@ -49,35 +49,26 @@ jobs:
           python3 version_script.py
           rm version_script.py
 
-      - name: Crear Estructura Web Clip para iOS 12
+      - name: Crear Estructura Segura para iOS 12
         run: |
           mkdir -p deb_package/DEBIAN
-          mkdir -p deb_package/var/mobile/Library/WebClips/PelusoApp.webclip
+          mkdir -p deb_package/usr/local/share/pelusoapp
 
-          # Copiar el icono si existe en la raíz o assets
-          if [ -f "assets/icon.png" ]; then
-            cp assets/icon.png deb_package/var/mobile/Library/WebClips/PelusoApp.webclip/icon.png
-          elif [ -f "icon.png" ]; then
-            cp icon.png deb_package/var/mobile/Library/WebClips/PelusoApp.webclip/icon.png
+          # Copiar assets web generados a una ruta segura del sistema
+          cp www/index.html deb_package/usr/local/share/pelusoapp/
+          if [ -d "www/local" ]; then
+            cp -r www/local deb_package/usr/local/share/pelusoapp/
+          fi
+          if [ -d "local" ]; then
+            cp -r local deb_package/usr/local/share/pelusoapp/
           fi
 
-          # Crear el Info.plist nativo del Web Clip (Apunta a tu Home Assistant o servidor local)
-          cat << 'EOF' > deb_package/var/mobile/Library/WebClips/PelusoApp.webclip/Info.plist
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>URL</key>
-              <string>http://192.168.1.100:8123</string>
-              <key>Title</key>
-              <string>PelusoApp</string>
-              <key>FullScreen</key>
-              <true/>
-              <key>IsApp</key>
-              <true/>
-          </dict>
-          </plist>
-          EOF
+          # Copiar icono si existe
+          if [ -f "assets/icon.png" ]; then
+            cp assets/icon.png deb_package/usr/local/share/pelusoapp/icon.png
+          elif [ -f "icon.png" ]; then
+            cp icon.png deb_package/usr/local/share/pelusoapp/icon.png
+          fi
 
           # Crear archivo de control DEBIAN
           cat << 'EOF' > deb_package/DEBIAN/control
@@ -92,11 +83,41 @@ jobs:
           Depends: uikittools
           EOF
 
-          # Crear script postinst para ajustar permisos de usuario móvil y refrescar uicache
+          # Crear script postinst para generar el Web Clip de manera segura durante la instalación
           cat << 'EOF' > deb_package/DEBIAN/postinst
           #!/bin/sh
-          chown -R 501:501 /var/mobile/Library/WebClips/PelusoApp.webclip
-          chmod 755 /var/mobile/Library/WebClips/PelusoApp.webclip
+          WEBCLIP_DIR="/var/mobile/Library/WebClips/PelusoApp.webclip"
+          mkdir -p "$WEBCLIP_DIR"
+
+          # Copiar icono si está disponible
+          if [ -f "/usr/local/share/pelusoapp/icon.png" ]; then
+            cp /usr/local/share/pelusoapp/icon.png "$WEBCLIP_DIR/icon.png"
+          fi
+
+          # Crear Info.plist del Web Clip apuntando a los archivos locales en el iPad
+          cat << 'PLIST' > "$WEBCLIP_DIR/Info.plist"
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>URL</key>
+              <string>file:///usr/local/share/pelusoapp/index.html</string>
+              <key>Title</key>
+              <string>PelusoApp</string>
+              <key>FullScreen</key>
+              <true/>
+              <key>IsApp</key>
+              <true/>
+          </dict>
+          </plist>
+          PLIST
+
+          # Ajustar permisos para el usuario móvil de iOS (UID 501)
+          chown -R 501:501 "$WEBCLIP_DIR"
+          chmod 755 "$WEBCLIP_DIR"
+          chmod 644 "$WEBCLIP_DIR/Info.plist"
+
+          # Refrescar caché del SpringBoard
           uicache
           exit 0
           EOF
