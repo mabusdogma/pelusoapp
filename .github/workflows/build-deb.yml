@@ -53,10 +53,14 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git wget libxml2-utils
           
+          # Limpiar instalaciones previas para evitar conflictos de directorios
+          rm -rf $HOME/theos
+          
           # Clonar Theos en el runner
           git clone --recursive https://github.com/theos/theos.git $HOME/theos
           
-          # Clonar SDKs oficiales de Theos (incluye iOS 12 SDK)
+          # Limpiar y clonar SDKs oficiales de Theos
+          rm -rf $HOME/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git $HOME/theos/sdks
           
           # Instalar ldid manualmente para evitar errores en Ubuntu
