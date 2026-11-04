@@ -1,4 +1,4 @@
-name: Build iOS DEB Package
+name: Build iOS DEB Package with Theos
 
 on:
   push:
@@ -49,49 +49,57 @@ jobs:
           python3 version_script.py
           rm version_script.py
 
-      - name: Compilar Binario Mach-O con Zig (Sin libSystem)
+      - name: Configurar Entorno Theos y SDK de iOS
         run: |
-          mkdir -p deb_package/DEBIAN
-          mkdir -p deb_package/Applications/PelusoApp.app
+          sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git ldid wget
+          
+          # Clonar Theos en el runner
+          git clone --recursive https://github.com/theos/theos.git $HOME/theos
+          
+          # Clonar SDKs oficiales de Theos (incluye iOS 12 SDK)
+          git clone --depth=1 https://github.com/theos/sdks.git $HOME/theos/sdks
+          
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+          echo "$HOME/theos/bin" >> $GITHUB_PATH
 
-          # Copiar assets web generados y recursos locales dentro de la App
-          cp www/index.html deb_package/Applications/PelusoApp.app/
+      - name: Construir Proyecto Nativo con Theos
+        run: |
+          mkdir -p theos_project/Resources
+          
+          # Copiar assets web a los recursos de Theos
+          cp www/index.html theos_project/Resources/index.html
           if [ -d "www/local" ]; then
-            cp -r www/local deb_package/Applications/PelusoApp.app/
+            cp -r www/local theos_project/Resources/
           fi
           if [ -d "local" ]; then
-            cp -r local deb_package/Applications/PelusoApp.app/
+            cp -r local theos_project/Resources/
           fi
-
+          
           # Copiar icono si existe
           if [ -f "assets/icon.png" ]; then
-            cp assets/icon.png deb_package/Applications/PelusoApp.app/icon.png
+            cp assets/icon.png theos_project/Resources/icon.png
           elif [ -f "icon.png" ]; then
-            cp icon.png deb_package/Applications/PelusoApp.app/icon.png
+            cp icon.png theos_project/Resources/icon.png
           fi
 
-          # Descargar Zig 0.13.0 oficialmente
-          ZIG_VERSION="0.13.0"
-          echo ">>> Descargando Zig $ZIG_VERSION... <<<"
-          curl -L https://ziglang.org/download/$ZIG_VERSION/zig-linux-x86_64-$ZIG_VERSION.tar.xz -o zig.tar.xz
-          tar -xf zig.tar.xz
-          ZIG_BIN="$PWD/zig-linux-x86_64-$ZIG_VERSION/zig"
+          cd theos_project
 
-          # Crear código fuente minimalista para arm64 sin dependencias
-          cat << 'EOF' > main.c
-          void _start() {
-              // Llamada directa al kernel para finalizar ejecución de manera limpia
-              __asm__("mov x0, #0\n\tmov x16, #1\n\tsvc #0x80");
-          }
+          # 1. Makefile oficial de Theos para una App nativa
+          cat << 'EOF' > Makefile
+          THEOS_DEVICE_IP = localhost
+          ARCHS = arm64
+          TARGET = iphone:clang:12.0:12.0
+
+          APPLICATION_NAME = PelusoApp
+          PelusoApp_FILES = main.mm
+          PelusoApp_FRAMEWORKS = UIKit Foundation
+
+          include $(THEOS)/makefiles/common.mk
+          include $(THEOS)/makefiles/application.mk
           EOF
 
-          # Compilar especificando formato Mach-O y freestanding (Evita por completo la búsqueda de libSystem)
-          "$ZIG_BIN" cc -target aarch64-ios -ofmt=macho -nostdlib -ffreestanding main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
-          chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
-          rm main.c zig.tar.xz
-
-          # Crear archivo de control DEBIAN para ubicarlo en /Applications y requerir uicache
-          cat << 'EOF' > deb_package/DEBIAN/control
+          # 2. Archivo control de Debian
+          cat << 'EOF' > control
           Package: com.peluso.ipadapp
           Name: PelusoApp
           Version: 2.0.9
@@ -103,17 +111,8 @@ jobs:
           Depends: mobilesubstrate, uikittools
           EOF
 
-          # Crear script postinst para actualizar el uicache del SpringBoard
-          cat << 'EOF' > deb_package/DEBIAN/postinst
-          #!/bin/sh
-          chmod 755 /Applications/PelusoApp.app/PelusoApp
-          uicache
-          exit 0
-          EOF
-          chmod +x deb_package/DEBIAN/postinst
-
-          # Crear Info.plist completo compatible con iOS 12 y Activator
-          cat << 'EOF' > deb_package/Applications/PelusoApp.app/Info.plist
+          # 3. Info.plist para iOS 12 y Activator
+          cat << 'EOF' > Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -143,16 +142,57 @@ jobs:
           </plist>
           EOF
 
-          # Ajustar permisos estrictos requeridos por dpkg
-          find deb_package -type d -exec chmod 755 {} +
-          chmod 644 deb_package/DEBIAN/control
-          chmod 755 deb_package/DEBIAN/postinst
-          chmod 755 deb_package/Applications/PelusoApp.app/PelusoApp
+          # 4. Código fuente Objective-C (Crea la app nativa y carga tu Home Assistant a pantalla completa)
+          cat << 'EOF' > main.mm
+          #import <UIKit/UIKit.h>
 
-      - name: Compilar Paquete .deb con Gzip Compatible
-        run: |
-          sudo apt-get update && sudo apt-get install -y dpkg-dev
-          dpkg-deb -Zgzip --build deb_package pelusoapp-ios.deb
+          @interface AppViewController : UIViewController
+          @end
+
+          @implementation AppViewController
+          - (void)viewDidLoad {
+              [super viewDidLoad];
+              UIWebView *webView = [[UIWebView alloc] initWithFrame:self.view.bounds];
+              webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+              webView.scalesPageToFit = YES;
+              
+              NSString *path = [[NSBundle mainBundle] pathForResource:@"index" ofType:@"html"];
+              if (!path) {
+                  path = @"/Applications/PelusoApp.app/index.html";
+              }
+              NSURL *url = [NSURL fileURLWithPath:path];
+              [webView loadRequest:[NSURLRequest requestWithURL:url]];
+              [self.view addSubview:webView];
+          }
+          @end
+
+          @interface AppDelegate : UIResponder <UIApplicationDelegate>
+          @property (strong, nonatomic) UIWindow *window;
+          @end
+
+          @implementation AppDelegate
+          - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+              self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+              AppViewController *vc = [[AppViewController alloc] init];
+              self.window.rootViewController = vc;
+              [self.window makeKeyAndVisible];
+              return YES;
+          }
+          @end
+
+          int main(int argc, char *argv[]) {
+              @autoreleasepool {
+                  return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+              }
+          }
+          EOF
+
+          # Compilar paquete .deb nativo usando Theos
+          make package
+
+          # Copiar el resultado a la raíz para el artefacto
+          cp packages/*.deb ../pelusoapp-ios.deb
+          cd ..
 
       - name: Upload Artifact DEB
         uses: actions/upload-artifact@v4
