@@ -84,7 +84,7 @@ jobs:
 
           cd theos_project
 
-          # 1. Makefile de Theos nativo para macOS
+          # 1. Makefile de Theos nativo para macOS (incluyendo la referencia al Info.plist)
           cat << 'EOF' > Makefile
           THEOS_DEVICE_IP = localhost
           ARCHS = arm64
@@ -93,6 +93,7 @@ jobs:
           APPLICATION_NAME = PelusoApp
           PelusoApp_FILES = main.mm
           PelusoApp_FRAMEWORKS = UIKit Foundation
+          PelusoApp_INFO_PLIST = Info.plist
           
           # Ignorar advertencia de UIWebView para iOS 12
           ADDITIONAL_CFLAGS = -Wno-error=deprecated-declarations
