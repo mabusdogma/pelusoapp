@@ -115,7 +115,7 @@ jobs:
           Depends: mobilesubstrate, uikittools
           EOF
 
-          # 3. Info.plist para iOS 12 (con soporte explícito para iPad y SpringBoard)
+          # 3. Info.plist con CFBundleIcons optimizado para iOS 12 y SpringBoard
           cat << 'EOF' > Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -135,8 +135,6 @@ jobs:
               <string>2.0.9</string>
               <key>CFBundlePackageType</key>
               <string>APPL</string>
-              <key>CFBundleIconFile</key>
-              <string>icon.png</string>
               <key>MinimumOSVersion</key>
               <string>12.0</string>
               <key>UIDeviceFamily</key>
@@ -144,6 +142,18 @@ jobs:
                   <integer>1</integer>
                   <integer>2</integer>
               </array>
+              <key>CFBundleIcons</key>
+              <dict>
+                  <key>CFBundlePrimaryIcon</key>
+                  <dict>
+                      <key>CFBundleIconFiles</key>
+                      <array>
+                          <string>icon</string>
+                      </array>
+                      <key>UIPrerenderedIcon</key>
+                      <true/>
+                  </dict>
+              </dict>
               <key>UIRequiredDeviceCapabilities</key>
               <array>
                   <string>armv7</string>
