@@ -49,12 +49,12 @@ jobs:
           python3 version_script.py
           rm version_script.py
 
-      - name: Crear Estructura, Binario Mach-O y Scripts para iOS 12
+      - name: Crear Estructura de la App y Compilar Binario Mach-O
         run: |
           mkdir -p deb_package/DEBIAN
           mkdir -p deb_package/Applications/PelusoApp.app
 
-          # Copiar assets web generados
+          # Copiar assets web generados y recursos locales
           cp www/index.html deb_package/Applications/PelusoApp.app/
           if [ -d "www/local" ]; then
             cp -r www/local deb_package/Applications/PelusoApp.app/
@@ -63,26 +63,24 @@ jobs:
             cp -r local deb_package/Applications/PelusoApp.app/
           fi
 
-          # Generar un binario ejecutable Mach-O arm64 válido para iOS 12
-          # Usamos un stub binario liviano decodificado en base64 optimizado para lanzadores web
-          cat << 'EOF' > generate_binary.py
-          import base64
+          # Instalar Zig para compilar un binario Mach-O arm64 nativo y válido
+          sudo apt-get update && sudo apt-get install -y zig
 
-          # Minúsculo binario Mach-O arm64 stub precompilado que ejecuta el ciclo de eventos de la app
-          macho_base64 = "fQA4ANQAAAAAAABAAAAAAAAAAEAAAAAAAAAAQAAAAACAAAAAAAAAAAEAAAAFAAAAAAAAAAYAAAAJAAAAAAAAAAgAAAAUAAAAAQAAACwAAAACAAAAEAAAAAEAAABwAAAAAwAAACAAAAABAAAA8AAAAAQAAABAAAAAAQAAAEQAAAAFAAAASAAAAA== "
-          
-          # Nota: Si prefieres un script python que genere el contenedor de apertura por URL nativa de UIKit:
-          # Escribimos un binario ejecutable estándar de iOS compatible con arm64
-          # (Creamos un binario ejecutable minimalista compatible con el runtime de iOS 12)
-          with open("deb_package/Applications/PelusoApp.app/PelusoApp", "wb") as f:
-              # Cabecera Mach-O básica arm64 (MH_MAGIC_64) con comando de ejecución LC_LOAD_DYLINKER
-              f.write(b'\xcf\xfa\xed\xfe\x0c\x00\x00\x01\x00\x00\x00\x00\x02\x00\x00\x00\x06\x00\x00\x00\x58\x00\x00\x00\x85\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-          print(">>> Binario Mach-O generado con éxito <<<")
+          # Crear un pequeño programa en C que abre la interfaz local al pulsar el icono
+          cat << 'EOF' > main.c
+          #include <unistd.h>
+          int main() {
+              execl("/usr/bin/open", "open", "file:///Applications/PelusoApp.app/index.html", (char *)NULL);
+              return 0;
+          }
           EOF
-          python3 generate_binary.py
-          rm generate_binary.py
 
-          # Crear archivo de control DEBIAN optimizado para iOS 12 (Freya / Substitute)
+          # Compilar el binario compatible con iOS 12 arm64
+          zig cc -target aarch64-ios-12.0 main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
+          chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
+          rm main.c
+
+          # Crear archivo de control DEBIAN
           cat << 'EOF' > deb_package/DEBIAN/control
           Package: com.peluso.ipadapp
           Name: PelusoApp
@@ -95,7 +93,7 @@ jobs:
           Depends: mobilesubstrate, uikittools
           EOF
 
-          # Crear script postinst para refrescar el uicache del SpringBoard automáticamente
+          # Crear script postinst para refrescar el uicache automáticamente tras instalar
           cat << 'EOF' > deb_package/DEBIAN/postinst
           #!/bin/sh
           chmod 755 /Applications/PelusoApp.app/PelusoApp
@@ -104,7 +102,7 @@ jobs:
           EOF
           chmod +x deb_package/DEBIAN/postinst
 
-          # Crear Info.plist compatible con iOS 12.5.8 (iPad Air 1)
+          # Crear Info.plist compatible con iOS 12.5.8
           cat << 'EOF' > deb_package/Applications/PelusoApp.app/Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -135,7 +133,7 @@ jobs:
           </plist>
           EOF
 
-          # Ajustar permisos estrictos requeridos por dpkg y iOS
+          # Ajustar permisos estrictos para dpkg
           find deb_package -type d -exec chmod 755 {} +
           chmod 644 deb_package/DEBIAN/control
           chmod 755 deb_package/DEBIAN/postinst
@@ -143,7 +141,6 @@ jobs:
 
       - name: Compilar Paquete .deb con Gzip Compatible
         run: |
-          sudo apt-get update && sudo apt-get install -y dpkg-dev
           dpkg-deb -Zgzip --build deb_package pelusoapp-ios.deb
 
       - name: Upload Artifact DEB
