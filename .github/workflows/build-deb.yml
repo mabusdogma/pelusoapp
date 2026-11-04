@@ -169,7 +169,7 @@ jobs:
           Depends: mobilesubstrate, uikittools
           EOF
 
-          # 4. Código fuente Objective-C con fondo negro y barra de estado en modo claro (iconos blancos)
+          # 4. Código fuente Objective-C ocultando por completo la barra de estado
           cat << 'EOF' > main.mm
           #import <UIKit/UIKit.h>
 
@@ -194,8 +194,8 @@ jobs:
               [self.view addSubview:webView];
           }
 
-          - (UIStatusBarStyle)preferredStatusBarStyle {
-              return UIStatusBarStyleLightContent;
+          - (BOOL)prefersStatusBarHidden {
+              return YES;
           }
           @end
 
