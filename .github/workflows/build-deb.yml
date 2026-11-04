@@ -49,7 +49,7 @@ jobs:
           python3 version_script.py
           rm version_script.py
 
-      - name: Crear Estructura de la App y Compilar Binario Mach-O para iOS
+      - name: Descargar SDK de iOS y Compilar con Zig
         run: |
           mkdir -p deb_package/DEBIAN
           mkdir -p deb_package/Applications/PelusoApp.app
@@ -70,6 +70,10 @@ jobs:
             cp icon.png deb_package/Applications/PelusoApp.app/icon.png
           fi
 
+          # Clonar los SDKs oficiales de Theos para obtener el SDK de iOS 12
+          echo ">>> Clonando iOS 12 SDK... <<<"
+          git clone --depth=1 https://github.com/theos/sdks.git theos_sdks
+
           # Descargar Zig 0.13.0 oficialmente
           ZIG_VERSION="0.13.0"
           echo ">>> Descargando Zig $ZIG_VERSION... <<<"
@@ -77,21 +81,22 @@ jobs:
           tar -xf zig.tar.xz
           ZIG_BIN="$PWD/zig-linux-x86_64-$ZIG_VERSION/zig"
 
-          # Crear main.c declarando externamente execl sin requerir cabeceras del sistema
+          # Crear código en C estándar usando cabeceras del SDK de iOS
           cat << 'EOF' > main.c
-          extern int execl(const char *path, const char *arg0, ...);
+          #include <stdlib.h>
           int main() {
-              execl("/usr/bin/open", "open", "file:///Applications/PelusoApp.app/index.html", (char *)0);
+              system("open file:///Applications/PelusoApp.app/index.html");
               return 0;
           }
           EOF
 
-          # Compilar usando Zig con el target exacto 'aarch64-ios'
-          "$ZIG_BIN" cc -target aarch64-ios main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
+          # Compilar usando Zig apuntando al SDK oficial de iOS 12 mediante -isysroot
+          "$ZIG_BIN" cc -target aarch64-ios -isysroot "$PWD/theos_sdks/iPhoneOS12.0.sdk" main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
           chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
           rm main.c zig.tar.xz
+          rm -rf theos_sdks
 
-          # Crear archivo de control DEBIAN para ubicarlo en /Applications
+          # Crear archivo de control DEBIAN para ubicarlo en /Applications y requerir uicache
           cat << 'EOF' > deb_package/DEBIAN/control
           Package: com.peluso.ipadapp
           Name: PelusoApp
@@ -104,7 +109,7 @@ jobs:
           Depends: mobilesubstrate, uikittools
           EOF
 
-          # Crear script postinst para refrescar el uicache automáticamente
+          # Crear script postinst para actualizar el uicache del SpringBoard
           cat << 'EOF' > deb_package/DEBIAN/postinst
           #!/bin/sh
           chmod 755 /Applications/PelusoApp.app/PelusoApp
