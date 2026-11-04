@@ -63,17 +63,18 @@ jobs:
           rm -rf $HOME/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git $HOME/theos/sdks
 
-          # Configurar symlinks para el toolchain de Linux usando LLD (ld64.lld) para soporte Mach-O
+          # Configurar toolchain y el wrapper inteligente para ld usando ld64.lld (Apple Mach-O Linker)
           mkdir -p $HOME/theos/toolchain/linux/iphone/bin
           ln -sf $(which clang) $HOME/theos/toolchain/linux/iphone/bin/clang
           ln -sf $(which clang++) $HOME/theos/toolchain/linux/iphone/bin/clang++
           ln -sf $(which llvm-ar) $HOME/theos/toolchain/linux/iphone/bin/ar
-          
-          if [ -f /usr/bin/ld64.lld ]; then
-            ln -sf /usr/bin/ld64.lld $HOME/theos/toolchain/linux/iphone/bin/ld
-          elif [ -f /usr/bin/lld ]; then
-            ln -sf /usr/bin/lld $HOME/theos/toolchain/linux/iphone/bin/ld
-          fi
+
+          # Crear script wrapper para forzar a ld a usar el motor ld64.lld de Apple
+          cat << 'EOF' > $HOME/theos/toolchain/linux/iphone/bin/ld
+          #!/bin/sh
+          exec ld64.lld "$@"
+          EOF
+          chmod +x $HOME/theos/toolchain/linux/iphone/bin/ld
 
           # Instalar ldid manualmente
           sudo wget -qO /usr/bin/ldid https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64 || \
@@ -184,7 +185,7 @@ jobs:
               
               NSString *path = [[NSBundle mainBundle] pathForResource:@"index" ofType:@"html"];
               if (!path) {
-                  path = @"/Applications/PelusoApp.app/index.html";
+                  path = `/Applications/PelusoApp.app/index.html`;
               }
               NSURL *url = [NSURL fileURLWithPath:path];
               [webView loadRequest:[NSURLRequest requestWithURL:url]];
