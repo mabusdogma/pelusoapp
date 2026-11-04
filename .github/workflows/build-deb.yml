@@ -1,0 +1,132 @@
+name: Build iOS DEB Package
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Preparar Web Assets y Versionar HTML
+        run: |
+          cat << 'EOF' > version_script.py
+          import json, os
+
+          with open('package.json', 'r') as f:
+              data = json.load(f)
+          version_name = data.get('version', '1.0.0')
+          parts = version_name.split('.')
+          version_code = int(parts[0]) * 10000 + int(parts[1]) * 100 + int(parts[2])
+          
+          os.makedirs('www', exist_ok=True)
+          
+          source_path = 'ipad.html' if os.path.exists('ipad.html') else ('www/ipad.html' if os.path.exists('www/ipad.html') else 'www/index.html')
+          target_path = 'www/index.html'
+          
+          with open(source_path, 'r', encoding='utf-8') as f:
+              content = f.read()
+          
+          content = content.replace('__VERSION_PLACEHOLDER__', version_name)
+          content = content.replace('__VERSION_CODE_PLACEHOLDER__', str(version_code))
+          
+          with open(target_path, 'w', encoding='utf-8') as f:
+              f.write(content)
+          print(f'Versión {version_name} inyectada desde {source_path}')
+          EOF
+          python3 version_script.py
+          rm version_script.py
+
+      - name: Crear Estructura del Paquete DEB para iOS
+        run: |
+          # Crear directorios para el paquete debian y la app de iOS
+          mkdir -p deb_package/DEBIAN
+          mkdir -p deb_package/Applications/PelusoApp.app
+
+          # Copilar/copiar los assets web generados
+          cp www/index.html deb_package/Applications/PelusoApp.app/
+          if [ -d "www/local" ]; then
+            cp -r www/local deb_package/Applications/PelusoApp.app/
+          fi
+          if [ -d "local" ]; then
+            cp -r local deb_package/Applications/PelusoApp.app/
+          fi
+
+          # Crear archivo de control DEBIAN
+          cat << 'EOF' > deb_package/DEBIAN/control
+          Package: com.peluso.ipadapp
+          Name: PelusoApp
+          Version: 2.0.9
+          Architecture: iphoneos-arm
+          Description: PelusoApp Home Assistant Dashboard for iOS 12
+          Maintainer: Peluso <admin@peluso.local>
+          Author: Peluso
+          Section: Utilities
+          Depends: mobilesubstrate, uikittools
+          EOF
+
+          # Crear Info.plist compatible con iOS 12.5.8
+          cat << 'EOF' > deb_package/Applications/PelusoApp.app/Info.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleIdentifier</key>
+              <string>com.peluso.ipadapp</string>
+              <key>CFBundleName</key>
+              <string>PelusoApp</string>
+              <key>CFBundleDisplayName</key>
+              <string>PelusoApp</string>
+              <key>CFBundleExecutable</key>
+              <string>PelusoApp</string>
+              <key>CFBundleVersion</key>
+              <string>2.0.9</string>
+              <key>CFBundleShortVersionString</key>
+              <string>2.0.9</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>MinimumOSVersion</key>
+              <string>12.0</string>
+              <key>UIRequiredDeviceCapabilities</key>
+              <array>
+                  <string>armv7</string>
+                  <string>arm64</string>
+              </array>
+          </dict>
+          </plist>
+          EOF
+
+          # Crear un script ejecutable ligero de soporte para el contenedor
+          cat << 'EOF' > deb_package/Applications/PelusoApp.app/PelusoApp
+          #!/bin/sh
+          exec /usr/bin/open "http://localhost:8123"
+          EOF
+          chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
+
+          # Asignar permisos estrictos requeridos por dpkg
+          find deb_package -type d -exec chmod 755 {} +
+          find deb_package -type f -exec chmod 644 {} +
+          chmod 755 deb_package/Applications/PelusoApp.app/PelusoApp
+
+      - name: Compilar Paquete .deb
+        run: |
+          sudo apt-get update && sudo apt-get install -y dpkg-dev
+          dpkg-deb --build deb_package pelusoapp-ios.deb
+
+      - name: Subir Artifact DEB
+        uses: actions/upload-artifact@v4
+        with:
+          name: pelusoapp-ios
+          path: pelusoapp-ios.deb
