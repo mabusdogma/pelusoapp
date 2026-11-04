@@ -59,6 +59,10 @@ jobs:
           # Clonar Theos en el runner
           git clone --recursive https://github.com/theos/theos.git $HOME/theos
           
+          # Clonar el toolchain de Linux para Theos (soluciona el error de clang faltante)
+          mkdir -p $HOME/theos/toolchain/linux
+          git clone --depth=1 https://github.com/theos/toolchain-linux.git $HOME/theos/toolchain/linux/iphone
+          
           # Limpiar y clonar SDKs oficiales de Theos
           rm -rf $HOME/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git $HOME/theos/sdks
