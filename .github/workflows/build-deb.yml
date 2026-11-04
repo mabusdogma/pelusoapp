@@ -1,4 +1,4 @@
-name: Build iOS DEB Package with Theos
+name: Build iOS DEB Package with Theos (macOS Native)
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-deb:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout Repository
@@ -49,73 +49,13 @@ jobs:
           python3 version_script.py
           rm version_script.py
 
-      - name: Configurar Entorno Theos, Toolchain y Linker de iOS
+      - name: Configurar Theos y Herramientas en macOS
         run: |
-          sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git wget libxml2-utils llvm lld
+          # Instalar dpkg (para empaquetar .deb) y ldid (para firmar el binario)
+          brew install dpkg ldid
 
-          # Limpiar instalaciones previas
-          rm -rf $HOME/theos
-          
-          # Clonar Theos
+          # Clonar Theos de forma nativa
           git clone --recursive https://github.com/theos/theos.git $HOME/theos
-          
-          # Limpiar y clonar SDKs oficiales de Theos
-          rm -rf $HOME/theos/sdks
-          git clone --depth=1 https://github.com/theos/sdks.git $HOME/theos/sdks
-
-          # Configurar toolchain de Linux para Theos
-          mkdir -p $HOME/theos/toolchain/linux/iphone/bin
-          ln -sf $(which clang) $HOME/theos/toolchain/linux/iphone/bin/clang
-          ln -sf $(which clang++) $HOME/theos/toolchain/linux/iphone/bin/clang++
-          ln -sf $(which llvm-ar) $HOME/theos/toolchain/linux/iphone/bin/ar
-
-          # Descargar lld64 / ld nativo compatible con Mach-O y darle permisos de ejecución
-          sudo wget -qO /usr/bin/ld64.lld https://github.com/ProcursusTeam/llvm-project/releases/download/llvm-project-15.0.6-2/ld64.lld-linux_x86_64 || true
-          
-          if [ ! -f /usr/bin/ld64.lld ] || [ ! -s /usr/bin/ld64.lld ]; then
-            sudo ln -sf $(which lld) /usr/bin/ld64.lld || sudo cp $(which clang) /usr/bin/ld64.lld
-          fi
-          sudo chmod +x /usr/bin/ld64.lld
-
-          # Crear script wrapper inteligente para ld forzando el flavor darwin (-flavor darwin)
-          cat << 'EOF' > $HOME/theos/toolchain/linux/iphone/bin/ld
-          #!/bin/sh
-          OUTFILE=""
-          prev=""
-          for arg in "$@"; do
-              if [ "$prev" = "-o" ]; then
-                  OUTFILE="$arg"
-                  break
-              fi
-              prev="$arg"
-          done
-
-          if [ -n "$OUTFILE" ]; then
-              OUTDIR=$(dirname "$OUTFILE")
-              mkdir -p "$OUTDIR"
-          fi
-
-          echo "=== LD ARGS ===" > /tmp/ld_debug.log
-          echo "$@" >> /tmp/ld_debug.log
-          
-          # Forzar el uso del motor darwin en lld para que genere correctamente el binario Mach-O
-          /usr/bin/ld64.lld -flavor darwin "$@" >> /tmp/ld_debug.log 2>&1 || lld -flavor darwin "$@" >> /tmp/ld_debug.log 2>&1
-          
-          STATUS=$?
-          echo "=== LD EXIT STATUS: $STATUS ===" >> /tmp/ld_debug.log
-          if [ $STATUS -ne 0 ]; then
-              echo "=== CONTENIDO DEL LOG DE LD (ERROR) ==="
-              cat /tmp/ld_debug.log
-          fi
-          exit $STATUS
-          EOF
-          chmod +x $HOME/theos/toolchain/linux/iphone/bin/ld
-
-          # Instalar ldid manualmente
-          sudo wget -qO /usr/bin/ldid https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64 || \
-          sudo wget -qO /usr/bin/ldid https://raw.githubusercontent.com/tihmstar/ldid/master/ldid || \
-          sudo apt-get install -y ldid || true
-          sudo chmod +x /usr/bin/ldid
 
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
           echo "$HOME/theos/bin" >> $GITHUB_PATH
@@ -142,7 +82,7 @@ jobs:
 
           cd theos_project
 
-          # 1. Makefile de Theos con flags de desactivación de módulos e ignorar advertencias de UIWebView
+          # 1. Makefile de Theos nativo para macOS
           cat << 'EOF' > Makefile
           THEOS_DEVICE_IP = localhost
           ARCHS = arm64
@@ -152,9 +92,9 @@ jobs:
           PelusoApp_FILES = main.mm
           PelusoApp_FRAMEWORKS = UIKit Foundation
           
-          # Desactivar módulos de Clang y evitar que UIWebView detenga la compilación
-          ADDITIONAL_CFLAGS = -fno-modules -fno-implicit-modules -Wno-error=deprecated-declarations
-          ADDITIONAL_OBJCFLAGS = -fno-modules -fno-implicit-modules -Wno-error=deprecated-declarations
+          # Ignorar advertencia de UIWebView para iOS 12
+          ADDITIONAL_CFLAGS = -Wno-error=deprecated-declarations
+          ADDITIONAL_OBJCFLAGS = -Wno-error=deprecated-declarations
 
           include $(THEOS)/makefiles/common.mk
           include $(THEOS)/makefiles/application.mk
@@ -249,7 +189,7 @@ jobs:
           }
           EOF
 
-          # Compilar el paquete .deb
+          # Compilar el paquete .deb de forma nativa en macOS
           make package
 
           # Copiar el resultado a la raíz
