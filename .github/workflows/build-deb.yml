@@ -77,14 +77,32 @@ jobs:
           fi
           sudo chmod +x /usr/bin/ld64.lld
 
-          # Crear script wrapper para ld con registro de depuración (Debug Log)
+          # Crear script wrapper inteligente para ld que crea el directorio de salida automáticamente
           cat << 'EOF' > $HOME/theos/toolchain/linux/iphone/bin/ld
           #!/bin/sh
-          echo "=== LD ARGS ===" >> /tmp/ld_debug.log
+          OUTFILE=""
+          prev=""
+          for arg in "$@"; do
+              if [ "$prev" = "-o" ]; then
+                  OUTFILE="$arg"
+                  break
+              fi
+              prev="$arg"
+          done
+
+          if [ -n "$OUTFILE" ]; then
+              OUTDIR=$(dirname "$OUTFILE")
+              mkdir -p "$OUTDIR"
+          fi
+
+          echo "=== LD ARGS ===" > /tmp/ld_debug.log
           echo "$@" >> /tmp/ld_debug.log
           /usr/bin/ld64.lld "$@" >> /tmp/ld_debug.log 2>&1
           STATUS=$?
           echo "=== LD EXIT STATUS: $STATUS ===" >> /tmp/ld_debug.log
+          if [ $STATUS -ne 0 ]; then
+              cat /tmp/ld_debug.log
+          fi
           exit $STATUS
           EOF
           chmod +x $HOME/theos/toolchain/linux/iphone/bin/ld
@@ -227,7 +245,7 @@ jobs:
           }
           EOF
 
-          # Compilar el paquete .deb (con captura de logs si falla el linkado)
+          # Compilar el paquete .deb
           make package || {
               echo "=== MOSTRANDO LOG DE DEPURACIÓN DEL LINKER ==="
               cat /tmp/ld_debug.log || true
