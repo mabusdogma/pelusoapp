@@ -63,7 +63,7 @@ jobs:
             cp -r local deb_package/Applications/PelusoApp.app/
           fi
 
-          # Descargar Zig oficialmente de forma directa (evita errores de apt)
+          # Descargar Zig oficialmente de forma directa
           ZIG_VERSION="0.13.0"
           echo ">>> Descargando Zig $ZIG_VERSION... <<<"
           curl -L https://ziglang.org/download/$ZIG_VERSION/zig-linux-x86_64-$ZIG_VERSION.tar.xz -o zig.tar.xz
@@ -79,8 +79,8 @@ jobs:
           }
           EOF
 
-          # Compilar el binario compatible con iOS 12 arm64 usando Zig descargado
-          "$ZIG_BIN" cc -target aarch64-ios-12.0 main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
+          # Compilar el binario compatible con iOS arm64 usando el target correcto de Apple
+          "$ZIG_BIN" cc -target aarch64-apple-ios main.c -o deb_package/Applications/PelusoApp.app/PelusoApp
           chmod +x deb_package/Applications/PelusoApp.app/PelusoApp
           rm main.c zig.tar.xz
 
