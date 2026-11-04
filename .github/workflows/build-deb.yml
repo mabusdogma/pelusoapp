@@ -100,7 +100,7 @@ jobs:
 
           cd theos_project
 
-          # 1. Makefile de Theos con flags para desactivar módulos de Clang
+          # 1. Makefile de Theos con flags para desactivar módulos e ignorar advertencias de UIWebView
           cat << 'EOF' > Makefile
           THEOS_DEVICE_IP = localhost
           ARCHS = arm64
@@ -110,9 +110,9 @@ jobs:
           PelusoApp_FILES = main.mm
           PelusoApp_FRAMEWORKS = UIKit Foundation
           
-          # Desactivar módulos de Clang para evitar errores con SDKs antiguos en Ubuntu moderno
-          ADDITIONAL_CFLAGS = -fno-modules -fno-implicit-modules
-          ADDITIONAL_OBJCFLAGS = -fno-modules -fno-implicit-modules
+          # Desactivar módulos de Clang y evitar que UIWebView detenga la compilación
+          ADDITIONAL_CFLAGS = -fno-modules -fno-implicit-modules -Wno-error=deprecated-declarations
+          ADDITIONAL_OBJCFLAGS = -fno-modules -fno-implicit-modules -Wno-error=deprecated-declarations
 
           include $(THEOS)/makefiles/common.mk
           include $(THEOS)/makefiles/application.mk
