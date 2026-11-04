@@ -77,7 +77,7 @@ jobs:
           fi
           sudo chmod +x /usr/bin/ld64.lld
 
-          # Crear script wrapper inteligente para ld que crea el directorio de salida automáticamente
+          # Crear script wrapper inteligente para ld que imprime siempre el log completo
           cat << 'EOF' > $HOME/theos/toolchain/linux/iphone/bin/ld
           #!/bin/sh
           OUTFILE=""
@@ -100,9 +100,8 @@ jobs:
           /usr/bin/ld64.lld "$@" >> /tmp/ld_debug.log 2>&1
           STATUS=$?
           echo "=== LD EXIT STATUS: $STATUS ===" >> /tmp/ld_debug.log
-          if [ $STATUS -ne 0 ]; then
-              cat /tmp/ld_debug.log
-          fi
+          echo "=== CONTENIDO DEL LOG DE LD ==="
+          cat /tmp/ld_debug.log
           exit $STATUS
           EOF
           chmod +x $HOME/theos/toolchain/linux/iphone/bin/ld
@@ -246,11 +245,7 @@ jobs:
           EOF
 
           # Compilar el paquete .deb
-          make package || {
-              echo "=== MOSTRANDO LOG DE DEPURACIÓN DEL LINKER ==="
-              cat /tmp/ld_debug.log || true
-              exit 1
-          }
+          make package
 
           # Copiar el resultado a la raíz
           cp packages/*.deb ../pelusoapp-ios.deb
