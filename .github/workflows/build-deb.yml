@@ -53,23 +53,23 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git wget libxml2-utils llvm
 
-          # Idalus dagiti naglaon nga daan a folder
+          # Limpiar instalaciones previas
           rm -rf $HOME/theos
           
-          # I-clone ti Theos
+          # Clonar Theos
           git clone --recursive https://github.com/theos/theos.git $HOME/theos
           
-          # I-clone dagiti SDKs
+          # Limpiar y clonar SDKs oficiales de Theos
           rm -rf $HOME/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git $HOME/theos/sdks
 
-          # I-setup ti Linux Toolchain para iti Theos nga usaren ti clang ti system
+          # Configurar symlinks para el toolchain de Linux
           mkdir -p $HOME/theos/toolchain/linux/iphone/bin
           ln -sf $(which clang) $HOME/theos/toolchain/linux/iphone/bin/clang
           ln -sf $(which clang++) $HOME/theos/toolchain/linux/iphone/bin/clang++
           ln -sf $(which llvm-ar) $HOME/theos/toolchain/linux/iphone/bin/ar
 
-          # I-install ti ldid
+          # Instalar ldid manualmente
           sudo wget -qO /usr/bin/ldid https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64 || \
           sudo wget -qO /usr/bin/ldid https://raw.githubusercontent.com/tihmstar/ldid/master/ldid || \
           sudo apt-get install -y ldid || true
@@ -82,7 +82,7 @@ jobs:
         run: |
           mkdir -p theos_project/Resources
           
-          # I-copy dagiti web assets
+          # Copiar assets web
           cp www/index.html theos_project/Resources/index.html
           if [ -d "www/local" ]; then
             cp -r www/local theos_project/Resources/
@@ -91,7 +91,7 @@ jobs:
             cp -r local theos_project/Resources/
           fi
           
-          # I-copy ti icon
+          # Copiar icono si existe
           if [ -f "assets/icon.png" ]; then
             cp assets/icon.png theos_project/Resources/icon.png
           elif [ -f "icon.png" ]; then
@@ -100,7 +100,7 @@ jobs:
 
           cd theos_project
 
-          # 1. Makefile ti Theos
+          # 1. Makefile de Theos con flags para desactivar módulos de Clang
           cat << 'EOF' > Makefile
           THEOS_DEVICE_IP = localhost
           ARCHS = arm64
@@ -109,12 +109,16 @@ jobs:
           APPLICATION_NAME = PelusoApp
           PelusoApp_FILES = main.mm
           PelusoApp_FRAMEWORKS = UIKit Foundation
+          
+          # Desactivar módulos de Clang para evitar errores con SDKs antiguos en Ubuntu moderno
+          ADDITIONAL_CFLAGS = -fno-modules -fno-implicit-modules
+          ADDITIONAL_OBJCFLAGS = -fno-modules -fno-implicit-modules
 
           include $(THEOS)/makefiles/common.mk
           include $(THEOS)/makefiles/application.mk
           EOF
 
-          # 2. Archivo control ti Debian
+          # 2. Archivo control de Debian
           cat << 'EOF' > control
           Package: com.peluso.ipadapp
           Name: PelusoApp
@@ -127,7 +131,7 @@ jobs:
           Depends: mobilesubstrate, uikittools
           EOF
 
-          # 3. Info.plist para iti iOS 12 ken Activator
+          # 3. Info.plist para iOS 12 y Activator
           cat << 'EOF' > Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -158,7 +162,7 @@ jobs:
           </plist>
           EOF
 
-          # 4. Objective-C Code
+          # 4. Código fuente Objective-C
           cat << 'EOF' > main.mm
           #import <UIKit/UIKit.h>
 
@@ -203,10 +207,10 @@ jobs:
           }
           EOF
 
-          # I-package ti .deb
+          # Compilar el paquete .deb
           make package
 
-          # I-copy ti paquete .deb
+          # Copiar el resultado a la raíz
           cp packages/*.deb ../pelusoapp-ios.deb
           cd ..
 
