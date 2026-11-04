@@ -169,7 +169,7 @@ jobs:
           Depends: mobilesubstrate, uikittools
           EOF
 
-          # 4. Código fuente Objective-C con barra de estado en modo claro (iconos blancos)
+          # 4. Código fuente Objective-C con fondo negro y barra de estado en modo claro (iconos blancos)
           cat << 'EOF' > main.mm
           #import <UIKit/UIKit.h>
 
@@ -179,6 +179,8 @@ jobs:
           @implementation AppViewController
           - (void)viewDidLoad {
               [super viewDidLoad];
+              self.view.backgroundColor = [UIColor blackColor];
+              
               UIWebView *webView = [[UIWebView alloc] initWithFrame:self.view.bounds];
               webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
               webView.scalesPageToFit = YES;
