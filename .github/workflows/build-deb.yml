@@ -53,7 +53,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y clang dpkg-dev make git wget libxml2-utils
           
-          # Limpiar instalaciones previas para evitar conflictos de directorios
+          # Limpiar instalaciones previas para evitar conflictos
           rm -rf $HOME/theos
           
           # Clonar Theos en el runner
@@ -94,11 +94,11 @@ jobs:
 
           cd theos_project
 
-          # 1. Makefile oficial de Theos para una App nativa
+          # 1. Makefile oficial de Theos usando 'latest' para evitar errores de SDK faltante
           cat << 'EOF' > Makefile
           THEOS_DEVICE_IP = localhost
           ARCHS = arm64
-          TARGET = iphone:clang:12.0:12.0
+          TARGET = iphone:clang:latest:12.0
 
           APPLICATION_NAME = PelusoApp
           PelusoApp_FILES = main.mm
