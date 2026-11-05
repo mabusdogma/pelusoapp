@@ -84,7 +84,7 @@ jobs:
 
           cd theos_project
 
-          # 3. Info.plist con CFBundleIcons y soporte para barra de estado personalizada
+          # 3. Info.plist con CFBundleIcons y ocultación global de barra de estado
           cat << 'EOF' > Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -106,8 +106,10 @@ jobs:
               <string>APPL</string>
               <key>MinimumOSVersion</key>
               <string>12.0</string>
-              <key>UIViewControllerBasedStatusBarAppearance</key>
+              <key>UIStatusBarHidden</key>
               <true/>
+              <key>UIViewControllerBasedStatusBarAppearance</key>
+              <false/>
               <key>UIDeviceFamily</key>
               <array>
                   <integer>1</integer>
@@ -134,7 +136,7 @@ jobs:
           </plist>
           EOF
 
-          # 1. Makefile de Theos nativo para macOS (con regla forzada after-stage para asegurar el Info.plist)
+          # 1. Makefile de Theos nativo para macOS
           cat << 'EOF' > Makefile
           THEOS_DEVICE_IP = localhost
           ARCHS = arm64
@@ -169,7 +171,7 @@ jobs:
           Depends: mobilesubstrate, uikittools
           EOF
 
-          # 4. Código fuente Objective-C ocultando por completo la barra de estado
+          # 4. Código fuente Objective-C forzando ocultación de barra en AppDelegate
           cat << 'EOF' > main.mm
           #import <UIKit/UIKit.h>
 
@@ -205,6 +207,9 @@ jobs:
 
           @implementation AppDelegate
           - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+              // Forzar ocultación de la barra de estado globalmente para toda la app
+              [[UIApplication sharedApplication] setStatusBarHidden:YES animated:NO];
+              
               self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
               AppViewController *vc = [[AppViewController alloc] init];
               self.window.rootViewController = vc;
