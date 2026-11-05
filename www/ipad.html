@@ -2495,20 +2495,37 @@
 
                 <!-- Contenedor interno unificado a 13px igual que las demás tarjetas -->
                 <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--card-border); font-size: 13px;">
-                    <!-- Botones de control rápido -->
+                    <!-- Botones de control rápido con formato de switch -->
                     <div style="display: flex; margin-bottom: 12px; gap: 8px;">
+                        <!-- Botón 1: Actualizar (Acción normal) -->
                         <button class="btn-action" style="flex: 1;"
                             onclick="toggleEntity('button.kermit_actualizar')"><svg class="icon">
                                 <use xlink:href="#icon-refresh" href="#icon-refresh"></use>
                             </svg> Actualizar</button>
-                        <button class="btn-action" style="flex: 1;"
-                            onclick="toggleEntity('switch.v2c_hacs_pausar_carga')"><svg class="icon">
-                                <use xlink:href="#icon-pause-circle" href="#icon-pause-circle"></use>
-                            </svg> Pausar</button>
-                        <button class="btn-action" style="flex: 1;"
-                            onclick="toggleEntity('switch.v2c_hacs_bloquear_cargador')"><svg class="icon">
-                                <use xlink:href="#icon-stop-circle" href="#icon-stop-circle"></use>
-                            </svg> Parar</button>
+
+                        <!-- Botón 2: Pausar (Estilo Switch) -->
+                        <div class="btn-action" style="flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; cursor: pointer;" onclick="toggleEntity('switch.v2c_hacs_pausar_carga')">
+                            <div style="display: flex; align-items: center; gap: 4px; overflow: hidden;">
+                                <svg class="icon" style="flex-shrink: 0;"><use xlink:href="#icon-pause-circle" href="#icon-pause-circle"></use></svg>
+                                <span style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Pausar</span>
+                            </div>
+                            <label class="ha-switch" onclick="event.stopPropagation();" style="flex-shrink: 0; margin-left: 4px;">
+                                <input type="checkbox" id="chk-switch.v2c_hacs_pausar_carga" onchange="toggleEntity('switch.v2c_hacs_pausar_carga')">
+                                <span class="ha-slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Botón 3: Parar (Estilo Switch) -->
+                        <div class="btn-action" style="flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; cursor: pointer;" onclick="toggleEntity('switch.v2c_hacs_bloquear_cargador')">
+                            <div style="display: flex; align-items: center; gap: 4px; overflow: hidden;">
+                                <svg class="icon" style="flex-shrink: 0;"><use xlink:href="#icon-stop-circle" href="#icon-stop-circle"></use></svg>
+                                <span style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Parar</span>
+                            </div>
+                            <label class="ha-switch" onclick="event.stopPropagation();" style="flex-shrink: 0; margin-left: 4px;">
+                                <input type="checkbox" id="chk-switch.v2c_hacs_bloquear_cargador" onchange="toggleEntity('switch.v2c_hacs_bloquear_cargador')">
+                                <span class="ha-slider"></span>
+                            </label>
+                        </div>
                     </div>
 
                     <!-- Switch interactivo para Carga Excedentes -->
