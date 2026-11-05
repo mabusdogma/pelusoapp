@@ -3491,7 +3491,7 @@
 
 		function updateAssetPaths() {
 			var isNativeIOSApp = window.location.protocol === 'file:' || window.location.protocol === 'capacitor:';
-			var prefix = isNativeIOSApp ? 'local/' : (HA_URL + '/local/');
+			var prefix = isNativeIOSApp ? '' : (HA_URL + '/local/');
 			var appleIcon = document.getElementById('apple-touch-icon-link');
 			if (appleIcon) {
 				appleIcon.href = prefix + 'icon.png?v=2';
@@ -3501,7 +3501,6 @@
 				'img-altahd': 'altahd.jpeg',
 				'img-malgrat': 'malgrat.png'
 			};
-
 			for (var id in assets) {
 				var el = document.getElementById(id);
 				if (el) {
