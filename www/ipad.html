@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Home Assistant - PelusoApp</title>   
-    <link rel="apple-touch-icon" href="/local/icon.png?v=2">
+    <title>Home Assistant - PelusoApp</title>    
+    <link id="apple-touch-icon-link" rel="apple-touch-icon" href="">
     <meta name="apple-mobile-web-app-title" content="PelusoApp">
 <style>
         :root {
@@ -2641,15 +2641,15 @@
             <div class="grid-1-col">
                 <div class="card">
                     <div class="card-title">Planta baja Oasis</div>
-                    <img src="/local/bajahd.jpeg" alt="Planta baja Oasis" class="plano-img">
+                    <img id="img-bajahd" data-filename="bajahd.jpeg" alt="Planta baja Oasis" class="plano-img">
                 </div>
                 <div class="card">
                     <div class="card-title">Planta alta Oasis</div>
-                    <img src="/local/altahd.jpeg" alt="Planta alta Oasis" class="plano-img">
+                    <img id="img-altahd" data-filename="altahd.jpeg" alt="Planta alta Oasis" class="plano-img">
                 </div>
                 <div class="card">
                     <div class="card-title">Piso Malgrat</div>
-                    <img src="/local/malgrat.png" alt="Piso Malgrat" class="plano-img">
+                    <img id="img-malgrat" data-filename="malgrat.png" alt="Piso Malgrat" class="plano-img">
                 </div>
             </div>
         </div>
@@ -3475,7 +3475,7 @@
             }
         };
 
-        function getIOSVersionInfo() {
+		function getIOSVersionInfo() {
 			var ua = navigator.userAgent;
 			var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 			if (!isIOS) return null;
@@ -3487,6 +3487,26 @@
 				return 'ios ' + major + '.' + minor + patch;
 			}
 			return 'ios';
+		}
+
+		function updateAssetPaths() {
+			var prefix = HA_URL + '/local/';
+			var appleIcon = document.getElementById('apple-touch-icon-link');
+			if (appleIcon) {
+				appleIcon.href = prefix + 'icon.png?v=2';
+			}
+			var assets = {
+				'img-bajahd': 'bajahd.jpeg',
+				'img-altahd': 'altahd.jpeg',
+				'img-malgrat': 'malgrat.png'
+			};
+
+			for (var id in assets) {
+				var el = document.getElementById(id);
+				if (el) {
+					el.src = prefix + assets[id];
+				}
+			}
 		}
 
 		function checkNetworkAndConnect() {
@@ -3512,6 +3532,7 @@
 				if (networkTextEl) {
 					networkTextEl.innerText = iosInfo ? iosInfo : 'web Tail';
 				}
+				updateAssetPaths();
 				connectWS();
 				return;
 			} else if (!isApp && typeof currentHost !== 'undefined' && (currentHost.indexOf('192.168.') === 0)) {
@@ -3520,6 +3541,7 @@
 				if (networkTextEl) {
 					networkTextEl.innerText = iosInfo ? iosInfo : 'web LAN';
 				}
+				updateAssetPaths();
 				connectWS();
 				return;
 			}
@@ -3533,6 +3555,7 @@
 				if (networkTextEl) {
 					networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app Tail' : 'web Tail');
 				}
+				updateAssetPaths();
 				connectWS();
 			}, 2000);
 			fetch(testUrl, { mode: 'no-cors', cache: 'no-store' })
@@ -3545,9 +3568,10 @@
 					if (networkTextEl) {
 						networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app LAN' : 'web LAN');
 					}
+					updateAssetPaths();
 					connectWS();
 				})
-				.catch(function(err) {
+				.catch(function_err => {
 					if (timedOut) return;
 					timedOut = true;
 					clearTimeout(timer);
@@ -3556,6 +3580,7 @@
 					if (networkTextEl) {
 						networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app Tail' : 'web Tail');
 					}
+					updateAssetPaths();
 					connectWS();
 				});
 		}
