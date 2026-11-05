@@ -64,13 +64,15 @@ jobs:
         run: |
           mkdir -p theos_project/Resources
           
-          # Copiar assets web
+          # Copiar assets web principales
           cp www/index.html theos_project/Resources/index.html
+          
+          # Copiar archivos de local directamente a la raíz de Resources
           if [ -d "www/local" ]; then
-            cp -r www/local theos_project/Resources/
+            cp www/local/* theos_project/Resources/ 2>/dev/null || true
           fi
           if [ -d "local" ]; then
-            cp -r local theos_project/Resources/
+            cp local/* theos_project/Resources/ 2>/dev/null || true
           fi
           
           # Copiar icono para iOS (Icon.png y AppIcon60x60@2x.png para compatibilidad)
