@@ -3490,12 +3490,11 @@
 		}
 
 		function updateAssetPaths() {
-			var isNativeIOSApp = window.location.protocol === 'file:' || window.location.protocol === 'capacitor:';
+			var isNativeIOSApp = window.location.protocol === 'file:' || window.location.protocol === 'capacitor:';			
 			var prefix;
 			if (isNativeIOSApp) {
 				var loc = window.location.href;
-				var basePath = loc.substring(0, loc.lastIndexOf('/') + 1);
-				prefix = basePath + 'local/';
+				prefix = loc.substring(0, loc.lastIndexOf('/') + 1);
 			} else {
 				prefix = HA_URL + '/local/';
 			}
