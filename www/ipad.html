@@ -3490,7 +3490,8 @@
 		}
 
 		function updateAssetPaths() {
-			var prefix = HA_URL + '/local/';
+			var isNativeIOSApp = window.location.protocol === 'file:' || window.location.protocol === 'capacitor:';
+			var prefix = isNativeIOSApp ? 'local/' : (HA_URL + '/local/');
 			var appleIcon = document.getElementById('apple-touch-icon-link');
 			if (appleIcon) {
 				appleIcon.href = prefix + 'icon.png?v=2';
