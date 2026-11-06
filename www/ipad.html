@@ -3471,21 +3471,6 @@
             return 'iOS';
         }
 
-        function getIOSVersionInfo() {
-            var ua = navigator.userAgent;
-            var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            if (!isIOS) return null;
-            
-            var match = ua.match(/OS (\d+)_(\d+)(?:_(\d+))?/);
-            if (match) {
-                window._internalIOSVersion = match[1] + '.' + match[2] + (match[3] ? '.' + match[3] : '');
-            } else {
-                window._internalIOSVersion = 'unknown';
-            }
-            
-            return 'iOS';
-        }
-
         function checkNetworkAndConnect() {
             var networkTextEl = document.getElementById('status-network');
             if (!HA_TOKEN) {
@@ -3503,6 +3488,14 @@
             
             if (networkTextEl) {
                 networkTextEl.innerText = iosInfo ? (iosInfo + ' ...') : 'Desconocido';
+            }
+            if (isApp) {
+                HA_URL = localStorage.getItem('ha_url') || LOCAL_HA_URL;
+                if (networkTextEl) {
+                    networkTextEl.innerText = iosInfo ? (iosInfo + ' LAN') : 'app LAN';
+                }
+                connectWS();
+                return;
             }
             if (!isApp && typeof currentHost !== 'undefined') {
                 if (currentHost.indexOf('100.') === 0) {
@@ -3535,6 +3528,16 @@
                 }
                 connectWS();
             }, 2000);
+            if (typeof window.fetch === 'undefined') {
+                clearTimeout(timer);
+                HA_URL = LOCAL_HA_URL;
+                localStorage.setItem('ha_url', HA_URL);
+                if (networkTextEl) {
+                    networkTextEl.innerText = iosInfo ? (iosInfo + ' LAN') : 'web LAN';
+                }
+                connectWS();
+                return;
+            }
             fetch(testUrl, { mode: 'no-cors', cache: 'no-store' })
                 .then(function(response) {
                     if (timedOut) return;
@@ -5543,8 +5546,14 @@
             setupAcSliderDragging('slider-container-ac-despacho', 'climate.ac1_ac_despacho', 12, 32, 'ac-despacho');
             setupAcSliderDragging('slider-container-ac-dormitorio', 'climate.ac_dormitorio_ac_dormitorio', 12, 32, 'ac-dormitorio');
             setupAcSliderDragging('slider-container-ac-suite', 'climate.ac2_ac_suite', 12, 32, 'ac-suite');
+            var planoImgs = document.querySelectorAll('.plano-img');
+            for (var i = 0; i < planoImgs.length; i++) {
+                var currentSrc = planoImgs[i].getAttribute('src');
+                if (currentSrc && currentSrc.indexOf('/local/') === 0) {
+                    planoImgs[i].src = HA_URL + currentSrc;
+                }
+            }
         });
-
         document.addEventListener('visibilitychange', function () {
             if (!document.hidden) {
                 if (!ws || ws.readyState !== WebSocket.OPEN) {
