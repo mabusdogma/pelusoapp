@@ -453,6 +453,25 @@
             transform: scale(0.92) translateZ(0);
         }
 
+        /* Estilo para entidades no disponibles (gris atenuado) */
+        .chip-mini.unavailable,
+        .card.unavailable,
+        .row.unavailable {
+            background: rgba(255, 255, 255, 0.01) !important;
+            color: rgba(255, 255, 255, 0.3) !important;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .chip-mini.unavailable i,
+        .chip-mini.unavailable .icon,
+        .card.unavailable i,
+        .card.unavailable .icon,
+        .row.unavailable i,
+        .row.unavailable .icon {
+            color: rgba(255, 255, 255, 0.3) !important;
+        }
+        
         .btn-action {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid var(--card-border);
@@ -2497,17 +2516,16 @@
                 <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--card-border); font-size: 13px;">
                     <!-- Botones de control rápido con formato de switch -->
                     <div style="display: flex; margin-bottom: 12px; gap: 8px;">
-                        <!-- Botón 1: Actualizar (Acción normal) -->
-                        <button class="btn-action" style="flex: 1;"
+                        <!-- Botón 1: Actualizar -->
+                        <button class="btn-action" style="flex: 1; display: flex; align-items: center; justify-content: center;"
                             onclick="toggleEntity('button.kermit_actualizar')"><svg class="icon">
                                 <use xlink:href="#icon-refresh" href="#icon-refresh"></use>
-                            </svg> Actualizar</button>
+                            </svg>Actualizar</button>
 
-                        <!-- Botón 2: Pausar (Estilo Switch) -->
+                        <!-- Botón 2: Pausar  -->
                         <div class="btn-action" style="flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; cursor: pointer;" onclick="toggleEntity('switch.v2c_hacs_pausar_carga')">
                             <div style="display: flex; align-items: center; gap: 4px; overflow: hidden;">
-                                <svg class="icon" style="flex-shrink: 0;"><use xlink:href="#icon-pause-circle" href="#icon-pause-circle"></use></svg>
-                                <span style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+                                <span style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Pausar</span>
                             </div>
                             <label class="ha-switch" onclick="event.stopPropagation();" style="flex-shrink: 0; margin-left: 4px;">
                                 <input type="checkbox" id="chk-switch.v2c_hacs_pausar_carga" onchange="toggleEntity('switch.v2c_hacs_pausar_carga')">
@@ -2515,11 +2533,10 @@
                             </label>
                         </div>
 
-                        <!-- Botón 3: Parar (Estilo Switch) -->
+                        <!-- Botón 3: Parar  -->
                         <div class="btn-action" style="flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; cursor: pointer;" onclick="toggleEntity('switch.v2c_hacs_bloquear_cargador')">
                             <div style="display: flex; align-items: center; gap: 4px; overflow: hidden;">
-                                <svg class="icon" style="flex-shrink: 0;"><use xlink:href="#icon-stop-circle" href="#icon-stop-circle"></use></svg>
-                                <span style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+                                <span style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Parar</span>
                             </div>
                             <label class="ha-switch" onclick="event.stopPropagation();" style="flex-shrink: 0; margin-left: 4px;">
                                 <input type="checkbox" id="chk-switch.v2c_hacs_bloquear_cargador" onchange="toggleEntity('switch.v2c_hacs_bloquear_cargador')">
@@ -3516,80 +3533,81 @@
 		}
 
 		function checkNetworkAndConnect() {
-			var networkTextEl = document.getElementById('status-network');
-			if (!HA_TOKEN) {
-				openConfigModal();
-				return;
-			}
-			var isApp = (typeof window.Capacitor !== 'undefined') || 
-						(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
-						window.location.protocol === 'capacitor:' || 
-						window.location.protocol === 'file:' || 
-						window.location.hostname === 'localhost' ||
-						window.location.hostname === '127.0.0.1' ||
-						/Android.*(Capacitor|wv)/i.test(navigator.userAgent);
-			var iosInfo = getIOSVersionInfo();
-			if (networkTextEl) {
-				networkTextEl.innerText = iosInfo ? iosInfo : 'Desconocido';
-			}
-			if (!isApp && typeof currentHost !== 'undefined' && currentHost.indexOf('100.') === 0) {
-				HA_URL = TAILSCALE_HA_URL;
-				localStorage.setItem('ha_url', HA_URL);
-				if (networkTextEl) {
-					networkTextEl.innerText = iosInfo ? iosInfo : 'web Tail';
-				}
-				updateAssetPaths();
-				connectWS();
-				return;
-			} else if (!isApp && typeof currentHost !== 'undefined' && (currentHost.indexOf('192.168.') === 0)) {
-				HA_URL = LOCAL_HA_URL;
-				localStorage.setItem('ha_url', HA_URL);
-				if (networkTextEl) {
-					networkTextEl.innerText = iosInfo ? iosInfo : 'web LAN';
-				}
-				updateAssetPaths();
-				connectWS();
-				return;
-			}
-			var testUrl = LOCAL_HA_URL + '/manifest.json';
-			var timedOut = false;
-			var timer = setTimeout(function() {
-				if (timedOut) return;
-				timedOut = true;
-				HA_URL = TAILSCALE_HA_URL;
-				localStorage.setItem('ha_url', HA_URL);
-				if (networkTextEl) {
-					networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app Tail' : 'web Tail');
-				}
-				updateAssetPaths();
-				connectWS();
-			}, 2000);
-			fetch(testUrl, { mode: 'no-cors', cache: 'no-store' })
-				.then(function(response) {
-					if (timedOut) return;
-					timedOut = true;
-					clearTimeout(timer);
-					HA_URL = LOCAL_HA_URL;
-					localStorage.setItem('ha_url', HA_URL);
-					if (networkTextEl) {
-						networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app LAN' : 'web LAN');
-					}
-					updateAssetPaths();
-					connectWS();
-				})
-				.catch(function_err => {
-					if (timedOut) return;
-					timedOut = true;
-					clearTimeout(timer);
-					HA_URL = TAILSCALE_HA_URL;
-					localStorage.setItem('ha_url', HA_URL);
-					if (networkTextEl) {
-						networkTextEl.innerText = iosInfo ? iosInfo : (isApp ? 'app Tail' : 'web Tail');
-					}
-					updateAssetPaths();
-					connectWS();
-				});
-		}
+            var networkTextEl = document.getElementById('status-network');
+            if (!HA_TOKEN) {
+                openConfigModal();
+                return;
+            }
+            var isApp = (typeof window.Capacitor !== 'undefined') || 
+                        (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
+                        window.location.protocol === 'capacitor:' || 
+                        window.location.file === 'file:' || 
+                        window.location.hostname === 'localhost' ||
+                        window.location.hostname === '127.0.0.1' ||
+                        /Android.*(Capacitor|wv)/i.test(navigator.userAgent);
+            var iosInternalVersion = getIOSVersionInfo(); 
+            var isIOS = Boolean(iosInternalVersion);
+            if (networkTextEl) {
+                networkTextEl.innerText = isIOS ? 'ios lan' : 'Desconocido';
+            }
+            if (!isApp && typeof currentHost !== 'undefined' && currentHost.indexOf('100.') === 0) {
+                HA_URL = TAILSCALE_HA_URL;
+                localStorage.setItem('ha_url', HA_URL);
+                if (networkTextEl) {
+                    networkTextEl.innerText = isIOS ? 'ios Tail' : 'web Tail';
+                }
+                updateAssetPaths();
+                connectWS();
+                return;
+            } else if (!isApp && typeof currentHost !== 'undefined' && (currentHost.indexOf('192.168.') === 0)) {
+                HA_URL = LOCAL_HA_URL;
+                localStorage.setItem('ha_url', HA_URL);
+                if (networkTextEl) {
+                    networkTextEl.innerText = isIOS ? 'ios lan' : 'web LAN';
+                }
+                updateAssetPaths();
+                connectWS();
+                return;
+            }
+            var testUrl = LOCAL_HA_URL + '/manifest.json';
+            var timedOut = false;
+            var timer = setTimeout(function() {
+                if (timedOut) return;
+                timedOut = true;
+                HA_URL = TAILSCALE_HA_URL;
+                localStorage.setItem('ha_url', HA_URL);
+                if (networkTextEl) {
+                    networkTextEl.innerText = isIOS ? 'ios Tail' : (isApp ? 'app Tail' : 'web Tail');
+                }
+                updateAssetPaths();
+                connectWS();
+            }, 2000);
+            fetch(testUrl, { mode: 'no-cors', cache: 'no-store' })
+                .then(function(response) {
+                    if (timedOut) return;
+                    timedOut = true;
+                    clearTimeout(timer);
+                    HA_URL = LOCAL_HA_URL;
+                    localStorage.setItem('ha_url', HA_URL);
+                    if (networkTextEl) {
+                        networkTextEl.innerText = isIOS ? 'ios lan' : (isApp ? 'app LAN' : 'web LAN');
+                    }
+                    updateAssetPaths();
+                    connectWS();
+                })
+                .catch(function_err => {
+                    if (timedOut) return;
+                    timedOut = true;
+                    clearTimeout(timer);
+                    HA_URL = TAILSCALE_HA_URL;
+                    localStorage.setItem('ha_url', HA_URL);
+                    if (networkTextEl) {
+                        networkTextEl.innerText = isIOS ? 'ios Tail' : (isApp ? 'app Tail' : 'web Tail');
+                    }
+                    updateAssetPaths();
+                    connectWS();
+                });
+        }
 
         function updateEnergyPercentages() {
             var total = window._energyData.produccion;
@@ -4779,12 +4797,18 @@
             if (!ent || !ent.entity_id) return;
             var id = ent.entity_id;
             var st = ent.state;
-			var elements = document.querySelectorAll('[data-entity="' + id + '"]');
+            var isUnavailable = (st === 'unavailable' || st === 'unknown');
+            var elements = document.querySelectorAll('[data-entity="' + id + '"]');
             elements.forEach(function(el) {
-                if (st === 'on') {
+                if (isUnavailable) {
+                    el.classList.remove('active');
+                    el.classList.add('unavailable');
+                } else if (st === 'on') {
                     el.classList.add('active');
+                    el.classList.remove('unavailable');
                 } else {
                     el.classList.remove('active');
+                    el.classList.remove('unavailable');
                 }
             });
             var autoAcMap = {
@@ -4796,7 +4820,7 @@
             if (autoAcMap.hasOwnProperty(id)) {
                 var iconEl = document.getElementById('icon-' + id);
                 if (iconEl) {
-                    iconEl.style.color = (st === 'on') ? autoAcMap[id] : '#696969';
+                    iconEl.style.color = isUnavailable ? '#666666' : ((st === 'on') ? autoAcMap[id] : '#696969');
                 }
             }
             if (id === 'climate.aux_cloud_e8165636d7b6_ac') {
@@ -4810,33 +4834,37 @@
             }
             if (id === 'fan.alivent_main_fan') {
                 var el = getCachedElement('val-climate-alivent-fan');
-                if (el) el.innerText = (st === 'on') ? 'Encendido' : 'Apagado';
+                if (el) el.innerText = isUnavailable ? 'No disponible' : ((st === 'on') ? 'Encendido' : 'Apagado');
                 var iconEl = getCachedElement('icon-alivent-fan');
                 if (iconEl) {
-                    iconEl.style.color = (st === 'on') ? 'var(--accent)' : '#999999';
+                    iconEl.style.color = isUnavailable ? '#666666' : ((st === 'on') ? 'var(--accent)' : '#999999');
                 }
             }
             if (id === 'light.alivent_main_light') {
                 var el = getCachedElement('val-climate-alivent-light');
-                if (el) el.innerText = (st === 'on') ? 'Encendido' : 'Apagado';
+                if (el) el.innerText = isUnavailable ? 'No disponible' : ((st === 'on') ? 'Encendido' : 'Apagado');
                 var iconEl = getCachedElement('icon-alivent-light');
                 if (iconEl) {
-                    iconEl.style.color = (st === 'on') ? 'var(--accent)' : '#999999';
+                    iconEl.style.color = isUnavailable ? '#666666' : ((st === 'on') ? 'var(--accent)' : '#999999');
                 }
             }
             if (id === 'fan.purificador') {
                 var el = getCachedElement('val-climate-puri');
-                if (el) el.innerText = (st === 'on') ? 'Encendido' : 'Apagado';
+                if (el) el.innerText = isUnavailable ? 'No disponible' : ((st === 'on') ? 'Encendido' : 'Apagado');
                 var iconEl = getCachedElement('icon-purificador');
                 if (iconEl) {
-                    iconEl.style.color = (st === 'on') ? '#66bb6a' : '#999999';
+                    iconEl.style.color = isUnavailable ? '#666666' : ((st === 'on') ? '#66bb6a' : '#999999');
                 }
             }
             if (id === 'sensor.particulas') {
                 var el = getCachedElement('val-climate-particulas');
                 if (el) {
-                    var val = parseFloat(st);
-                    el.innerText = (isNaN(val) ? st : val.toFixed(1)) + ' µg/m³';
+                    if (isUnavailable) {
+                        el.innerText = 'No disponible';
+                    } else {
+                        var val = parseFloat(st);
+                        el.innerText = (isNaN(val) ? st : val.toFixed(1)) + ' µg/m³';
+                    }
                 }
             }
             if (id === 'sensor.inversor_estado_del_dispositivo' || 
@@ -4850,7 +4878,7 @@
                 var valEl = getCachedElement('val-' + id);
                 var unit = (ent.attributes && ent.attributes.unit_of_measurement) ? ' ' + ent.attributes.unit_of_measurement : '';
                 if (rangeEl && document.activeElement !== rangeEl) {
-                    rangeEl.value = st;
+                    rangeEl.value = isUnavailable ? 0 : st;
                 }
                 if (ent.attributes) {
                     if (rangeEl && ent.attributes.min !== undefined) rangeEl.min = ent.attributes.min;
@@ -4858,14 +4886,17 @@
                     if (rangeEl && ent.attributes.step !== undefined) rangeEl.step = ent.attributes.step;
                 }
                 if (valEl) {
-                    valEl.innerText = st + unit;
+                    valEl.innerText = isUnavailable ? 'No disponible' : (st + unit);
                 }
             }
             if (id === 'automation.cargador_dinamico') {
                 var realDiv = getCachedElement('container-amperaje-real');
                 var manualDiv = getCachedElement('container-intensidad-manual');
                 if (realDiv && manualDiv) {
-                    if (st === 'on') {
+                    if (isUnavailable) {
+                        realDiv.style.display = 'none';
+                        manualDiv.style.display = 'flex';
+                    } else if (st === 'on') {
                         realDiv.style.display = 'flex';
                         manualDiv.style.display = 'none';
                     } else {
@@ -4878,16 +4909,22 @@
                 var config = entityTextUpdates[id];
                 var el = getCachedElement(config.id);
                 if (el) {
-                    el.innerText = config.format ? config.format(st, ent.attributes) : st;
+                    el.innerText = isUnavailable ? 'No disponible' : (config.format ? config.format(st, ent.attributes) : st);
                 }
             }
-            if (id === 'input_text.notificacion_ipad') {
+            if (id === 'input_text.notificacion_ipad' && !isUnavailable) {
                 showNotification(st);
             }
             if (id === 'binary_sensor.gente') {
                 var valEl = getCachedElement('val-binary_sensor.gente');
                 var iconEl = getCachedElement('icon-badge-gente');
-                if (st === 'on') {
+                if (isUnavailable) {
+                    if (valEl) {
+                        valEl.innerText = 'No disponible';
+                        valEl.style.color = '#666666';
+                    }
+                    if (iconEl) iconEl.style.color = '#666666';
+                } else if (st === 'on') {
                     if (valEl) {
                         valEl.innerText = 'En casa';
                         valEl.style.color = '#ffc107';
@@ -4905,9 +4942,14 @@
             if (doorSensors.indexOf(id) !== -1) {
                 var valEl = getCachedElement('val-' + id);
                 if (valEl) {
-                    var isOpen = (st === 'on');
-                    valEl.innerText = isOpen ? 'Abierto' : 'Cerrado';
-                    valEl.style.color = isOpen ? '#ffc107' : 'var(--text-primary)';
+                    if (isUnavailable) {
+                        valEl.innerText = 'No disponible';
+                        valEl.style.color = '#666666';
+                    } else {
+                        var isOpen = (st === 'on');
+                        valEl.innerText = isOpen ? 'Abierto' : 'Cerrado';
+                        valEl.style.color = isOpen ? '#ffc107' : 'var(--text-primary)';
+                    }
                 }
             }
             if (id === 'alarm_control_panel.alarma') {
@@ -4915,10 +4957,13 @@
                 var alarmCard = getCachedElement('card-alarm');
                 var alarmIcon = getCachedElement('icon-alarm');
                 var useAlarm = getCachedElement('use-alarm');
-                if (alarmText) alarmText.innerText = translateState(st, id, ent.attributes);
+                if (alarmText) alarmText.innerText = isUnavailable ? 'No disponible' : translateState(st, id, ent.attributes);
                 if (alarmCard && alarmIcon && useAlarm) {
                     alarmCard.classList.remove('active');
-                    if (st === 'disarmed') {
+                    if (isUnavailable) {
+                        alarmCard.classList.add('unavailable');
+                        alarmIcon.style.color = '#666666';
+                    } else if (st === 'disarmed') {
                         useAlarm.setAttribute('xlink:href', '#icon-shield-off');
                         useAlarm.setAttribute('href', '#icon-shield-off');
                         alarmIcon.style.color = '#2196F3';
@@ -4939,25 +4984,27 @@
             if (id === 'switch.sirenas') {
                 var sirenaText = getCachedElement('state-sirena');
                 var iconSirena = getCachedElement('icon-sirena');
-                if (sirenaText) sirenaText.innerText = (st === 'on') ? '¡ACTIVADAS!' : 'En silencio';
+                if (sirenaText) sirenaText.innerText = isUnavailable ? 'No disponible' : ((st === 'on') ? '¡ACTIVADAS!' : 'En silencio');
                 if (iconSirena) {
-                    iconSirena.style.color = (st === 'on') ? 'var(--accent)' : '#999999';
+                    iconSirena.style.color = isUnavailable ? '#666666' : ((st === 'on') ? 'var(--accent)' : '#999999');
                 }
             }
             if (id === 'script.abrir_puerta') {
                 var puertaText = getCachedElement('state-abrir-puerta');
                 var iconPuerta = getCachedElement('icon-abrir-puerta');
-                if (puertaText) puertaText.innerText = (st === 'on' || st === 'active') ? 'Ejecutando...' : 'Sin ejecutar';
+                if (puertaText) puertaText.innerText = isUnavailable ? 'No disponible' : ((st === 'on' || st === 'active') ? 'Ejecutando...' : 'Sin ejecutar');
                 if (iconPuerta) {
-                    iconPuerta.style.color = (st === 'on' || st === 'active') ? 'var(--accent)' : '#999999';
+                    iconPuerta.style.color = isUnavailable ? '#666666' : ((st === 'on' || st === 'active') ? 'var(--accent)' : '#999999');
                 }
             }
             if (id === 'vacuum.covadonga_lan') {
                 var vacState = getCachedElement('state-vacuum');
-                if (vacState) vacState.innerText = translateState(st, id, ent.attributes);
+                if (vacState) vacState.innerText = isUnavailable ? 'No disponible' : translateState(st, id, ent.attributes);
                 var iconVacuum = getCachedElement('icon-robot-vacuum');
                 if (iconVacuum) {
-                    if (st === 'docked' || st === 'off') {
+                    if (isUnavailable) {
+                        iconVacuum.style.color = '#666666';
+                    } else if (st === 'docked' || st === 'off') {
                         iconVacuum.style.color = '#9e9e9e';
                     } else if (st === 'error' || st === 'idle') {
                         iconVacuum.style.color = 'var(--danger)';
@@ -4972,30 +5019,45 @@
             }
             var chipEl = getCachedElement('chip-' + id);
             if (chipEl) {
-                if (st === 'on' || st === 'home' || st === 'active') {
+                if (isUnavailable) {
+                    chipEl.classList.remove('active');
+                    chipEl.classList.add('unavailable');
+                } else if (st === 'on' || st === 'home' || st === 'active') {
                     chipEl.classList.add('active');
+                    chipEl.classList.remove('unavailable');
                 } else {
                     chipEl.classList.remove('active');
+                    chipEl.classList.remove('unavailable');
                 }
             }
             var chkEl = getCachedElement('chk-' + id);
             if (chkEl) {
                 chkEl.checked = (st === 'on');
+                chkEl.disabled = isUnavailable;
             }
             var rowEl = getCachedElement('row-' + id);
             if (rowEl) {
-                if (st === 'on') {
+                if (isUnavailable) {
+                    rowEl.classList.remove('active');
+                    rowEl.classList.add('unavailable');
+                } else if (st === 'on') {
                     rowEl.classList.add('active');
+                    rowEl.classList.remove('unavailable');
                 } else {
                     rowEl.classList.remove('active');
+                    rowEl.classList.remove('unavailable');
                 }
             }
             var valEl = getCachedElement('val-' + id);
             if (valEl) {
-                var unitStr = (ent.attributes && ent.attributes.unit_of_measurement) ? ent.attributes.unit_of_measurement : '';
-                var displaySt = formatValueByUnit(st, unitStr, ent.attributes, id);
-                var unit = (unitStr && unitStr !== 'W' && unitStr !== 'kW' && unitStr !== '%') ? ' ' + unitStr : '';
-                valEl.innerText = displaySt + unit;
+                if (isUnavailable) {
+                    valEl.innerText = 'No disponible';
+                } else {
+                    var unitStr = (ent.attributes && ent.attributes.unit_of_measurement) ? ent.attributes.unit_of_measurement : '';
+                    var displaySt = formatValueByUnit(st, unitStr, ent.attributes, id);
+                    var unit = (unitStr && unitStr !== 'W' && unitStr !== 'kW' && unitStr !== '%') ? ' ' + unitStr : '';
+                    valEl.innerText = displaySt + unit;
+                }
             }
         }
 
