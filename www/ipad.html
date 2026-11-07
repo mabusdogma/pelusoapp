@@ -3489,15 +3489,7 @@
             if (networkTextEl) {
                 networkTextEl.innerText = iosInfo ? (iosInfo + ' ...') : 'Desconocido';
             }
-            if (isApp) {
-                HA_URL = localStorage.getItem('ha_url') || LOCAL_HA_URL;
-                if (networkTextEl) {
-                    networkTextEl.innerText = iosInfo ? (iosInfo + ' LAN') : 'app LAN';
-                }
-                connectWS();
-                return;
-            }
-            if (!isApp && typeof currentHost !== 'undefined') {
+            if (typeof currentHost !== 'undefined') {
                 if (currentHost.indexOf('100.') === 0) {
                     HA_URL = TAILSCALE_HA_URL;
                     localStorage.setItem('ha_url', HA_URL);
@@ -3527,13 +3519,13 @@
                     networkTextEl.innerText = iosInfo ? (iosInfo + ' Tail') : (isApp ? 'app Tail' : 'web Tail');
                 }
                 connectWS();
-            }, 2000);
+            }, 1500);
             if (typeof window.fetch === 'undefined') {
                 clearTimeout(timer);
                 HA_URL = LOCAL_HA_URL;
                 localStorage.setItem('ha_url', HA_URL);
                 if (networkTextEl) {
-                    networkTextEl.innerText = iosInfo ? (iosInfo + ' LAN') : 'web LAN';
+                    networkTextEl.innerText = iosInfo ? (iosInfo + ' LAN') : 'app LAN';
                 }
                 connectWS();
                 return;
