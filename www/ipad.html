@@ -1390,7 +1390,7 @@
                 </div>
             </div>
 
-            <!-- SIRENAS Y ABRIR PUERTA -->
+        <!-- SIRENAS Y ABRIR PUERTA -->
         <div class="grid-2-col">
             <div class="card card-clickable" id="card-sirena"
                 style="padding: 6px 10px;"
@@ -3631,6 +3631,9 @@
         }
 
         function mostrarPopupActualizacion(versionName, apkUrl) {
+            // --- CÓDIGO DESHABILITADO TEMPORALMENTE ---
+            return;
+            /*
             var ua = navigator.userAgent;
             if (/iPad|iPhone|iPod/.test(ua) || !/Android/.test(ua)) {
                 return;
@@ -3695,6 +3698,7 @@
                     document.getElementById('btn-cancel-update').disabled = false;
                 }
             };
+            */
         }
 
 		async function probarNotificacionNativa() {
@@ -3741,6 +3745,10 @@
 
         async function showNotification(texto) {
 			if (!texto || texto === '' || texto === 'unknown' || texto === 'unavailable') return;
+            var ultimaAceptada = localStorage.getItem('peluso_ultima_notif_aceptada');
+            if (texto === ultimaAceptada) {
+                return;
+            }
 			var timeMatch = texto.match(/\s+(\d{1,2}:\d{2}(?:am|pm)?\s+\d{1,2}\/\d{1,2}\/\d{2,4})$/i);
 			var timeText = '';
 			var cleanTexto = texto;
@@ -5395,6 +5403,9 @@
         }
 
         function closePopup() {
+            if (activeNotifications.length > 0) {
+                localStorage.setItem('peluso_ultima_notif_aceptada', activeNotifications[activeNotifications.length - 1]);
+            }
             activeNotifications = [];
             var container = document.getElementById('popup-message');
             if (container) container.innerHTML = '';
