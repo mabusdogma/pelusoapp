@@ -1698,50 +1698,30 @@
                 </div>
             </div>
 
-            <!-- VACUUM CARD: COVADONGA -->
-            <div class="card" style="margin-bottom: 14px;">
-                <div class="mush-row">
-                    <div class="mush-icon" style="color:#2196f3; background: rgba(33, 150, 243, 0.15);"><svg
-                            class="icon">
-                            <use xlink:href="#icon-robot-vacuum" href="#icon-robot-vacuum"></use>
-                        </svg></div>
-                    <div class="mush-info">
-                        <div class="mush-primary">Covadonga</div>
-                        <div class="mush-secondary" id="state-vacuum">Estado: Cargando...</div>
+            <!-- VACUUM CARD & POSPONER: COVADONGA -->
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: stretch; margin-bottom: 14px;">
+                <div class="card" style="margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                        <div class="mush-icon" id="icon-robot-vacuum" style="width: 38px; height: 38px; font-size: 20px; color:#2196f3; background: rgba(33, 150, 243, 0.15); margin-right: 0;"><svg class="icon" style="width: 20px; height: 20px;">
+                                <use xlink:href="#icon-robot-vacuum" href="#icon-robot-vacuum"></use>
+                            </svg></div>
+                        <div style="min-width: 0;">
+                            <div style="font-size: 14px; font-weight: bold; line-height: 1.1;">Covadonga</div>
+                            <div style="font-size: 11px; color: var(--text-secondary);" id="state-vacuum">Cargando...</div>
+                        </div>
+                    </div>
+                <div class="vacuum-controls" style="display: flex; gap: 6px; margin-top: 0;">
+                        <button class="vacuum-btn" style="width: 38px; height: 38px; font-size: 16px;" title="Iniciar / Pausar" onclick="callVacuumCommand('start_pause')"><svg class="icon" style="width: 18px; height: 18px;"><use xlink:href="#icon-play-pause" href="#icon-play-pause"></use></svg></button>
+                        <button class="vacuum-btn" style="width: 38px; height: 38px; font-size: 16px;" title="Localizar" onclick="callVacuumCommand('locate')"><svg class="icon" style="width: 18px; height: 18px;"><use xlink:href="#icon-map-marker-question" href="#icon-map-marker-question"></use></svg></button>
                     </div>
                 </div>
-                <div class="vacuum-controls">
-                    <button class="vacuum-btn" title="Iniciar/Pausar" onclick="callVacuumCommand('start')"><svg
-                            class="icon">
-                            <use xlink:href="#icon-play-pause" href="#icon-play-pause"></use>
-                        </svg></button>
-                    <button class="vacuum-btn" title="Detener" onclick="callVacuumCommand('stop')"><svg class="icon">
-                            <use xlink:href="#icon-stop" href="#icon-stop"></use>
-                        </svg></button>
-                    <button class="vacuum-btn" title="Localizar" onclick="callVacuumCommand('locate')"><svg
-                            class="icon">
-                            <use xlink:href="#icon-map-marker-question" href="#icon-map-marker-question"></use>
-                        </svg></button>
-                    <button class="vacuum-btn" title="Limpieza Puntual" onclick="callVacuumCommand('clean_spot')"><svg
-                            class="icon">
-                            <use xlink:href="#icon-target" href="#icon-target"></use>
-                        </svg></button>
-                    <button class="vacuum-btn" title="Volver a Base" onclick="callVacuumCommand('return_to_base')"><svg
-                            class="icon">
-                            <use xlink:href="#icon-home-map-marker" href="#icon-home-map-marker"></use>
-                        </svg></button>
+                <div class="card card-clickable" id="chip-posponer-limpieza" onclick="toggleEntity('input_boolean.posponer_limpieza')" style="display: flex; align-items: center; justify-content: center; padding: 0 14px; margin-bottom: 0; gap: 8px; white-space: nowrap;">
+                    <div id="icon-posponer-container" style="color: #696969; display: flex; align-items: center;">
+                        <svg class="icon" style="width: 22px; height: 22px;"><use xlink:href="#icon-update" href="#icon-clock-end"></use></svg>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary); font-weight: bold;">Posponer</div>
                 </div>
-            </div>
-			
-			<!-- TARJETA RESUMEN DE HORARIO COVADONGA -->
-			<div class="card" style="margin-bottom: 14px; padding: 14px;">
-				<div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-					<svg class="icon" style="color: var(--accent); flex-shrink: 0;"><use xlink:href="#icon-calendar" href="#icon-calendar"></use></svg>
-					<div id="horario-covadonga-resumen" style="font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
-						Cargando próximos eventos...
-					</div>
-				</div>
-			</div>		
+            </div>		
         </div>
 
         <!-- VISTA: CÁMARAS (SEGUNDA POSICIÓN) -->
@@ -4061,7 +4041,7 @@
                     case 'docked': return 'En la base';
                     case 'cleaning': return 'Limpiando';
                     case 'paused': return 'En pausa';
-                    case 'idle': return 'Inactivo';
+                    case 'idle': return 'En pausa';
                     case 'returning':
                     case 'returning_home': return 'Volviendo a la base';
                     case 'error': return 'Error';
@@ -4891,6 +4871,21 @@
                     if (iconEl) iconEl.style.color = '#757575';
                 }
             }
+            if (id === 'input_boolean.posponer_limpieza') {
+                var chip = getCachedElement('chip-posponer-limpieza');
+                var iconContainer = getCachedElement('icon-posponer-container');
+                if (chip && iconContainer) {
+                    if (st === 'on') {
+                        chip.style.background = 'rgba(255, 152, 0, 0.15)';
+                        chip.style.borderColor = 'var(--accent)';
+                        iconContainer.style.color = '#ff9800';
+                    } else {
+                        chip.style.background = 'var(--card-bg)';
+                        chip.style.borderColor = 'var(--card-border)';
+                        iconContainer.style.color = '#696969';
+                    }
+                }
+            }
             var doorSensors = ['binary_sensor.puerta', 'binary_sensor.salon', 'binary_sensor.salon2', 'binary_sensor.cocina', 'binary_sensor.garage', 'binary_sensor.terraza'];
             if (doorSensors.indexOf(id) !== -1) {
                 var valEl = getCachedElement('val-' + id);
@@ -4943,15 +4938,16 @@
                 }
             }
             if (id === 'vacuum.covadonga_lan') {
+                window.covadongaState = st;
                 var vacState = getCachedElement('state-vacuum');
                 if (vacState) vacState.innerText = translateState(st, id, ent.attributes);
                 var iconVacuum = getCachedElement('icon-robot-vacuum');
                 if (iconVacuum) {
                     if (st === 'docked' || st === 'off') {
                         iconVacuum.style.color = '#9e9e9e';
-                    } else if (st === 'error' || st === 'idle') {
+                    } else if (st === 'error') {
                         iconVacuum.style.color = 'var(--danger)';
-                    } else if (st === 'charging' || st === 'paused') {
+                    } else if (st === 'charging' || st === 'paused' || st === 'idle') {
                         iconVacuum.style.color = 'var(--active-blue)';
                     } else if (st === 'returning' || st === 'returning_home') {
                         iconVacuum.style.color = 'var(--active-amber)';
@@ -5489,10 +5485,15 @@
         }
 
         function callVacuumCommand(command) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return; 
+            var serviceToCall = command;
+            if (command === 'start_pause') {
+                serviceToCall = (window.covadongaState === 'cleaning') ? 'pause' : 'start';
+            }
             sendWS({
                 type: 'call_service',
                 domain: 'vacuum',
-                service: command,
+                service: serviceToCall,
                 target: { entity_id: 'vacuum.covadonga_lan' }
             });
         }
