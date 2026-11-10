@@ -4109,7 +4109,7 @@
                     var ampm = h >= 12 ? 'pm' : 'am';
                     h = h % 12;
                     h = h ? h : 12;
-                    hora = h + ' ' + ampm;
+                    hora = h + ampm;
                 }
                 var temp = Math.round(item.temperature) + '°';
                 var condition = item.condition || '';
