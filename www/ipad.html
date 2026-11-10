@@ -2501,11 +2501,15 @@
                             onclick="toggleEntity('button.kermit_actualizar')"><svg class="icon">
                                 <use xlink:href="#icon-refresh" href="#icon-refresh"></use>
                             </svg> Actualizar</button>
-                        <button class="btn-action" style="flex: 1;"
+                        
+                        <!-- Botón Pausar con ID -->
+                        <button class="btn-action" style="flex: 1;" id="btn-switch.v2c_hacs_pausar_carga"
                             onclick="toggleEntity('switch.v2c_hacs_pausar_carga')"><svg class="icon">
                                 <use xlink:href="#icon-pause-circle" href="#icon-pause-circle"></use>
                             </svg> Pausar</button>
-                        <button class="btn-action" style="flex: 1;"
+                            
+                        <!-- Botón Parar con ID -->
+                        <button class="btn-action" style="flex: 1;" id="btn-switch.v2c_hacs_bloquear_cargador"
                             onclick="toggleEntity('switch.v2c_hacs_bloquear_cargador')"><svg class="icon">
                                 <use xlink:href="#icon-stop-circle" href="#icon-stop-circle"></use>
                             </svg> Parar</button>
@@ -4779,6 +4783,20 @@
                 updateClimateCard(ent, 'ac-dormitorio');
             } else if (id === 'climate.ac2_ac_suite') {
                 updateClimateCard(ent, 'ac-suite');
+            }
+            if (id === 'switch.v2c_hacs_pausar_carga' || id === 'switch.v2c_hacs_bloquear_cargador') {
+                var btnEl = document.getElementById('btn-' + id);
+                if (btnEl) {
+                    if (st === 'on') {
+                        btnEl.style.backgroundColor = 'var(--accent)';
+                        btnEl.style.color = '#000';
+                        btnEl.style.borderColor = 'var(--accent)';
+                    } else {
+                        btnEl.style.backgroundColor = '';
+                        btnEl.style.color = '';
+                        btnEl.style.borderColor = '';
+                    }
+                }
             }
             if (id === 'fan.alivent_main_fan') {
                 var el = getCachedElement('val-climate-alivent-fan');
