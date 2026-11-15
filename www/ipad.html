@@ -764,7 +764,7 @@
             height: 6px;
             border-radius: 3px;
             overflow: hidden;
-            gap: 1px;
+            gap: 0px;
         }
 
         .range-segment {
@@ -1335,6 +1335,30 @@
 
         <!-- VISTA: PRINCIPAL -->
         <div id="principal" class="view-section active">
+
+        <!-- HORA ACTUAL Y CICLO SOLAR DEL CIELO (COMPACTO) -->
+        <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 10px; margin-bottom: 10px;">
+            <!-- Tarjeta de Hora -->
+            <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 8px;">
+                <div id="val-current-time-large" style="font-size: 26px; font-weight: bold; color: var(--accent); letter-spacing: -0.5px; line-height: 1;">--:--</div>
+                <div id="val-current-date-small" style="font-size: 11px; color: var(--text-secondary); margin-top: 2px; text-transform: lowercase;">--</div>
+            </div>
+            
+            <!-- Tarjeta de Ciclo Solar -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: center; padding: 6px 10px;">
+                <div class="range-bar-container" style="margin: 2px 0 4px 0; height: 24px;">
+                    <div class="range-segments" id="segments-sky" style="height: 24px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);"></div>
+                    <div class="range-pointer" id="pointer-sky" style="bottom: -3px; width: 3px; height: 30px; border-radius: 2px;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-secondary); padding: 0 2px; margin-top: 0;">
+                    <span>12am</span>
+                    <span>6am</span>
+                    <span>12pm</span>
+                    <span>6pm</span>
+                    <span>12am</span>
+                </div>
+            </div>
+        </div>
 
             <!-- BADGES SUPERIORES JUSTIFICADOS -->
             <div class="badges-row">
@@ -1974,7 +1998,7 @@
 						<div class="mush-value" id="temp-ac-salon" style="font-size: 20px; min-width: 55px;">--°C</div>
 						<div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-salon">
 							<div id="pointer-target-ac-salon" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
-							<div id="bar-ac-salon" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
+							<div id="bar-ac-salon" style="display: flex; gap: 0px; height: 6px; width: 100%; cursor: pointer;"></div>
 							<div id="pointer-ac-salon" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
 						</div>
 						<div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-salon">--</span>°C</div>
@@ -2009,7 +2033,7 @@
 						<div class="mush-value" id="temp-ac-despacho" style="font-size: 20px; min-width: 55px;">--°C</div>
 						<div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-despacho">
 							<div id="pointer-target-ac-despacho" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
-							<div id="bar-ac-despacho" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
+							<div id="bar-ac-despacho" style="display: flex; gap: 0px; height: 6px; width: 100%; cursor: pointer;"></div>
 							<div id="pointer-ac-despacho" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
 						</div>
 						<div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-despacho">--</span>°C</div>
@@ -2044,7 +2068,7 @@
 						<div class="mush-value" id="temp-ac-dormitorio" style="font-size: 20px; min-width: 55px;">--°C</div>
 						<div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-dormitorio">
 							<div id="pointer-target-ac-dormitorio" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
-							<div id="bar-ac-dormitorio" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
+							<div id="bar-ac-dormitorio" style="display: flex; gap: 0px; height: 6px; width: 100%; cursor: pointer;"></div>
 							<div id="pointer-ac-dormitorio" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
 						</div>
 						<div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-dormitorio">--</span>°C</div>
@@ -2079,7 +2103,7 @@
 						<div class="mush-value" id="temp-ac-suite" style="font-size: 20px; min-width: 55px;">--°C</div>
 						<div style="position: relative; flex: 1; margin: 0 10px; touch-action: none;" id="slider-container-ac-suite">
 							<div id="pointer-target-ac-suite" style="position: absolute; top: -7px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff; transition: left 0.1s ease; z-index: 3; cursor: grab;"></div>
-							<div id="bar-ac-suite" style="display: flex; gap: 1px; height: 6px; width: 100%; cursor: pointer;"></div>
+							<div id="bar-ac-suite" style="display: flex; gap: 0px; height: 6px; width: 100%; cursor: pointer;"></div>
 							<div id="pointer-ac-suite" style="position: absolute; bottom: -6px; left: 0%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #808080; transition: left 0.3s ease; z-index: 1;"></div>
 						</div>
 						<div style="font-size: 12px; color: var(--text-secondary); min-width: 45px; text-align: right;"><span id="sensor-temp-ac-suite">--</span>°C</div>
@@ -2878,6 +2902,7 @@
         var HA_TOKEN = localStorage.getItem('ha_token') || '';
 		var ws;
 		var msgId = 1;
+        var haServerTimeOffset = 0;
 		var entityStates = {};
 		var connectionAttempt = 0;
         var pendingAlarmService = '';
@@ -3569,16 +3594,25 @@
 
         function renderRangeSegments(containerId, min, max, steps, colorFunc) {
             var container = document.getElementById(containerId);
-            if (!container || container.children.length > 0) return;
-            var stepSize = (max - min) / steps;
-            for (let i = 0; i <= steps; i++) {
-                var val = min + (i * stepSize);
+            if (!container) return;
+            container.style.margin = '0';
+            container.style.padding = '0';
+            container.style.border = 'none';
+            container.style.outline = 'none';
+            container.style.height = '6px';
+            container.style.borderRadius = '3px';
+            container.style.overflow = 'hidden';
+            container.style.display = 'block';
+            container.innerHTML = '';
+            var gradientStops = [];
+            for (var i = 0; i <= steps; i++) {
+                var factor = i / steps;
+                var val = min + (factor * (max - min));
                 var segColor = colorFunc(val);
-                var seg = document.createElement('div');
-                seg.className = 'range-segment';
-                seg.style.backgroundColor = segColor;
-                container.appendChild(seg);
+                var percent = factor * 100;
+                gradientStops.push(segColor + ' ' + percent.toFixed(1) + '%');
             }
+            container.style.background = 'linear-gradient(to right, ' + gradientStops.join(', ') + ')';
         }
 
         function updatePointer(pointerId, value, min, max) {
@@ -4420,6 +4454,122 @@
             }
         }
 
+        function syncServerTime(stateObj) {
+            if (stateObj && stateObj.last_updated) {
+                var serverTime = new Date(stateObj.last_updated).getTime();
+                if (!isNaN(serverTime)) {
+                    haServerTimeOffset = serverTime - Date.now();
+                }
+            }
+        }
+
+        function parseSunTimeMinutes(isoString) {
+            if (!isoString) return null;
+            var d = new Date(isoString);
+            if (isNaN(d.getTime())) return null;
+            return d.getHours() * 60 + d.getMinutes();
+        }
+
+function getSkyColorForMinute(m, dawnM, riseM, setM, duskM) {
+            dawnM = dawnM !== null ? dawnM : 390;
+            riseM = riseM !== null ? riseM : 435;
+            setM = setM !== null ? setM : 1215;
+            duskM = duskM !== null ? duskM : 1260;
+            var dawnStart = dawnM - 60;
+            var duskEnd = duskM + 60;
+
+            if (m < dawnStart || m >= duskEnd) {
+                return '#02030a';
+            } else if (m >= dawnStart && m < dawnM) {
+                var f = (m - dawnStart) / (dawnM - dawnStart);
+                return interpolateColor('#02030a', '#4a0e17', f);
+            } else if (m >= dawnM && m < riseM) {
+                var f = (m - dawnM) / (riseM - dawnM);
+                if (f < 0.33) {
+                    return interpolateColor('#4a0e17', '#c0392b', f / 0.33);
+                } else if (f < 0.66) {
+                    return interpolateColor('#c0392b', '#d35400', (f - 0.33) / 0.33);
+                } else {
+                    return interpolateColor('#d35400', '#f39c12', (f - 0.66) / 0.34);
+                }
+            } else if (m >= riseM && m < riseM + 90) {
+                var f = (m - riseM) / 90;
+                return interpolateColor('#f39c12', '#5dade2', f);
+            } else if (m >= riseM + 90 && m < setM - 90) {
+                var midDay = 720;
+                if (m <= midDay) {
+                    var f = (m - (riseM + 90)) / (midDay - (riseM + 90));
+                    return interpolateColor('#5dade2', '#2980b9', f);
+                } else {
+                    var f = (m - midDay) / ((setM - 90) - midDay);
+                    return interpolateColor('#2980b9', '#5dade2', f);
+                }
+            } else if (m >= setM - 90 && m < setM) {
+                var f = (m - (setM - 90)) / 90;
+                return interpolateColor('#5dade2', '#f39c12', f);
+            } else if (m >= setM && m < duskM) {
+                var f = (m - setM) / (duskM - setM);
+                if (f < 0.33) {
+                    return interpolateColor('#f39c12', '#d35400', f / 0.33);
+                } else if (f < 0.66) {
+                    return interpolateColor('#d35400', '#c0392b', (f - 0.33) / 0.33);
+                } else {
+                    return interpolateColor('#c0392b', '#4a0e17', (f - 0.66) / 0.34);
+                }
+            } else if (m >= duskM && m < duskEnd) {
+                var f = (m - duskM) / (duskEnd - duskM);
+                return interpolateColor('#4a0e17', '#02030a', f);
+            }
+            return '#02030a';
+        }
+
+        function updateSkyTimeline() {
+            var sunEntity = entityStates['sun.sun'];
+            var dawnM = null, riseM = null, setM = null, duskM = null;  
+            if (sunEntity && sunEntity.attributes) {
+                syncServerTime(sunEntity);
+                dawnM = parseSunTimeMinutes(sunEntity.attributes.next_dawn);
+                riseM = parseSunTimeMinutes(sunEntity.attributes.next_rising);
+                setM = parseSunTimeMinutes(sunEntity.attributes.next_setting);
+                duskM = parseSunTimeMinutes(sunEntity.attributes.next_dusk);
+            }       
+            var container = document.getElementById('segments-sky');
+            if (container) {
+                container.style.margin = '0';
+                container.style.padding = '0';
+                container.style.border = 'none';
+                container.style.outline = 'none';
+                var gradientStops = [];
+                for (var i = 0; i <= 144; i++) {
+                    var m = i * 10;
+                    var col = getSkyColorForMinute(m, dawnM, riseM, setM, duskM);
+                    var percent = (m / 1440) * 100;
+                    gradientStops.push(col + ' ' + percent.toFixed(1) + '%');
+                }
+                container.style.background = 'linear-gradient(to right, ' + gradientStops.join(', ') + ')';
+                if (container.children.length > 0) {
+                    container.innerHTML = '';
+                }
+            }
+            var now = new Date(Date.now() + haServerTimeOffset);
+            var hours = now.getHours();
+            var minutes = now.getMinutes();
+            var ampm = hours >= 12 ? 'pm' : 'am';
+            var h12 = hours % 12 || 12;
+            var timeStr = h12 + ':' + (minutes < 10 ? '0' : '') + minutes + ampm;
+            var timeLargeEl = document.getElementById('val-current-time-large');
+            if (timeLargeEl) timeLargeEl.innerText = timeStr;
+            var dateSmallEl = document.getElementById('val-current-date-small');
+            if (dateSmallEl) {
+                var diasSemana = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+                var meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                dateSmallEl.innerText = diasSemana[now.getDay()] + ', ' + now.getDate() + ' ' + meses[now.getMonth()];
+            }
+            var totalMinutes = hours * 60 + minutes;
+            updatePointer('pointer-sky', totalMinutes, 0, 1440);
+        }
+        setInterval(updateSkyTimeline, 60000);
+
         function setClimateMode(entityId, mode) {
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
             sendWS({
@@ -5255,6 +5405,7 @@
                             entityStates[data.result[i].entity_id] = data.result[i];
                             queueEntityUpdate(data.result[i]);
                         }
+                        updateSkyTimeline();
                     }
                 } else if (data.type === 'event' && data.event && data.event.data) {
                     var ent = data.event.data.new_state;
