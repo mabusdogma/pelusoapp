@@ -1341,7 +1341,7 @@
             <!-- Tarjeta de Hora -->
             <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 8px;">
                 <div id="val-current-time-large" style="font-size: 26px; font-weight: bold; color: var(--accent); letter-spacing: -0.5px; line-height: 1;">--:--</div>
-                <div id="val-current-date-small" style="font-size: 11px; color: var(--text-secondary); margin-top: 2px; text-transform: lowercase;">--</div>
+                <div id="val-current-date-small" style="font-size: 13px; font-weight: bold; color: var(--text-secondary); margin-top: 3px; text-transform: lowercase;">--</div>
             </div>
 
             <!-- Tarjeta de Ciclo Solar Interactiva -->
@@ -1767,10 +1767,10 @@
                         </div>
                     </div>
 
-                    <!-- Fila Inferior Integrada: Resumen de Horarios con más espacio -->
-                    <div style="display: flex; align-items: center; gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 2px; width: 100%;">
+                    <!-- Fila Inferior Integrada: Resumen de Horarios centrado -->
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 2px; width: 100%;">
                         <svg class="icon" style="color: var(--accent); flex-shrink: 0; width: 14px; height: 14px;"><use xlink:href="#icon-calendar" href="#icon-calendar"></use></svg>
-                        <div id="horario-covadonga-resumen" style="font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
+                        <div id="horario-covadonga-resumen" style="font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;">
                             Cargando próximos eventos...
                         </div>
                     </div>
@@ -1921,17 +1921,29 @@
 
             <!-- TARJETA CLIMA ACTUAL -->
             <div class="card" style="margin-bottom: 0; padding: 14px;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div id="clima-icon-container" style="font-size: 36px;"></div>
-                        <div>
+                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;">
+                    <!-- Izquierda: Icono y estado -->
+                    <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                        <div id="clima-icon-container" style="font-size: 36px; flex-shrink: 0;"></div>
+                        <div style="min-width: 0;">
                             <div style="font-size: 16px; font-weight: bold; color: var(--text-primary);" id="val-clima-nombre">Oasis</div>
-                            <div style="font-size: 12px; color: var(--text-secondary);" id="val-clima-estado">Cargando...</div>
+                            <div style="font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="val-clima-estado">Cargando...</div>
                         </div>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 26px; font-weight: bold; color: var(--text-primary);" id="val-clima-temp">--°C</div>
-                        <div style="font-size: 11px; color: var(--text-secondary);" id="val-clima-humedad">Humedad: --%</div>
+
+                    <!-- Centro: Temperatura y humedad -->
+                    <div style="text-align: center;">
+                        <div style="font-size: 26px; font-weight: bold; color: var(--text-primary); line-height: 1.1;" id="val-clima-temp">--°C</div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
+                            <span style="font-weight: bold;">Humedad: </span><span id="val-clima-humedad" style="font-weight: bold; color: #ff9800;">--%</span>
+                        </div>
+                    </div>
+
+                    <!-- Derecha: Aparente, nubes y presión -->
+                    <div style="text-align: right; font-size: 11px; color: var(--text-secondary); line-height: 1.35;">
+                        <div><span style="font-weight: bold;">Aparente: </span><span id="val-clima-aparente" style="font-weight: bold; color: #ff9800;">--°C</span></div>
+                        <div><span style="font-weight: bold;">Nubes: </span><span id="val-clima-nubes" style="font-weight: bold; color: #ff9800;">--%</span></div>
+                        <div><span style="font-weight: bold;">Presión: </span><span id="val-clima-presion" style="font-weight: bold; color: #ff9800;">-- hPa</span></div>
                     </div>
                 </div>
             </div>
@@ -2157,14 +2169,14 @@
                                     <div class="mush-icon" style="width: 30px; height: 30px; font-size: 15px; color: #26a69a; background: rgba(38,166,154,0.15); margin-right: 8px;"><svg class="icon"><use xlink:href="#icon-power"></use></svg></div>
                                     <div class="mush-primary" style="font-size: 13px;">Power</div>
                                 </div>
-                                <div style="font-size: 11px; color: var(--text-secondary);">Pulsa</div>
+                                <div style="font-size: 11px; font-weight: bold; color: #ff9800;">Pulsa</div>
                             </div>
                             <div class="card card-clickable" onclick="toggleEntity('script.vent_intensidad')" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; margin-bottom: 0;">
                                 <div style="display: flex; align-items: center;">
                                     <div class="mush-icon" style="width: 30px; height: 30px; font-size: 15px; color: #26a69a; background: rgba(38,166,154,0.15); margin-right: 8px;"><svg class="icon"><use xlink:href="#icon-finance"></use></svg></div>
                                     <div class="mush-primary" style="font-size: 13px;">Nivel</div>
                                 </div>
-                                <div style="font-size: 11px; color: var(--text-secondary);">Pulsa</div>
+                                <div style="font-size: 11px; font-weight: bold; color: #ff9800;">Pulsa</div>
                             </div>
                         </div>
                     </div>
@@ -3005,10 +3017,8 @@
                     var estadoEl = document.getElementById('val-clima-estado');
                     var humedadEl = document.getElementById('val-clima-humedad');
                     var iconContainer = document.getElementById('clima-icon-container');
-
                     var temp = (a && a.temperature !== undefined) ? a.temperature : s;
-                    var humidity = (a && a.humidity !== undefined) ? a.humidity : '--';
-                    
+                    var humidity = (a && a.humidity !== undefined) ? a.humidity : '--'; 
                     var estadoMap = {
                         'sunny': 'Soleado',
                         'clear-night': 'Despejado',
@@ -3019,13 +3029,36 @@
                         'windy': 'Ventoso'
                     };
                     var estadoTexto = estadoMap[s] || s;
-
                     if (tempEl) tempEl.innerText = temp + '°C';
                     if (estadoEl) estadoEl.innerText = estadoTexto;
-                    if (humedadEl) humedadEl.innerText = 'Humedad: ' + humidity + '%';
+                    if (humedadEl) humedadEl.innerText = humidity + '%';
                     if (iconContainer) iconContainer.innerText = getWeatherEmoji(s);
                     
                     return temp + '°C';
+                }
+            },
+            'sensor.temperatura_aparente': {
+                id: 'val-clima-aparente',
+                format: function(s, a) {
+                    if (s === 'unavailable' || s === 'unknown') return '--°C';
+                    var unit = (a && a.unit_of_measurement) ? a.unit_of_measurement : '°C';
+                    return s + unit;
+                }
+            },
+            'sensor.openweathermap2_cloud_coverage': {
+                id: 'val-clima-nubes',
+                format: function(s, a) {
+                    if (s === 'unavailable' || s === 'unknown') return '--%';
+                    var unit = (a && a.unit_of_measurement) ? a.unit_of_measurement : '%';
+                    return s + unit;
+                }
+            },
+            'sensor.openweathermap2_pressure': {
+                id: 'val-clima-presion',
+                format: function(s, a) {
+                    if (s === 'unavailable' || s === 'unknown') return '-- hPa';
+                    var unit = (a && a.unit_of_measurement) ? a.unit_of_measurement : 'hPa';
+                    return s + ' ' + unit;
                 }
             },
             'sun.sun': {
@@ -4539,7 +4572,7 @@
             var h12 = hours % 12 || 12;
             return h12 + ':' + (mins < 10 ? '0' : '') + mins + ampm;
         }
-        
+
         function updateSkyTimeline() {
             var sunEntity = entityStates['sun.sun'];
             var dawnM = null, riseM = null, setM = null, duskM = null;  
@@ -4588,8 +4621,8 @@
             var minutes = now.getMinutes();
             var totalMinutes = hours * 60 + minutes;
             var isDay = false;
-            if (riseM !== null && setM !== null) {
-                isDay = (totalMinutes >= riseM && totalMinutes < setM);
+            if (dawnM !== null && duskM !== null) {
+                isDay = (totalMinutes >= dawnM && totalMinutes < duskM);
             } else {
                 isDay = (hours >= 6 && hours < 20);
             }
@@ -4604,14 +4637,13 @@
             var timeStr = h12 + ':' + (minutes < 10 ? '0' : '') + minutes + ampm;
             var timeLargeEl = document.getElementById('val-current-time-large');
             if (timeLargeEl) timeLargeEl.innerText = timeStr;
+
             var dateSmallEl = document.getElementById('val-current-date-small');
             if (dateSmallEl) {
                 var diasSemana = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
                 var meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
                 dateSmallEl.innerText = diasSemana[now.getDay()] + ', ' + now.getDate() + ' ' + meses[now.getMonth()];
             }
-            var totalMinutes = hours * 60 + minutes;
-            updatePointer('pointer-sky', totalMinutes, 0, 1440);
         }
         setInterval(updateSkyTimeline, 60000);
         updateSkyTimeline();
