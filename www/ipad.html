@@ -4535,9 +4535,11 @@
         function formatMinutesToTime(totalMins) {
             var hours = Math.floor(totalMins / 60);
             var mins = totalMins % 60;
-            return (hours < 10 ? '0' : '') + hours + ':' + (mins < 10 ? '0' : '') + mins;
+            var ampm = hours >= 12 ? 'pm' : 'am';
+            var h12 = hours % 12 || 12;
+            return h12 + ':' + (mins < 10 ? '0' : '') + mins + ampm;
         }
-
+        
         function updateSkyTimeline() {
             var sunEntity = entityStates['sun.sun'];
             var dawnM = null, riseM = null, setM = null, duskM = null;  
