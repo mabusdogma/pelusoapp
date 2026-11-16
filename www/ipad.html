@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -1342,22 +1343,45 @@
                 <div id="val-current-time-large" style="font-size: 26px; font-weight: bold; color: var(--accent); letter-spacing: -0.5px; line-height: 1;">--:--</div>
                 <div id="val-current-date-small" style="font-size: 11px; color: var(--text-secondary); margin-top: 2px; text-transform: lowercase;">--</div>
             </div>
-            
-            <!-- Tarjeta de Ciclo Solar -->
-            <div class="card" style="display: flex; flex-direction: column; justify-content: center; padding: 6px 10px;">
-                <div class="range-bar-container" style="margin: 2px 0 4px 0; height: 24px;">
+
+            <!-- Tarjeta de Ciclo Solar Interactiva -->
+            <div class="card" onclick="toggleSunDetails()" style="display: flex; flex-direction: column; justify-content: center; padding: 6px 10px; cursor: pointer; position: relative;">
+                <!-- Barra circadiana -->
+                <div class="range-bar-container" style="margin: 2px 0 4px 0; height: 24px; position: relative;">
                     <div class="range-segments" id="segments-sky" style="height: 24px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);"></div>
-                    <div class="range-pointer" id="pointer-sky" style="bottom: -3px; width: 3px; height: 30px; border-radius: 2px;"></div>
+                    <div id="pointer-sky" style="position: absolute; top: 0; bottom: 0; width: 0; display: flex; align-items: center; justify-content: center; transform: translateX(-50%); font-size: 14px; z-index: 3; transition: left 0.3s ease;">☀️</div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-secondary); padding: 0 2px; margin-top: 0;">
-                    <span>12am</span>
-                    <span>6am</span>
-                    <span>12pm</span>
-                    <span>6pm</span>
-                    <span>12am</span>
+                
+                <!-- Contenedor de horas extremas (Dawn y Dusk) por defecto -->
+                <div id="sun-labels-default" style="position: relative; height: 14px; font-size: 10px; color: var(--text-secondary); margin-top: 2px;">
+                    <span style="position: absolute; left: 0%; transform: translateX(0);">12am</span>
+                    <span id="label-dawn" style="position: absolute; left: 25%; transform: translateX(-50%);">--:--</span>
+                    <span style="position: absolute; left: 50%; transform: translateX(-50%);">12pm</span>
+                    <span id="label-dusk" style="position: absolute; left: 75%; transform: translateX(-50%);">--:--</span>
+                    <span style="position: absolute; right: 0%; transform: translateX(0);">12am</span>
+                </div>
+
+                <!-- Panel expandido con las 4 horas detalladas (oculto por defecto) -->
+                <div id="sun-details-expanded" style="display: none; grid-template-columns: repeat(4, 1fr); text-align: center; gap: 2px; font-size: 10px; margin-top: 2px; padding: 2px 0;">
+                    <div>
+                        <div style="color: var(--text-secondary);">alba</div>
+                        <div id="val-sun-dawn" style="font-weight: bold; color: var(--text-primary);">--:--</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary);">salida</div>
+                        <div id="val-sun-rising" style="font-weight: bold; color: var(--accent);">--:--</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary);">puesta</div>
+                        <div id="val-sun-setting" style="font-weight: bold; color: var(--accent);">--:--</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary);">ocaso</div>
+                        <div id="val-sun-dusk" style="font-weight: bold; color: var(--text-primary);">--:--</div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </div>    
 
             <!-- BADGES SUPERIORES JUSTIFICADOS -->
             <div class="badges-row">
@@ -1721,23 +1745,38 @@
                 </div>
             </div>
 
-            <!-- VACUUM CARD & POSPONER: COVADONGA -->
+            <!-- VACUUM CARD, POSPONER Y HORARIO INTEGRADO: COVADONGA -->
             <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: stretch; margin-bottom: 14px;">
-                <div class="card" style="margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; gap: 12px;">
-                    <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-                        <div class="mush-icon" id="icon-robot-vacuum" style="width: 38px; height: 38px; font-size: 20px; color:#2196f3; background: rgba(33, 150, 243, 0.15); margin-right: 0;"><svg class="icon" style="width: 20px; height: 20px;">
-                                <use xlink:href="#icon-robot-vacuum" href="#icon-robot-vacuum"></use>
-                            </svg></div>
-                        <div style="min-width: 0;">
-                            <div style="font-size: 14px; font-weight: bold; line-height: 1.1;">Covadonga</div>
-                            <div style="font-size: 11px; color: var(--text-secondary);" id="state-vacuum">Cargando...</div>
+                <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: center; padding: 10px 14px; gap: 6px;">
+                    <!-- Fila Superior: Icono, Nombre/Estado y Botones -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                            <div class="mush-icon" id="icon-robot-vacuum" style="width: 38px; height: 38px; font-size: 20px; color:#2196f3; background: rgba(33, 150, 243, 0.15); margin-right: 0;">
+                                <svg class="icon" style="width: 20px; height: 20px;">
+                                    <use xlink:href="#icon-robot-vacuum" href="#icon-robot-vacuum"></use>
+                                </svg>
+                            </div>
+                            <div style="min-width: 0;">
+                                <div style="font-size: 14px; font-weight: bold; line-height: 1.1;">Covadonga</div>
+                                <div style="font-size: 11px; color: var(--text-secondary);" id="state-vacuum">Cargando...</div>
+                            </div>
+                        </div>
+                        <div class="vacuum-controls" style="display: flex; gap: 6px; margin-top: 0;">
+                            <button class="vacuum-btn" style="width: 38px; height: 38px; font-size: 16px;" title="Iniciar / Pausar" onclick="callVacuumCommand('start_pause')"><svg class="icon" style="width: 18px; height: 18px;"><use xlink:href="#icon-play-pause" href="#icon-play-pause"></use></svg></button>
+                            <button class="vacuum-btn" style="width: 38px; height: 38px; font-size: 16px;" title="Localizar" onclick="callVacuumCommand('locate')"><svg class="icon" style="width: 18px; height: 18px;"><use xlink:href="#icon-map-marker-question" href="#icon-map-marker-question"></use></svg></button>
                         </div>
                     </div>
-                <div class="vacuum-controls" style="display: flex; gap: 6px; margin-top: 0;">
-                        <button class="vacuum-btn" style="width: 38px; height: 38px; font-size: 16px;" title="Iniciar / Pausar" onclick="callVacuumCommand('start_pause')"><svg class="icon" style="width: 18px; height: 18px;"><use xlink:href="#icon-play-pause" href="#icon-play-pause"></use></svg></button>
-                        <button class="vacuum-btn" style="width: 38px; height: 38px; font-size: 16px;" title="Localizar" onclick="callVacuumCommand('locate')"><svg class="icon" style="width: 18px; height: 18px;"><use xlink:href="#icon-map-marker-question" href="#icon-map-marker-question"></use></svg></button>
+
+                    <!-- Fila Inferior Integrada: Resumen de Horarios con más espacio -->
+                    <div style="display: flex; align-items: center; gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 2px; width: 100%;">
+                        <svg class="icon" style="color: var(--accent); flex-shrink: 0; width: 14px; height: 14px;"><use xlink:href="#icon-calendar" href="#icon-calendar"></use></svg>
+                        <div id="horario-covadonga-resumen" style="font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
+                            Cargando próximos eventos...
+                        </div>
                     </div>
                 </div>
+
+                <!-- Botón de Posponer (se mantiene al lado como solicitado) -->
                 <div class="card card-clickable" id="chip-posponer-limpieza" onclick="toggleEntity('input_boolean.posponer_limpieza')" style="display: flex; align-items: center; justify-content: center; padding: 0 14px; margin-bottom: 0; gap: 8px; white-space: nowrap;">
                     <div id="icon-posponer-container" style="color: #696969; display: flex; align-items: center;">
                         <svg class="icon" style="width: 22px; height: 22px;"><use xlink:href="#icon-update" href="#icon-clock-end"></use></svg>
@@ -1745,16 +1784,6 @@
                     <div style="font-size: 13px; color: var(--text-secondary); font-weight: bold;">Posponer</div>
                 </div>
             </div>
-            
-			<!-- TARJETA RESUMEN DE HORARIO COVADONGA -->
-			<div class="card" style="margin-bottom: 14px; padding: 14px;">
-				<div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-					<svg class="icon" style="color: var(--accent); flex-shrink: 0;"><use xlink:href="#icon-calendar" href="#icon-calendar"></use></svg>
-					<div id="horario-covadonga-resumen" style="font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
-						Cargando próximos eventos...
-					</div>
-				</div>
-			</div>
         </div>
 
         <!-- VISTA: CÁMARAS (SEGUNDA POSICIÓN) -->
@@ -1890,44 +1919,19 @@
         <!-- VISTA: CLIMA (TERCERA POSICIÓN) -->
         <div id="clima" class="view-section">
 
-            <!-- FILA A DOBLE COLUMNA: CLIMA ACTUAL Y DATOS SOLARES / CIRCADIANOS -->
-            <div class="grid-2-col">
-                <!-- TARJETA CLIMA ACTUAL -->
-                <div class="card" style="margin-bottom: 0; padding: 14px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div id="clima-icon-container" style="font-size: 36px;"></div>
-                            <div>
-                                <div style="font-size: 16px; font-weight: bold; color: var(--text-primary);" id="val-clima-nombre">Oasis</div>
-                                <div style="font-size: 12px; color: var(--text-secondary);" id="val-clima-estado">Cargando...</div>
-                            </div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 26px; font-weight: bold; color: var(--text-primary);" id="val-clima-temp">--°C</div>
-                            <div style="font-size: 11px; color: var(--text-secondary);" id="val-clima-humedad">Humedad: --%</div>
+            <!-- TARJETA CLIMA ACTUAL -->
+            <div class="card" style="margin-bottom: 0; padding: 14px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div id="clima-icon-container" style="font-size: 36px;"></div>
+                        <div>
+                            <div style="font-size: 16px; font-weight: bold; color: var(--text-primary);" id="val-clima-nombre">Oasis</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);" id="val-clima-estado">Cargando...</div>
                         </div>
                     </div>
-                </div>
-
-                <!-- TARJETA DATOS SOLARES / CIRCADIANOS -->
-                <div class="card" style="margin-bottom: 0; padding: 12px 14px; display: flex; align-items: center;">
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; gap: 4px; font-size: 11px; width: 100%;">
-                        <div>
-                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Amanecer</div>
-                            <div id="val-sun-dawn" style="font-weight: bold; color: var(--text-primary);">--:--</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Salida</div>
-                            <div id="val-sun-rising" style="font-weight: bold; color: var(--accent);">--:--</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Puesta</div>
-                            <div id="val-sun-setting" style="font-weight: bold; color: var(--accent);">--:--</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Anochecer</div>
-                            <div id="val-sun-dusk" style="font-weight: bold; color: var(--text-primary);">--:--</div>
-                        </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 26px; font-weight: bold; color: var(--text-primary);" id="val-clima-temp">--°C</div>
+                        <div style="font-size: 11px; color: var(--text-secondary);" id="val-clima-humedad">Humedad: --%</div>
                     </div>
                 </div>
             </div>
@@ -3858,7 +3862,7 @@
                         events = res.result.response['calendar.horario_covadonga'].events || [];
                     }
                     if (!events || events.length === 0) {
-                        container.innerHTML = '<b>Limpieza:</b> No hay eventos próximos';
+                        container.innerHTML = '<b> </b> No hay eventos próximos';
                         return;
                     }
                     var diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
@@ -3870,22 +3874,23 @@
                         var d = new Date(startDateStr);
                         if (!isNaN(d.getTime())) {
                             var diaSem = diasSemana[d.getDay()];
+                            diaSem = diaSem.charAt(0).toUpperCase() + diaSem.slice(1);
                             var diaNum = d.getDate();
                             var mes = meses[d.getMonth()];
                             var hours = d.getHours();
                             var ampm = hours >= 12 ? 'pm' : 'am';
                             hours = hours % 12;
                             hours = hours ? hours : 12;
-                            textos.push(diaSem + ' ' + diaNum + ' ' + mes + ' (' + hours + ampm + ') ');
+                            textos.push(' ' + diaSem + ' ' + diaNum + ' ' + mes + ' (' + hours + ampm + ') ');
                         }
                     }
                     if (textos.length > 0) {
-                        container.innerHTML = '<b>Limpieza:</b> ' + textos.join(' / ');
+                        container.innerHTML = '<b> </b> ' + textos.join(' /');
                     } else {
-                        container.innerHTML = '<b>Limpieza:</b> Sin fechas programadas';
+                        container.innerHTML = '<b> </b> Sin fechas programadas';
                     }
                 } catch (e) {
-                    container.innerHTML = '<b>Limpieza:</b> Sincronizando...';
+                    container.innerHTML = '<b></b> Sincronizando...';
                 }
             });
         }
@@ -4453,15 +4458,6 @@
             }
         }
 
-        function syncServerTime(stateObj) {
-            if (stateObj && stateObj.last_updated) {
-                var serverTime = new Date(stateObj.last_updated).getTime();
-                if (!isNaN(serverTime)) {
-                    haServerTimeOffset = serverTime - Date.now();
-                }
-            }
-        }
-
         function parseSunTimeMinutes(isoString) {
             if (!isoString) return null;
             var d = new Date(isoString);
@@ -4469,7 +4465,7 @@
             return d.getHours() * 60 + d.getMinutes();
         }
 
-function getSkyColorForMinute(m, dawnM, riseM, setM, duskM) {
+        function getSkyColorForMinute(m, dawnM, riseM, setM, duskM) {
             dawnM = dawnM !== null ? dawnM : 390;
             riseM = riseM !== null ? riseM : 435;
             setM = setM !== null ? setM : 1215;
@@ -4522,18 +4518,37 @@ function getSkyColorForMinute(m, dawnM, riseM, setM, duskM) {
             return '#02030a';
         }
 
+        function toggleSunDetails() {
+            var defaultLabels = document.getElementById('sun-labels-default');
+            var expandedDetails = document.getElementById('sun-details-expanded');
+            if (defaultLabels && expandedDetails) {
+                if (expandedDetails.style.display === 'none') {
+                    defaultLabels.style.display = 'none';
+                    expandedDetails.style.display = 'grid';
+                } else {
+                    expandedDetails.style.display = 'none';
+                    defaultLabels.style.display = 'block';
+                }
+            }
+        }
+
+        function formatMinutesToTime(totalMins) {
+            var hours = Math.floor(totalMins / 60);
+            var mins = totalMins % 60;
+            return (hours < 10 ? '0' : '') + hours + ':' + (mins < 10 ? '0' : '') + mins;
+        }
+
         function updateSkyTimeline() {
             var sunEntity = entityStates['sun.sun'];
             var dawnM = null, riseM = null, setM = null, duskM = null;  
             if (sunEntity && sunEntity.attributes) {
-                syncServerTime(sunEntity);
                 dawnM = parseSunTimeMinutes(sunEntity.attributes.next_dawn);
                 riseM = parseSunTimeMinutes(sunEntity.attributes.next_rising);
                 setM = parseSunTimeMinutes(sunEntity.attributes.next_setting);
                 duskM = parseSunTimeMinutes(sunEntity.attributes.next_dusk);
             }       
             var container = document.getElementById('segments-sky');
-            if (container) {
+            if (container && container.style.background.indexOf('linear-gradient') === -1 && dawnM !== null) {
                 container.style.margin = '0';
                 container.style.padding = '0';
                 container.style.border = 'none';
@@ -4550,9 +4565,38 @@ function getSkyColorForMinute(m, dawnM, riseM, setM, duskM) {
                     container.innerHTML = '';
                 }
             }
-            var now = new Date(Date.now() + haServerTimeOffset);
+            if (dawnM !== null) {
+                var dawnPercent = (dawnM / 1440) * 100;
+                var elDawn = document.getElementById('label-dawn');
+                if (elDawn) {
+                    elDawn.style.left = dawnPercent + '%';
+                    elDawn.innerText = formatMinutesToTime(dawnM);
+                }
+            }
+            if (duskM !== null) {
+                var duskPercent = (duskM / 1440) * 100;
+                var elDusk = document.getElementById('label-dusk');
+                if (elDusk) {
+                    elDusk.style.left = duskPercent + '%';
+                    elDusk.innerText = formatMinutesToTime(duskM);
+                }
+            }
+            var now = new Date();
             var hours = now.getHours();
             var minutes = now.getMinutes();
+            var totalMinutes = hours * 60 + minutes;
+            var isDay = false;
+            if (riseM !== null && setM !== null) {
+                isDay = (totalMinutes >= riseM && totalMinutes < setM);
+            } else {
+                isDay = (hours >= 6 && hours < 20);
+            }
+            var pointerEl = document.getElementById('pointer-sky');
+            if (pointerEl) {
+                var pointerPercent = (totalMinutes / 1440) * 100;
+                pointerEl.style.left = pointerPercent + '%';
+                pointerEl.innerHTML = '<span style="font-size: 16px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));">' + (isDay ? '☀️' : '🌙') + '</span>';
+            }
             var ampm = hours >= 12 ? 'pm' : 'am';
             var h12 = hours % 12 || 12;
             var timeStr = h12 + ':' + (minutes < 10 ? '0' : '') + minutes + ampm;
@@ -4568,6 +4612,7 @@ function getSkyColorForMinute(m, dawnM, riseM, setM, duskM) {
             updatePointer('pointer-sky', totalMinutes, 0, 1440);
         }
         setInterval(updateSkyTimeline, 60000);
+        updateSkyTimeline();
 
         function setClimateMode(entityId, mode) {
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
