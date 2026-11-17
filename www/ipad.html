@@ -3641,13 +3641,28 @@
             container.style.display = 'block';
             container.innerHTML = '';
             var gradientStops = [];
-            for (var i = 0; i <= steps; i++) {
-                var factor = i / steps;
-                var val = min + (factor * (max - min));
-                var segColor = colorFunc(val);
-                var percent = factor * 100;
-                gradientStops.push(segColor + ' ' + percent.toFixed(1) + '%');
-            }
+            var stretch = 45; // Minutos extra para estirar cada cambio de color
+                var noonM = Math.round((riseM + setM) / 2); // Mediodía solar exacto
+
+                var points = [
+                    { m: 0,                                  pos: 0 },
+                    { m: dawnM,                              pos: Math.max(0, dawnM - stretch) },
+                    { m: Math.round((dawnM + riseM) / 2),    pos: Math.round((dawnM + riseM) / 2) },
+                    { m: riseM,                              pos: riseM + stretch },
+                    { m: noonM,                              pos: noonM },
+                    { m: setM,                               pos: setM - stretch },
+                    { m: Math.round((setM + duskM) / 2),     pos: Math.round((setM + duskM) / 2) },
+                    { m: duskM,                              pos: Math.min(1440, duskM + stretch) },
+                    { m: 1440,                               pos: 1440 }
+                ];
+
+                var gradientStops = [];
+                for (var i = 0; i < points.length; i++) {
+                    var col = getSkyColorForMinute(points[i].m, dawnM, riseM, setM, duskM);
+                    var percent = (points[i].pos / 1440) * 100;
+                    gradientStops.push(col + ' ' + percent.toFixed(2) + '%');
+                }
+                container.style.background = 'linear-gradient(to right, ' + gradientStops.join(', ') + ')';
             container.style.background = 'linear-gradient(to right, ' + gradientStops.join(', ') + ')';
         }
 
