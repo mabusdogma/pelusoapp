@@ -3641,28 +3641,13 @@
             container.style.display = 'block';
             container.innerHTML = '';
             var gradientStops = [];
-            var stretch = 45; // Minutos extra para estirar cada cambio de color
-                var noonM = Math.round((riseM + setM) / 2); // Mediodía solar exacto
-
-                var points = [
-                    { m: 0,                                  pos: 0 },
-                    { m: dawnM,                              pos: Math.max(0, dawnM - stretch) },
-                    { m: Math.round((dawnM + riseM) / 2),    pos: Math.round((dawnM + riseM) / 2) },
-                    { m: riseM,                              pos: riseM + stretch },
-                    { m: noonM,                              pos: noonM },
-                    { m: setM,                               pos: setM - stretch },
-                    { m: Math.round((setM + duskM) / 2),     pos: Math.round((setM + duskM) / 2) },
-                    { m: duskM,                              pos: Math.min(1440, duskM + stretch) },
-                    { m: 1440,                               pos: 1440 }
-                ];
-
-                var gradientStops = [];
-                for (var i = 0; i < points.length; i++) {
-                    var col = getSkyColorForMinute(points[i].m, dawnM, riseM, setM, duskM);
-                    var percent = (points[i].pos / 1440) * 100;
-                    gradientStops.push(col + ' ' + percent.toFixed(2) + '%');
-                }
-                container.style.background = 'linear-gradient(to right, ' + gradientStops.join(', ') + ')';
+            for (var i = 0; i <= steps; i++) {
+                var factor = i / steps;
+                var val = min + (factor * (max - min));
+                var segColor = colorFunc(val);
+                var percent = factor * 100;
+                gradientStops.push(segColor + ' ' + percent.toFixed(1) + '%');
+            }
             container.style.background = 'linear-gradient(to right, ' + gradientStops.join(', ') + ')';
         }
 
@@ -4598,17 +4583,35 @@
                 duskM = parseSunTimeMinutes(sunEntity.attributes.next_dusk);
             }       
             var container = document.getElementById('segments-sky');
-            if (container && container.style.background.indexOf('linear-gradient') === -1 && dawnM !== null) {
+            if (container && container.style.background.indexOf('linear-gradient') === -1 && dawnM !== null && riseM !== null && setM !== null && duskM !== null) {
                 container.style.margin = '0';
                 container.style.padding = '0';
                 container.style.border = 'none';
                 container.style.outline = 'none';
+                var noonM = Math.round((riseM + setM) / 2);
+                var morningMidM = Math.round(riseM + (noonM - riseM) * 0.45);
+                var afternoonMidM = Math.round(setM - (setM - noonM) * 0.45);
+                var preDawnM = Math.max(0, dawnM - 75);
+                var postDuskM = Math.min(1440, duskM + 75);
+                var skyStops = [
+                    { m: 0,             color: '#1b2026' },
+                    { m: preDawnM,      color: '#23282e' },
+                    { m: dawnM,         color: '#5a5046' },
+                    { m: riseM,         color: '#c99e63' },
+                    { m: riseM + 45,    color: '#cbbba4' },
+                    { m: morningMidM,   color: '#b7c7d4' },
+                    { m: noonM,         color: '#9bc2e0' },
+                    { m: afternoonMidM, color: '#b7c7d4' },
+                    { m: setM - 45,     color: '#cbbba4' },
+                    { m: setM,          color: '#c99e63' }, 
+                    { m: duskM,         color: '#5a5046' }, 
+                    { m: postDuskM,     color: '#23282e' }, 
+                    { m: 1440,          color: '#1b2026' }  
+                ];
                 var gradientStops = [];
-                for (var i = 0; i <= 144; i++) {
-                    var m = i * 10;
-                    var col = getSkyColorForMinute(m, dawnM, riseM, setM, duskM);
-                    var percent = (m / 1440) * 100;
-                    gradientStops.push(col + ' ' + percent.toFixed(1) + '%');
+                for (var i = 0; i < skyStops.length; i++) {
+                    var percent = (skyStops[i].m / 1440) * 100;
+                    gradientStops.push(skyStops[i].color + ' ' + percent.toFixed(2) + '%');
                 }
                 container.style.background = 'linear-gradient(to right, ' + gradientStops.join(', ') + ')';
                 if (container.children.length > 0) {
@@ -4652,7 +4655,6 @@
             var timeStr = h12 + ':' + (minutes < 10 ? '0' : '') + minutes + ampm;
             var timeLargeEl = document.getElementById('val-current-time-large');
             if (timeLargeEl) timeLargeEl.innerText = timeStr;
-
             var dateSmallEl = document.getElementById('val-current-date-small');
             if (dateSmallEl) {
                 var diasSemana = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
